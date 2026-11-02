@@ -1,0 +1,23 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Node & Dependencies
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# SvelteKit & Build
+.svelte-kit/
+build/
+dist/
+.output/
+
+# OS & Logs
+.DS_Store
+Thumbs.db
+*.log
+
