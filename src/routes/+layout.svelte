@@ -32,7 +32,6 @@
 		SlidersHorizontal,
 		Database,
 		ChevronRight,
-		Sparkles,
 	} from "lucide-svelte";
 
 	let { children }: LayoutProps = $props();
@@ -120,11 +119,11 @@
 </svelte:head>
 
 <SidebarProvider>
-	<!-- Modern Professional Blue Sidebar (Width 280px, Sleek SaaS Layout) -->
+	<!-- Modern Professional Blue Sidebar (Width 280px, Sleek SaaS Layout, Clean Collapsed Mode) -->
 	<Sidebar collapsible="icon" class="border-r border-slate-200/90 bg-white shadow-2xs">
 		<!-- Sidebar Brand Header -->
-		<SidebarHeader class="p-3 border-b border-slate-100">
-			<a href="/" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-slate-50/80 transition-all group">
+		<SidebarHeader class="p-3 border-b border-slate-100 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+			<a href="/" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-slate-50/80 transition-all group group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
 				<div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white flex items-center justify-center shrink-0 shadow-xs shadow-blue-600/30 ring-1 ring-blue-700/20 group-hover:scale-105 transition-transform">
 					<GraduationCap class="w-5 h-5 text-white" />
 				</div>
@@ -139,41 +138,41 @@
 		</SidebarHeader>
 
 		<!-- Sidebar Navigation Items -->
-		<SidebarContent class="px-2.5 py-3 space-y-4">
+		<SidebarContent class="px-2.5 py-3 space-y-4 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:space-y-2">
 			{#each navSections as section}
 				<SidebarGroup class="p-0">
 					<SidebarGroupLabel class="text-[11px] font-bold tracking-wider text-slate-400 uppercase px-2.5 py-1 mb-0.5 group-data-[collapsible=icon]:hidden">
 						{section.title}
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
-						<SidebarMenu class="space-y-0.5">
+						<SidebarMenu class="space-y-0.5 group-data-[collapsible=icon]:space-y-1">
 							{#each section.items as item}
 								{@const isActive =
 									item.href === "/"
 										? page.url.pathname === "/"
 										: page.url.pathname.startsWith(item.href.split("?")[0])}
 								<SidebarMenuItem>
-									<SidebarMenuButton tooltipContent={item.label} {isActive} class="p-0">
+									<SidebarMenuButton tooltipContent={item.label} {isActive} class="p-0 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
 										{#snippet child({ props })}
 											<a
 												href={item.href}
 												{...props}
 												class={cn(
-													"group flex items-center justify-between w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150",
+													"group flex items-center w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150",
+													"group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto",
 													isActive
 														? "bg-blue-600 text-white font-semibold shadow-xs shadow-blue-600/25 hover:bg-blue-700 hover:text-white"
 														: "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 active:bg-slate-200/70"
 												)}
 											>
-												<div class="flex items-center gap-2.5 truncate">
-													<item.icon
-														class={cn(
-															"w-4 h-4 shrink-0 transition-colors",
-															isActive ? "text-white" : "text-slate-400 group-hover:text-blue-600"
-														)}
-													/>
-													<span class="truncate">{item.label}</span>
-												</div>
+												<item.icon
+													class={cn(
+														"w-4 h-4 shrink-0 transition-colors",
+														"group-data-[collapsible=icon]:w-5 group-data-[collapsible=icon]:h-5",
+														isActive ? "text-white" : "text-slate-400 group-hover:text-blue-600"
+													)}
+												/>
+												<span class="truncate ml-2.5 flex-1 group-data-[collapsible=icon]:hidden">{item.label}</span>
 												{#if isActive}
 													<span class="w-1.5 h-1.5 rounded-full bg-white/90 shrink-0 group-data-[collapsible=icon]:hidden"></span>
 												{/if}
@@ -189,8 +188,8 @@
 		</SidebarContent>
 
 		<!-- Unified Elegant Sidebar Footer -->
-		<SidebarFooter class="p-3 border-t border-slate-100">
-			<!-- Consolidated Card: Wave Status & Profile Info -->
+		<SidebarFooter class="p-3 border-t border-slate-100 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+			<!-- Expanded Consolidated Card: Wave Status & Profile Info -->
 			<div class="rounded-xl bg-slate-50 border border-slate-200/80 p-2.5 space-y-2 group-data-[collapsible=icon]:hidden">
 				<!-- Session Wave -->
 				<div class="flex items-center justify-between">
@@ -223,6 +222,13 @@
 						<Database class="w-3 h-3 text-emerald-600" />
 						<span>Postgres</span>
 					</span>
+				</div>
+			</div>
+
+			<!-- Collapsed Mini Footer Avatar -->
+			<div class="hidden group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center" title="Panitia PPDB (Neon Postgres)">
+				<div class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-blue-700 font-bold text-xs flex items-center justify-center transition shadow-2xs">
+					PA
 				</div>
 			</div>
 		</SidebarFooter>

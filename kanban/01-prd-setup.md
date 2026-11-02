@@ -190,6 +190,21 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
   - [x] Uji responsivitas & visual rendering di seluruh rute aplikasi (HTTP 200 OK)
 
+### [TASK-017] Perbaikan Tampilan Icon & Alignment pada State Collapsed Sidebar
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Memperbaiki tampilan sidebar saat di-collapse agar seluruh icon navigasi, logo header, dan avatar footer tampil presisi di tengah (perfectly centered), tidak terpotong (clipped/overflow), serta label teks dan padding berlebih disembunyikan saat mode collapsed icon aktif.
+- **Sub-tasks**:
+  - [x] Sesuaikan lebar ikon collapsed di `constants.ts` (`SIDEBAR_WIDTH_ICON = "3.75rem"` / 60px)
+  - [x] Tambahkan modifier `group-data-[collapsible=icon]` pada `SidebarContent`, `SidebarMenuItem`, `SidebarMenuButton`, dan anchor tag
+  - [x] Pastikan label teks disembunyikan secara eksplisit saat collapsed (`group-data-[collapsible=icon]:hidden`)
+  - [x] Pastikan icon button berukuran `size-10` (40x40px) dan terpusat (`mx-auto justify-center`)
+  - [x] Pusatkan logo di Header dan Avatar di Footer saat collapsed
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
+  - [x] Verifikasi rendering collapsed icon di browser
+
+
+
 
 
 
