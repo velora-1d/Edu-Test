@@ -1,1 +1,27 @@
 @import 'tailwindcss';
+
+@theme {
+	--font-display: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+	--font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+	--color-primary: #004ac6;
+	--color-primary-hover: #1d4ed8;
+	--color-primary-active: #1e40af;
+	--color-surface-base: #f8fafc;
+	--color-surface-card: #ffffff;
+	--color-border-subtle: #e2e8f0;
+}
+
+body {
+	font-family: var(--font-sans);
+	background-color: #f8fafc;
+	color: #0f172a;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+	font-family: var(--font-display);
+}
+
+.tabular-nums {
+	font-variant-numeric: tabular-nums;
+}

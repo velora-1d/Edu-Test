@@ -7,3 +7,4 @@
 {"id":"EDU-TEST-7","title":"Penyelarasan Rute Penilaian & Navigasi (Fix 404)","status":"closed","created_at":"2026-11-02T11:40:00Z","priority":"high"}
 {"id":"EDU-TEST-8","title":"Fix SSR Head Favicon Import (500 Error di /wawancara)","status":"closed","created_at":"2026-11-02T11:47:00Z","priority":"high"}
 {"id":"EDU-TEST-9","title":"Fix Effect Loop di Wawancara (effect_update_depth_exceeded)","status":"closed","created_at":"2026-11-02T11:53:00Z","priority":"high"}
+{"id":"EDU-TEST-10","title":"Adopsi & Integrasi Sistem Desain DESIGN.md (EdTech Clean Minimalist)","status":"closed","created_at":"2026-11-02T11:57:00Z","priority":"high"}

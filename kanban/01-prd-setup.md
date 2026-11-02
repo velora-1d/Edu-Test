@@ -99,3 +99,14 @@
   - [x] Verifikasi `pnpm build` (100% lulus build)
   - [x] Pengujian beban request via curl ke /wawancara (200 OK konsisten)
 
+### [TASK-010] Adopsi & Integrasi Sistem Desain DESIGN.md (EdTech Clean Minimalist)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Mengintegrasikan DESIGN.md dari MCP designmd (kit Osutsuki93/ssss) ke dalam repositori serta menyelaraskan token CSS tema Tailwind v4.
+- **Sub-tasks**:
+  - [x] Download & simpan DESIGN.md via designmd MCP
+  - [x] Sinkronisasi token tema di `src/routes/layout.css` (@theme Be Vietnam Pro + Inter & palet #004ac6 / #2563eb)
+  - [x] Setup webfont Google Fonts di `src/app.html`
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% build lulus)
+  - [x] Pengujian empiris 7 rute utama (seluruhnya 200 OK)
+
