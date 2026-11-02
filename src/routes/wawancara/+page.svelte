@@ -31,6 +31,7 @@
 	let autosaveStatus = $state<'saved' | 'saving' | 'idle'>('idle');
 	let lastSavedTime = $state<string>('');
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let showCompleteModal = $state(false);
 
 	let currentCandidate = $derived(data.selectedCandidate);
 	let interviewData = $derived(currentCandidate?.interview);
@@ -1116,8 +1117,8 @@
 						</button>
 
 						<button
-							type="submit"
-							formaction="?/complete"
+							type="button"
+							onclick={() => (showCompleteModal = true)}
 							class="flex-1 sm:flex-initial px-6 py-3 rounded-xl bg-blue-800 text-white hover:bg-blue-900 font-bold text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all active:scale-98 shadow-md shadow-blue-950/20"
 						>
 							<Check class="w-4 h-4" />
@@ -1130,6 +1131,53 @@
 					</div>
 				{/if}
 			</div>
+
+			<!-- Custom Modal Konfirmasi Kunci Dossier Wawancara -->
+			{#if showCompleteModal}
+				<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+					<div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+						<div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center shadow-xs">
+							<Lock class="w-6 h-6 text-blue-700" />
+						</div>
+						<div>
+							<h3 class="text-lg font-bold text-slate-900">Kunci Dossier Wawancara?</h3>
+							<p class="text-xs text-slate-500 mt-1 leading-relaxed">
+								Anda akan menandai sesi wawancara untuk <strong>{currentCandidate.fullName}</strong> ({currentCandidate.testNumber}) telah selesai. Catatan wawancara yang terkunci akan menjadi rujukan resmi pimpinan pada Sidang Pleno.
+							</p>
+						</div>
+
+						<div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+							<div class="flex justify-between">
+								<span class="text-slate-500">Pewawancara:</span>
+								<span class="font-bold text-slate-800">{interviewerName}</span>
+							</div>
+							<div class="flex justify-between">
+								<span class="text-slate-500">Rekomendasi Khusus:</span>
+								<span class="font-semibold text-blue-700">{specialRecommendation}</span>
+							</div>
+						</div>
+
+						<div class="flex items-center justify-end gap-3 pt-2">
+							<button
+								type="button"
+								onclick={() => (showCompleteModal = false)}
+								class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition min-h-[44px]"
+							>
+								Batal
+							</button>
+							<button
+								type="submit"
+								formaction="?/complete"
+								onclick={() => (showCompleteModal = false)}
+								class="px-5 py-2.5 rounded-xl bg-blue-800 text-white font-bold text-sm hover:bg-blue-900 transition shadow-md shadow-blue-950/20 min-h-[44px] flex items-center gap-2"
+							>
+								<Check class="w-4 h-4" />
+								<span>Ya, Kunci Dossier</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</form>
 	{:else}
 		<div class="bg-white rounded-2xl p-12 text-center border border-slate-200">

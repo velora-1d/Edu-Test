@@ -34,13 +34,15 @@
 		}
 	});
 
-	// Dossier Modal
+	// Dossier Modal & Custom Modals
 	let selectedDossierCandidate = $state<(typeof data.candidates)[0] | null>(null);
+	let showRatifyModal = $state(false);
+	let overrideCandidate = $state<(typeof data.candidates)[0] | null>(null);
+	let targetOverrideStatus = $state<'LULUS' | 'WAITING_LIST'>('LULUS');
+	let overrideReasonText = $state('');
 
 	// Overrides map: { [candidateId]: { status: 'LULUS' | 'WAITING_LIST', reason: string } }
 	let overrides = $state<Record<string, { status: string; reason: string }>>({});
-	let editingOverrideId = $state<string | null>(null);
-	let overrideReasonInput = $state('');
 
 	function openDossier(c: (typeof data.candidates)[0]) {
 		selectedDossierCandidate = c;
@@ -50,12 +52,24 @@
 		selectedDossierCandidate = null;
 	}
 
-	function setOverride(candidateId: string, newStatus: string) {
-		const existingReason = overrides[candidateId]?.reason || '';
-		overrides[candidateId] = {
-			status: newStatus,
-			reason: existingReason || 'Diskresi pimpinan sidang pleno'
+	function startOverride(c: (typeof data.candidates)[0], newStatus: 'LULUS' | 'WAITING_LIST') {
+		overrideCandidate = c;
+		targetOverrideStatus = newStatus;
+		overrideReasonText =
+			overrides[c.id]?.reason ||
+			(newStatus === 'LULUS'
+				? 'Prestasi tahfidz & rekomendasi khusus pengasuh pondok'
+				: 'Pertimbangan kesiapan asrama & kapasitas kuota gelombang');
+	}
+
+	function confirmOverride() {
+		if (!overrideCandidate) return;
+		overrides[overrideCandidate.id] = {
+			status: targetOverrideStatus,
+			reason: overrideReasonText.trim() || 'Diskresi pimpinan sidang pleno'
 		};
+		overrideCandidate = null;
+		overrideReasonText = '';
 	}
 
 	function removeOverride(candidateId: string) {
@@ -250,37 +264,16 @@
 				</span>
 			</div>
 
-			<!-- Tombol Pengesahan Pleno -->
-			<form
-				method="POST"
-				action="?/savePleno"
-				use:enhance={() => {
-					isSaving = true;
-					return async ({ update }) => {
-						isSaving = false;
-						await update();
-					};
-				}}
+			<!-- Tombol Pengesahan Pleno (Custom Modal) -->
+			<button
+				type="button"
+				disabled={isSaving}
+				onclick={() => (showRatifyModal = true)}
+				class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-950/20 disabled:opacity-50 min-h-[44px]"
 			>
-				<input type="hidden" name="waveId" value={data.activeWave?.id || ''} />
-				<input type="hidden" name="quotaCapacity" value={quotaInput} />
-				<input type="hidden" name="approvedBy" value={approvedByName} />
-				<input type="hidden" name="overrides" value={JSON.stringify(overrides)} />
-
-				<button
-					type="submit"
-					disabled={isSaving}
-					onclick={(e) => {
-						if (!confirm(`Sahkan keputusan sidang pleno dengan kuota ${quotaInput} santri lulus?`)) {
-							e.preventDefault();
-						}
-					}}
-					class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-bold text-sm hover:bg-emerald-600 transition shadow-lg disabled:opacity-50"
-				>
-					<ShieldCheck class="w-5 h-5 text-white" />
-					<span>{isSaving ? 'Menyimpan Pengesahan...' : 'Sahkan Keputusan Pleno'}</span>
-				</button>
-			</form>
+				<ShieldCheck class="w-5 h-5 text-white" />
+				<span>{isSaving ? 'Menyimpan Pengesahan...' : 'Sahkan Keputusan Pleno'}</span>
+			</button>
 		</div>
 	</div>
 
@@ -399,7 +392,7 @@
 								{:else if isLulus}
 									<button
 										type="button"
-										onclick={() => setOverride(c.id, 'WAITING_LIST')}
+										onclick={() => startOverride(c, 'WAITING_LIST')}
 										class="px-2 py-0.5 text-[10px] rounded bg-slate-100 text-slate-600 hover:bg-amber-100 hover:text-amber-800 font-medium transition"
 										title="Ubah status ke Waiting List dengan pertimbangan pleno"
 									>
@@ -408,7 +401,7 @@
 								{:else}
 									<button
 										type="button"
-										onclick={() => setOverride(c.id, 'LULUS')}
+										onclick={() => startOverride(c, 'LULUS')}
 										class="px-2 py-0.5 text-[10px] rounded bg-slate-100 text-slate-600 hover:bg-emerald-100 hover:text-emerald-800 font-medium transition"
 										title="Ubah status ke Lulus dengan pertimbangan pleno"
 									>
@@ -599,6 +592,214 @@
 						class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 text-white hover:bg-slate-900 transition"
 					>
 						Tutup Dossier
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Custom Modal Pengesahan Sidang Pleno (Bebas Dialog Browser Native) -->
+	{#if showRatifyModal}
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
+		>
+			<div
+				class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150"
+			>
+				<!-- Modal Header -->
+				<div class="flex items-start gap-4">
+					<div
+						class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 shadow-xs"
+					>
+						<ShieldCheck class="w-7 h-7 text-emerald-600" />
+					</div>
+					<div>
+						<h3 class="text-lg font-bold text-slate-900">
+							Sahkan Keputusan Sidang Pleno?
+						</h3>
+						<p class="text-xs text-slate-500 mt-1 leading-relaxed">
+							Konfirmasi penetapan kuota kelulusan resmi santri baru TA 2027/2028. Hasil kelulusan akan disimpan permanen ke database seleksi.
+						</p>
+					</div>
+				</div>
+
+				<!-- Summary Card -->
+				<div
+					class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs"
+				>
+					<div
+						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
+					>
+						<span class="text-slate-500 font-medium">Gelombang Seleksi:</span>
+						<span class="font-bold text-slate-800"
+							>{data.activeWave?.waveName || 'Gelombang 1'}</span
+						>
+					</div>
+					<div
+						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
+					>
+						<span class="text-slate-500 font-medium">Daya Tampung / Kuota:</span>
+						<span class="font-black text-emerald-700 text-sm"
+							>{quotaInput} Santri Lulus</span
+						>
+					</div>
+					<div
+						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
+					>
+						<span class="text-slate-500 font-medium">Total Peserta Diperingkat:</span>
+						<span class="font-bold text-slate-800"
+							>{plenoCandidates.length} Santri</span
+						>
+					</div>
+					<div
+						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
+					>
+						<span class="text-slate-500 font-medium">Jumlah Waiting List:</span>
+						<span class="font-bold text-amber-700"
+							>{Math.max(0, plenoCandidates.length - quotaInput)} Santri</span
+						>
+					</div>
+					<div
+						class="flex justify-between items-center py-1.5"
+					>
+						<span class="text-slate-500 font-medium">Pimpinan Sidang:</span>
+						<span class="font-semibold text-slate-800 text-right"
+							>{approvedByName}</span
+						>
+					</div>
+				</div>
+
+				<!-- Notice Alert -->
+				<div
+					class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] flex items-center gap-2.5"
+				>
+					<CheckCircle2 class="w-4 h-4 text-blue-600 shrink-0" />
+					<span
+						>Hasil pleno ini mengunci status LULUS dan WAITING LIST untuk publikasi pengumuman santri baru.</span
+					>
+				</div>
+
+				<!-- Modal Actions -->
+				<div class="flex items-center justify-end gap-3 pt-2">
+					<button
+						type="button"
+						onclick={() => (showRatifyModal = false)}
+						class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition min-h-[44px]"
+					>
+						Batal
+					</button>
+
+					<form
+						method="POST"
+						action="?/savePleno"
+						use:enhance={() => {
+							isSaving = true;
+							showRatifyModal = false;
+							return async ({ update }) => {
+								isSaving = false;
+								await update();
+							};
+						}}
+					>
+						<input
+							type="hidden"
+							name="waveId"
+							value={data.activeWave?.id || ''}
+						/>
+						<input
+							type="hidden"
+							name="quotaCapacity"
+							value={quotaInput}
+						/>
+						<input
+							type="hidden"
+							name="approvedBy"
+							value={approvedByName}
+						/>
+						<input
+							type="hidden"
+							name="overrides"
+							value={JSON.stringify(overrides)}
+						/>
+
+						<button
+							type="submit"
+							disabled={isSaving}
+							class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-950/20 disabled:opacity-50 min-h-[44px]"
+						>
+							<ShieldCheck class="w-4 h-4 text-white" />
+							<span>{isSaving ? 'Menyimpan...' : 'Ya, Sahkan Keputusan'}</span>
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Custom Modal Diskresi Override Pimpinan Pleno -->
+	{#if overrideCandidate}
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
+		>
+			<div
+				class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150"
+			>
+				<div class="flex items-start gap-3">
+					<div
+						class="w-10 h-10 rounded-xl {targetOverrideStatus === 'LULUS' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'} flex items-center justify-center shrink-0 font-bold"
+					>
+						<Edit3 class="w-5 h-5" />
+					</div>
+					<div>
+						<h3 class="text-base font-bold text-slate-900">
+							Diskresi Pimpinan Sidang Pleno
+						</h3>
+						<p class="text-xs text-slate-500 mt-0.5">
+							Ubah status kelulusan untuk <strong>{overrideCandidate.fullName}</strong> ({overrideCandidate.testNumber}).
+						</p>
+					</div>
+				</div>
+
+				<div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+					<div class="flex justify-between">
+						<span class="text-slate-500">Peringkat Komposit:</span>
+						<span class="font-bold text-slate-900">#{overrideCandidate.ranking?.rankParallel || '-'} (Skor: {overrideCandidate.ranking?.compositeScore || '-'})</span>
+					</div>
+					<div class="flex justify-between">
+						<span class="text-slate-500">Target Status Baru:</span>
+						<span class="font-bold {targetOverrideStatus === 'LULUS' ? 'text-emerald-700' : 'text-amber-700'}">
+							{targetOverrideStatus === 'LULUS' ? 'LULUS (Prioritas Kuota)' : 'WAITING LIST (Penangguhan)'}
+						</span>
+					</div>
+				</div>
+
+				<div>
+					<label for="override-reason" class="block text-xs font-semibold text-slate-700 mb-1.5">
+						Alasan / Catatan Pertimbangan Diskresi:
+					</label>
+					<textarea
+						id="override-reason"
+						bind:value={overrideReasonText}
+						rows="3"
+						placeholder="Contoh: Prestasi hafalan Quran mutqin, rekomendasi khusus pengasuh pondok..."
+						class="w-full text-xs rounded-xl border border-slate-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 resize-none"
+					></textarea>
+				</div>
+
+				<div class="flex items-center justify-end gap-2.5 pt-1">
+					<button
+						type="button"
+						onclick={() => (overrideCandidate = null)}
+						class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition min-h-[38px]"
+					>
+						Batal
+					</button>
+					<button
+						type="button"
+						onclick={confirmOverride}
+						class="px-4 py-2 rounded-xl {targetOverrideStatus === 'LULUS' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-950/20' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-950/20'} text-white font-bold text-xs transition shadow-md min-h-[38px]"
+					>
+						Terapkan Diskresi
 					</button>
 				</div>
 			</div>

@@ -110,3 +110,15 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% build lulus)
   - [x] Pengujian empiris 7 rute utama (seluruhnya 200 OK)
 
+### [TASK-011] Eliminasi Dialog Bawaan Browser & Implementasi Modal Custom Estetik
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Menghapus seluruh confirm/alert bawaan browser dan menggantinya dengan modal konfirmasi custom bertema EdTech Clean Minimalist (Tailwind backdrop-blur, rounded-2xl, icon badge, dan rekap aksi).
+- **Sub-tasks**:
+  - [x] Hapus browser `confirm()` di `src/routes/pleno/+page.svelte`
+  - [x] Implementasikan Modal Pengesahan Sidang Pleno custom estetik (rekap kuota, nama pimpinan, alert permanen)
+  - [x] Implementasikan Modal Override Diskresi Pleno custom estetik (alasan diskresi, skor komposit, target status)
+  - [x] Implementasikan Modal Kunci Dossier Wawancara custom estetik di `src/routes/wawancara/+page.svelte`
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
+  - [x] Verifikasi 0 `confirm/alert/prompt` tersisa di seluruh codebase
+
