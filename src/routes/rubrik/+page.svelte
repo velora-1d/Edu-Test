@@ -20,7 +20,8 @@
 		Info,
 		Layers,
 		ArrowLeft,
-		ArrowRight
+		ArrowRight,
+		Sparkles
 	} from "lucide-svelte";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -511,11 +512,11 @@
 					{/if}
 				</div>
 
-				<!-- 7 Tabs Navigation Header (Tablet Touch Optimized - min 48px) -->
+				<!-- 7 Tabs Navigation Header (Grid 2 Baris: 4 Kolom x 2 Baris) -->
 				<div
-					class="bg-white rounded-2xl p-2 shadow-xs border border-slate-200 overflow-x-auto"
+					class="bg-white rounded-2xl p-2.5 shadow-xs border border-slate-200"
 				>
-					<div class="flex items-center gap-1.5 min-w-max">
+					<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
 						{#each tabs as t}
 							{@const active = activeTab === t.id}
 							{@const score = t.getScore()}
@@ -524,16 +525,18 @@
 							<button
 								type="button"
 								onclick={() => (activeTab = t.id as any)}
-								class={`px-3.5 py-2.5 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center gap-2.5 transition-all select-none ${
+								class={`px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm min-h-[46px] flex items-center justify-between gap-2 transition-all select-none border ${
 									active
-										? "bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40"
-										: "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+										? "bg-blue-800 text-white border-blue-800 shadow-md ring-2 ring-blue-500/40"
+										: "bg-slate-50/80 text-slate-700 hover:bg-blue-50/60 hover:text-blue-900 hover:border-blue-200 border-slate-200"
 								}`}
 							>
-								<TabIcon class="w-4 h-4 shrink-0" />
-								<span>{t.label}</span>
+								<div class="flex items-center gap-2 truncate">
+									<TabIcon class="w-4 h-4 shrink-0 {active ? 'text-white' : 'text-slate-500'}" />
+									<span class="truncate">{t.label}</span>
+								</div>
 								<span
-									class={`text-[11px] px-2 py-0.5 rounded-md font-mono font-extrabold ${
+									class={`text-[11px] px-2 py-0.5 rounded-md font-mono font-extrabold shrink-0 ${
 										active
 											? "bg-blue-700 text-white"
 											: isPassed
@@ -545,6 +548,21 @@
 								</span>
 							</button>
 						{/each}
+
+						<!-- Slot ke-8: Rata-rata 7 Bidang Melengkapi Grid 2 Baris -->
+						<div
+							class="px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm min-h-[46px] flex items-center justify-between gap-2 bg-blue-50/90 border border-blue-200 text-blue-900 select-none shadow-2xs"
+						>
+							<div class="flex items-center gap-2 truncate">
+								<Sparkles class="w-4 h-4 text-blue-700 shrink-0" />
+								<span class="truncate font-bold text-blue-950">Rata-rata Total</span>
+							</div>
+							<span
+								class="text-[11px] px-2 py-0.5 rounded-md font-mono font-black bg-blue-700 text-white shrink-0 shadow-xs"
+							>
+								{averageScore}
+							</span>
+						</div>
 					</div>
 				</div>
 
