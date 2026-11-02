@@ -24,7 +24,10 @@
 		Award,
 		AlertTriangle,
 		ShieldAlert,
-		IdCard
+		IdCard,
+		SlidersHorizontal,
+		Building2,
+		GraduationCap
 	} from 'lucide-svelte';
 
 	let { data, form }: { data: PageData; form?: ActionData } = $props();
@@ -41,6 +44,27 @@
 	let deletingCandidate = $state<any>(null);
 	let isSubmitting = $state(false);
 
+	// Master Data CRUD States (Jurusan & Ruang)
+	let showMasterModal = $state(false);
+	let activeMasterTab = $state<'majors' | 'rooms'>('majors');
+	let isSubmittingMaster = $state(false);
+
+	// Major CRUD Form State
+	let showAddMajorForm = $state(false);
+	let newMajorName = $state('');
+	let newMajorCode = $state('');
+	let newMajorDesc = $state('');
+	let editingMajor = $state<{ id: string; name: string; code: string; description: string | null } | null>(null);
+	let deletingMajor = $state<{ id: string; name: string } | null>(null);
+
+	// Room CRUD Form State
+	let showAddRoomForm = $state(false);
+	let newRoomName = $state('');
+	let newRoomCapacity = $state(30);
+	let newRoomLocation = $state('');
+	let editingRoom = $state<{ id: string; name: string; capacity: number; location: string | null } | null>(null);
+	let deletingRoom = $state<{ id: string; name: string } | null>(null);
+
 	// Create Form State
 	let createFullName = $state('');
 	let createNisn = $state('');
@@ -52,6 +76,12 @@
 	$effect(() => {
 		if (!createWaveId && data.activeWave?.id) {
 			createWaveId = data.activeWave.id;
+		}
+		if (data.majors && data.majors.length > 0 && !createMajorChoice) {
+			createMajorChoice = data.majors[0].name;
+		}
+		if (data.examRooms && data.examRooms.length > 0 && !createRoomAssignment) {
+			createRoomAssignment = data.examRooms[0].name;
 		}
 	});
 
@@ -181,7 +211,15 @@
 				</p>
 			</div>
 
-			<div class="flex items-center gap-2.5 shrink-0">
+			<div class="flex items-center gap-2.5 shrink-0 flex-wrap">
+				<button
+					type="button"
+					onclick={() => (showMasterModal = true)}
+					class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-800/80 text-white font-bold text-xs sm:text-sm shadow-md hover:bg-blue-700 transition border border-white/20 active:scale-95"
+				>
+					<SlidersHorizontal class="w-4 h-4 text-sky-300" />
+					<span>Kelola Jurusan & Ruang</span>
+				</button>
 				<button
 					type="button"
 					onclick={() => (showCreateModal = true)}
@@ -331,9 +369,15 @@
 					class="text-xs md:text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 				>
 					<option value="ALL">Semua Jurusan</option>
-					<option value="Rekayasa Perangkat Lunak">RPL (Rekayasa Perangkat Lunak)</option>
-					<option value="Desain Komunikasi Visual">DKV (Desain Komunikasi Visual)</option>
-					<option value="Bisnis Digital">BD (Bisnis Digital)</option>
+					{#if data.majors && data.majors.length > 0}
+						{#each data.majors as m}
+							<option value={m.name}>{m.name} ({m.code})</option>
+						{/each}
+					{:else}
+						<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak (RPL)</option>
+						<option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
+						<option value="Bisnis Digital">Bisnis Digital (BD)</option>
+					{/if}
 				</select>
 			</div>
 
@@ -665,36 +709,66 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<!-- Pilihan Jurusan -->
 					<div>
-						<label for="create_majorChoice" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-							Jurusan Pilihan <span class="text-rose-500">*</span>
-						</label>
+						<div class="flex items-center justify-between mb-1.5">
+							<label for="create_majorChoice" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+								Jurusan Pilihan <span class="text-rose-500">*</span>
+							</label>
+							<button
+								type="button"
+								onclick={() => { showMasterModal = true; activeMasterTab = 'majors'; }}
+								class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline transition"
+							>
+								+ Kelola Jurusan
+							</button>
+						</div>
 						<select
 							id="create_majorChoice"
 							name="majorChoice"
 							bind:value={createMajorChoice}
 							class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 						>
-							<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak (RPL)</option>
-							<option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
-							<option value="Bisnis Digital">Bisnis Digital (BD)</option>
+							{#if data.majors && data.majors.length > 0}
+								{#each data.majors as m}
+									<option value={m.name}>{m.name} ({m.code})</option>
+								{/each}
+							{:else}
+								<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak (RPL)</option>
+								<option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
+								<option value="Bisnis Digital">Bisnis Digital (BD)</option>
+							{/if}
 						</select>
 					</div>
 
 					<!-- Sesi Ruangan -->
 					<div>
-						<label for="create_roomAssignment" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-							Alokasi Ruang Ujian
-						</label>
+						<div class="flex items-center justify-between mb-1.5">
+							<label for="create_roomAssignment" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+								Alokasi Ruang Ujian
+							</label>
+							<button
+								type="button"
+								onclick={() => { showMasterModal = true; activeMasterTab = 'rooms'; }}
+								class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline transition"
+							>
+								+ Kelola Ruang
+							</button>
+						</div>
 						<select
 							id="create_roomAssignment"
 							name="roomAssignment"
 							bind:value={createRoomAssignment}
 							class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 						>
-							<option value="Ruang 1 (Lab RPL)">Ruang 1 (Lab RPL)</option>
-							<option value="Ruang 2 (Lab DKV)">Ruang 2 (Lab DKV)</option>
-							<option value="Ruang 3 (Kelas A)">Ruang 3 (Kelas A)</option>
-							<option value="Ruang 4 (Kelas B)">Ruang 4 (Kelas B)</option>
+							{#if data.examRooms && data.examRooms.length > 0}
+								{#each data.examRooms as r}
+									<option value={r.name}>{r.name}{r.location ? ` - ${r.location}` : ''}</option>
+								{/each}
+							{:else}
+								<option value="Ruang 1 (Lab RPL)">Ruang 1 (Lab RPL)</option>
+								<option value="Ruang 2 (Lab DKV)">Ruang 2 (Lab DKV)</option>
+								<option value="Ruang 3 (Kelas A)">Ruang 3 (Kelas A)</option>
+								<option value="Ruang 4 (Kelas B)">Ruang 4 (Kelas B)</option>
+							{/if}
 						</select>
 					</div>
 				</div>
@@ -844,9 +918,15 @@
 							bind:value={editMajorChoice}
 							class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 						>
-							<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak (RPL)</option>
-							<option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
-							<option value="Bisnis Digital">Bisnis Digital (BD)</option>
+							{#if data.majors && data.majors.length > 0}
+								{#each data.majors as m}
+									<option value={m.name}>{m.name} ({m.code})</option>
+								{/each}
+							{:else}
+								<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak (RPL)</option>
+								<option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
+								<option value="Bisnis Digital">Bisnis Digital (BD)</option>
+							{/if}
 						</select>
 					</div>
 
@@ -861,10 +941,16 @@
 							bind:value={editRoomAssignment}
 							class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 						>
-							<option value="Ruang 1 (Lab RPL)">Ruang 1 (Lab RPL)</option>
-							<option value="Ruang 2 (Lab DKV)">Ruang 2 (Lab DKV)</option>
-							<option value="Ruang 3 (Kelas A)">Ruang 3 (Kelas A)</option>
-							<option value="Ruang 4 (Kelas B)">Ruang 4 (Kelas B)</option>
+							{#if data.examRooms && data.examRooms.length > 0}
+								{#each data.examRooms as r}
+									<option value={r.name}>{r.name}{r.location ? ` - ${r.location}` : ''}</option>
+								{/each}
+							{:else}
+								<option value="Ruang 1 (Lab RPL)">Ruang 1 (Lab RPL)</option>
+								<option value="Ruang 2 (Lab DKV)">Ruang 2 (Lab DKV)</option>
+								<option value="Ruang 3 (Kelas A)">Ruang 3 (Kelas A)</option>
+								<option value="Ruang 4 (Kelas B)">Ruang 4 (Kelas B)</option>
+							{/if}
 						</select>
 					</div>
 				</div>
@@ -986,6 +1072,659 @@
 						<Trash2 class="w-4 h-4" />
 						<span>Ya, Hapus Data</span>
 					{/if}
+				</button>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- ========================================================================= -->
+<!-- CUSTOM AESTHETIC MODAL 4: KELOLA MASTER JURUSAN & RUANG UJIAN              -->
+<!-- ========================================================================= -->
+{#if showMasterModal}
+	<div
+		class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+		tabindex="-1"
+		role="dialog"
+		aria-modal="true"
+	>
+		<div
+			class="bg-white rounded-3xl max-w-3xl w-full p-6 md:p-8 shadow-2xl border border-slate-200 space-y-6 relative animate-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col"
+		>
+			<!-- Modal Header -->
+			<div class="flex items-start justify-between pb-4 border-b border-slate-100">
+				<div class="flex items-center gap-3">
+					<div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-black">
+						<SlidersHorizontal class="w-6 h-6 stroke-[2.2]" />
+					</div>
+					<div>
+						<h2 class="text-xl font-black text-slate-900">Kelola Master Jurusan & Ruang Ujian</h2>
+						<p class="text-xs text-slate-500 mt-0.5">
+							Pilihan jurusan dan ruang ujian tersinkronisasi otomatis ke formulir pendaftaran santri baru.
+						</p>
+					</div>
+				</div>
+				<button
+					type="button"
+					onclick={() => {
+						showMasterModal = false;
+						editingMajor = null;
+						editingRoom = null;
+						showAddMajorForm = false;
+						showAddRoomForm = false;
+					}}
+					class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+				>
+					<X class="w-5 h-5" />
+				</button>
+			</div>
+
+			<!-- Tab Switcher -->
+			<div class="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl">
+				<button
+					type="button"
+					onclick={() => { activeMasterTab = 'majors'; }}
+					class="flex-1 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition {activeMasterTab === 'majors' ? 'bg-white text-blue-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'}"
+				>
+					<GraduationCap class="w-4 h-4 text-blue-600" />
+					<span>Jurusan Pilihan ({data.majors?.length || 0})</span>
+				</button>
+				<button
+					type="button"
+					onclick={() => { activeMasterTab = 'rooms'; }}
+					class="flex-1 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition {activeMasterTab === 'rooms' ? 'bg-white text-blue-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'}"
+				>
+					<Building2 class="w-4 h-4 text-emerald-600" />
+					<span>Alokasi Ruang Ujian ({data.examRooms?.length || 0})</span>
+				</button>
+			</div>
+
+			<!-- Modal Body (Scrollable) -->
+			<div class="overflow-y-auto space-y-4 flex-1 pr-1">
+				{#if activeMasterTab === 'majors'}
+					<!-- TAB JURUSAN -->
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Jurusan Aktif</span>
+							{#if !showAddMajorForm && !editingMajor}
+								<button
+									type="button"
+									onclick={() => {
+										showAddMajorForm = true;
+										newMajorName = '';
+										newMajorCode = '';
+										newMajorDesc = '';
+									}}
+									class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition shadow-xs"
+								>
+									<Plus class="w-3.5 h-3.5 stroke-[3]" />
+									<span>Tambah Jurusan</span>
+								</button>
+							{/if}
+						</div>
+
+						<!-- Form Tambah Jurusan Baru -->
+						{#if showAddMajorForm}
+							<form
+								method="POST"
+								action="?/createMajor"
+								use:enhance={() => {
+									isSubmittingMaster = true;
+									return async ({ update }) => {
+										isSubmittingMaster = false;
+										await update();
+										showAddMajorForm = false;
+									};
+								}}
+								class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-3"
+							>
+								<div class="flex items-center justify-between pb-1 border-b border-blue-200/60">
+									<h4 class="text-xs font-bold text-blue-900">Form Tambah Jurusan Baru</h4>
+									<button
+										type="button"
+										onclick={() => (showAddMajorForm = false)}
+										class="text-xs font-semibold text-slate-500 hover:text-slate-800"
+									>
+										Tutup
+									</button>
+								</div>
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div class="sm:col-span-2">
+										<label for="new_major_name" class="block text-[11px] font-bold text-slate-700 mb-1">Nama Jurusan *</label>
+										<input
+											id="new_major_name"
+											type="text"
+											name="name"
+											bind:value={newMajorName}
+											required
+											placeholder="Contoh: Rekayasa Perangkat Lunak"
+											class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600"
+										/>
+									</div>
+									<div>
+										<label for="new_major_code" class="block text-[11px] font-bold text-slate-700 mb-1">Kode (2-4 huruf) *</label>
+										<input
+											id="new_major_code"
+											type="text"
+											name="code"
+											bind:value={newMajorCode}
+											required
+											maxlength="5"
+											placeholder="Contoh: RPL"
+											class="w-full px-3 py-2 text-xs font-mono font-bold uppercase bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600"
+										/>
+									</div>
+								</div>
+								<div>
+									<label for="new_major_desc" class="block text-[11px] font-bold text-slate-700 mb-1">Deskripsi Singkat</label>
+									<input
+										id="new_major_desc"
+										type="text"
+										name="description"
+										bind:value={newMajorDesc}
+										placeholder="Contoh: Konsentrasi Software & Web Development"
+										class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600"
+									/>
+								</div>
+								<div class="flex items-center justify-end gap-2 pt-1">
+									<button
+										type="button"
+										onclick={() => (showAddMajorForm = false)}
+										class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition"
+									>
+										Batal
+									</button>
+									<button
+										type="submit"
+										disabled={isSubmittingMaster}
+										class="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-700 text-white hover:bg-blue-800 transition disabled:opacity-50"
+									>
+										{isSubmittingMaster ? 'Menyimpan...' : 'Simpan Jurusan'}
+									</button>
+								</div>
+							</form>
+						{/if}
+
+						<!-- Form Edit Jurusan -->
+						{#if editingMajor}
+							<form
+								method="POST"
+								action="?/updateMajor"
+								use:enhance={() => {
+									isSubmittingMaster = true;
+									return async ({ update }) => {
+										isSubmittingMaster = false;
+										await update();
+										editingMajor = null;
+									};
+								}}
+								class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3"
+							>
+								<input type="hidden" name="id" value={editingMajor.id} />
+								<div class="flex items-center justify-between pb-1 border-b border-amber-200/60">
+									<h4 class="text-xs font-bold text-amber-900">Edit Jurusan: {editingMajor.name}</h4>
+									<button
+										type="button"
+										onclick={() => (editingMajor = null)}
+										class="text-xs font-semibold text-slate-500 hover:text-slate-800"
+									>
+										Tutup
+									</button>
+								</div>
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div class="sm:col-span-2">
+										<label for="edit_major_name" class="block text-[11px] font-bold text-slate-700 mb-1">Nama Jurusan *</label>
+										<input
+											id="edit_major_name"
+											type="text"
+											name="name"
+											bind:value={editingMajor.name}
+											required
+											class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-600"
+										/>
+									</div>
+									<div>
+										<label for="edit_major_code" class="block text-[11px] font-bold text-slate-700 mb-1">Kode *</label>
+										<input
+											id="edit_major_code"
+											type="text"
+											name="code"
+											bind:value={editingMajor.code}
+											required
+											maxlength="5"
+											class="w-full px-3 py-2 text-xs font-mono font-bold uppercase bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-600"
+										/>
+									</div>
+								</div>
+								<div>
+									<label for="edit_major_desc" class="block text-[11px] font-bold text-slate-700 mb-1">Deskripsi</label>
+									<input
+										id="edit_major_desc"
+										type="text"
+										name="description"
+										value={editingMajor.description || ''}
+										class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-600"
+									/>
+								</div>
+								<div class="flex items-center justify-end gap-2 pt-1">
+									<button
+										type="button"
+										onclick={() => (editingMajor = null)}
+										class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition"
+									>
+										Batal
+									</button>
+									<button
+										type="submit"
+										disabled={isSubmittingMaster}
+										class="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition disabled:opacity-50"
+									>
+										{isSubmittingMaster ? 'Memperbarui...' : 'Simpan Perubahan'}
+									</button>
+								</div>
+							</form>
+						{/if}
+
+						<!-- Tabel List Jurusan -->
+						<div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+							<table class="w-full text-left text-xs">
+								<thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+									<tr>
+										<th class="py-2.5 px-3">Jurusan</th>
+										<th class="py-2.5 px-3 w-20 text-center">Kode</th>
+										<th class="py-2.5 px-3">Deskripsi</th>
+										<th class="py-2.5 px-3 w-20 text-center">Aksi</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-100">
+									{#if !data.majors || data.majors.length === 0}
+										<tr>
+											<td colspan="4" class="py-6 text-center text-slate-400">Belum ada jurusan terdaftar.</td>
+										</tr>
+									{:else}
+										{#each data.majors as m}
+											<tr class="hover:bg-slate-50/80 transition">
+												<td class="py-2.5 px-3 font-bold text-slate-900">{m.name}</td>
+												<td class="py-2.5 px-3 text-center">
+													<span class="inline-block px-2 py-0.5 rounded-md font-mono font-black text-[11px] bg-blue-100 text-blue-800 border border-blue-200">
+														{m.code}
+													</span>
+												</td>
+												<td class="py-2.5 px-3 text-slate-500 text-[11px]">{m.description || '-'}</td>
+												<td class="py-2.5 px-3 text-center">
+													<div class="inline-flex items-center gap-1">
+														<button
+															type="button"
+															onclick={() => { editingMajor = { ...m }; showAddMajorForm = false; }}
+															class="p-1 rounded-lg hover:bg-slate-200 text-slate-600 transition"
+															title="Edit Jurusan"
+														>
+															<Edit3 class="w-3.5 h-3.5" />
+														</button>
+														<button
+															type="button"
+															onclick={() => { deletingMajor = { id: m.id, name: m.name }; }}
+															class="p-1 rounded-lg hover:bg-rose-100 text-rose-600 transition"
+															title="Hapus Jurusan"
+														>
+															<Trash2 class="w-3.5 h-3.5" />
+														</button>
+													</div>
+												</td>
+											</tr>
+										{/each}
+									{/if}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+				{:else if activeMasterTab === 'rooms'}
+					<!-- TAB RUANG UJIAN -->
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Ruang Ujian Aktif</span>
+							{#if !showAddRoomForm && !editingRoom}
+								<button
+									type="button"
+									onclick={() => {
+										showAddRoomForm = true;
+										newRoomName = '';
+										newRoomCapacity = 30;
+										newRoomLocation = '';
+									}}
+									class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition shadow-xs"
+								>
+									<Plus class="w-3.5 h-3.5 stroke-[3]" />
+									<span>Tambah Ruangan</span>
+								</button>
+							{/if}
+						</div>
+
+						<!-- Form Tambah Ruang Baru -->
+						{#if showAddRoomForm}
+							<form
+								method="POST"
+								action="?/createExamRoom"
+								use:enhance={() => {
+									isSubmittingMaster = true;
+									return async ({ update }) => {
+										isSubmittingMaster = false;
+										await update();
+										showAddRoomForm = false;
+									};
+								}}
+								class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3"
+							>
+								<div class="flex items-center justify-between pb-1 border-b border-emerald-200/60">
+									<h4 class="text-xs font-bold text-emerald-900">Form Tambah Ruang Ujian Baru</h4>
+									<button
+										type="button"
+										onclick={() => (showAddRoomForm = false)}
+										class="text-xs font-semibold text-slate-500 hover:text-slate-800"
+									>
+										Tutup
+									</button>
+								</div>
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div class="sm:col-span-2">
+										<label for="new_room_name" class="block text-[11px] font-bold text-slate-700 mb-1">Nama Ruangan *</label>
+										<input
+											id="new_room_name"
+											type="text"
+											name="name"
+											bind:value={newRoomName}
+											required
+											placeholder="Contoh: Ruang 1 (Lab RPL)"
+											class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600"
+										/>
+									</div>
+									<div>
+										<label for="new_room_capacity" class="block text-[11px] font-bold text-slate-700 mb-1">Kapasitas (Kursi)</label>
+										<input
+											id="new_room_capacity"
+											type="number"
+											name="capacity"
+											bind:value={newRoomCapacity}
+											min="1"
+											max="200"
+											class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600"
+										/>
+									</div>
+								</div>
+								<div>
+									<label for="new_room_location" class="block text-[11px] font-bold text-slate-700 mb-1">Lokasi / Gedung</label>
+									<input
+										id="new_room_location"
+										type="text"
+										name="location"
+										bind:value={newRoomLocation}
+										placeholder="Contoh: Gedung A Lantai 1"
+										class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600"
+									/>
+								</div>
+								<div class="flex items-center justify-end gap-2 pt-1">
+									<button
+										type="button"
+										onclick={() => (showAddRoomForm = false)}
+										class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition"
+									>
+										Batal
+									</button>
+									<button
+										type="submit"
+										disabled={isSubmittingMaster}
+										class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white hover:bg-emerald-800 transition disabled:opacity-50"
+									>
+										{isSubmittingMaster ? 'Menyimpan...' : 'Simpan Ruang'}
+									</button>
+								</div>
+							</form>
+						{/if}
+
+						<!-- Form Edit Ruang -->
+						{#if editingRoom}
+							<form
+								method="POST"
+								action="?/updateExamRoom"
+								use:enhance={() => {
+									isSubmittingMaster = true;
+									return async ({ update }) => {
+										isSubmittingMaster = false;
+										await update();
+										editingRoom = null;
+									};
+								}}
+								class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3"
+							>
+								<input type="hidden" name="id" value={editingRoom.id} />
+								<div class="flex items-center justify-between pb-1 border-b border-amber-200/60">
+									<h4 class="text-xs font-bold text-amber-900">Edit Ruang Ujian: {editingRoom.name}</h4>
+									<button
+										type="button"
+										onclick={() => (editingRoom = null)}
+										class="text-xs font-semibold text-slate-500 hover:text-slate-800"
+									>
+										Tutup
+									</button>
+								</div>
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<div class="sm:col-span-2">
+										<label for="edit_room_name" class="block text-[11px] font-bold text-slate-700 mb-1">Nama Ruangan *</label>
+										<input
+											id="edit_room_name"
+											type="text"
+											name="name"
+											bind:value={editingRoom.name}
+											required
+											class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-600"
+										/>
+									</div>
+									<div>
+										<label for="edit_room_capacity" class="block text-[11px] font-bold text-slate-700 mb-1">Kapasitas</label>
+										<input
+											id="edit_room_capacity"
+											type="number"
+											name="capacity"
+											bind:value={editingRoom.capacity}
+											min="1"
+											max="200"
+											class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-600"
+										/>
+									</div>
+								</div>
+								<div>
+									<label for="edit_room_location" class="block text-[11px] font-bold text-slate-700 mb-1">Lokasi</label>
+									<input
+										id="edit_room_location"
+										type="text"
+										name="location"
+										value={editingRoom.location || ''}
+										class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-600"
+									/>
+								</div>
+								<div class="flex items-center justify-end gap-2 pt-1">
+									<button
+										type="button"
+										onclick={() => (editingRoom = null)}
+										class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition"
+									>
+										Batal
+									</button>
+									<button
+										type="submit"
+										disabled={isSubmittingMaster}
+										class="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition disabled:opacity-50"
+									>
+										{isSubmittingMaster ? 'Memperbarui...' : 'Simpan Perubahan'}
+									</button>
+								</div>
+							</form>
+						{/if}
+
+						<!-- Tabel List Ruang -->
+						<div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+							<table class="w-full text-left text-xs">
+								<thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+									<tr>
+										<th class="py-2.5 px-3">Nama Ruang</th>
+										<th class="py-2.5 px-3 w-28 text-center">Kapasitas</th>
+										<th class="py-2.5 px-3">Lokasi</th>
+										<th class="py-2.5 px-3 w-20 text-center">Aksi</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-100">
+									{#if !data.examRooms || data.examRooms.length === 0}
+										<tr>
+											<td colspan="4" class="py-6 text-center text-slate-400">Belum ada ruang ujian terdaftar.</td>
+										</tr>
+									{:else}
+										{#each data.examRooms as r}
+											<tr class="hover:bg-slate-50/80 transition">
+												<td class="py-2.5 px-3 font-bold text-slate-900">{r.name}</td>
+												<td class="py-2.5 px-3 text-center">
+													<span class="inline-block px-2 py-0.5 rounded-md font-mono text-[11px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+														{r.capacity} Kursi
+													</span>
+												</td>
+												<td class="py-2.5 px-3 text-slate-500 text-[11px]">{r.location || '-'}</td>
+												<td class="py-2.5 px-3 text-center">
+													<div class="inline-flex items-center gap-1">
+														<button
+															type="button"
+															onclick={() => { editingRoom = { ...r }; showAddRoomForm = false; }}
+															class="p-1 rounded-lg hover:bg-slate-200 text-slate-600 transition"
+															title="Edit Ruang"
+														>
+															<Edit3 class="w-3.5 h-3.5" />
+														</button>
+														<button
+															type="button"
+															onclick={() => { deletingRoom = { id: r.id, name: r.name }; }}
+															class="p-1 rounded-lg hover:bg-rose-100 text-rose-600 transition"
+															title="Hapus Ruang"
+														>
+															<Trash2 class="w-3.5 h-3.5" />
+														</button>
+													</div>
+												</td>
+											</tr>
+										{/each}
+									{/if}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Modal Footer -->
+			<div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+				<span class="text-xs text-slate-500">
+					Perubahan jurusan dan ruangan langsung berlaku di formulir pendaftaran santri baru.
+				</span>
+				<button
+					type="button"
+					onclick={() => {
+						showMasterModal = false;
+						editingMajor = null;
+						editingRoom = null;
+					}}
+					class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-white hover:bg-slate-900 transition"
+				>
+					Selesai & Tutup
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- MODAL HAPUS JURUSAN -->
+{#if deletingMajor}
+	<div class="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+		<div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-200 space-y-4">
+			<div class="text-center space-y-2">
+				<div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+					<Trash2 class="w-6 h-6" />
+				</div>
+				<h3 class="font-black text-slate-900 text-base">Hapus Jurusan?</h3>
+				<p class="text-xs text-slate-500">
+					Hapus jurusan <strong class="text-slate-800">{deletingMajor.name}</strong> dari daftar pilihan PPDB?
+				</p>
+			</div>
+			<form
+				method="POST"
+				action="?/deleteMajor"
+				use:enhance={() => {
+					isSubmittingMaster = true;
+					return async ({ update }) => {
+						isSubmittingMaster = false;
+						await update();
+						deletingMajor = null;
+					};
+				}}
+				class="flex items-center justify-end gap-2 pt-2"
+			>
+				<input type="hidden" name="id" value={deletingMajor.id} />
+				<button
+					type="button"
+					onclick={() => (deletingMajor = null)}
+					class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+				>
+					Batal
+				</button>
+				<button
+					type="submit"
+					disabled={isSubmittingMaster}
+					class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition"
+				>
+					{isSubmittingMaster ? 'Menghapus...' : 'Ya, Hapus'}
+				</button>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- MODAL HAPUS RUANGAN -->
+{#if deletingRoom}
+	<div class="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+		<div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-200 space-y-4">
+			<div class="text-center space-y-2">
+				<div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+					<Trash2 class="w-6 h-6" />
+				</div>
+				<h3 class="font-black text-slate-900 text-base">Hapus Ruang Ujian?</h3>
+				<p class="text-xs text-slate-500">
+					Hapus ruang ujian <strong class="text-slate-800">{deletingRoom.name}</strong> dari daftar ruangan PPDB?
+				</p>
+			</div>
+			<form
+				method="POST"
+				action="?/deleteExamRoom"
+				use:enhance={() => {
+					isSubmittingMaster = true;
+					return async ({ update }) => {
+						isSubmittingMaster = false;
+						await update();
+						deletingRoom = null;
+					};
+				}}
+				class="flex items-center justify-end gap-2 pt-2"
+			>
+				<input type="hidden" name="id" value={deletingRoom.id} />
+				<button
+					type="button"
+					onclick={() => (deletingRoom = null)}
+					class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+				>
+					Batal
+				</button>
+				<button
+					type="submit"
+					disabled={isSubmittingMaster}
+					class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition"
+				>
+					{isSubmittingMaster ? 'Menghapus...' : 'Ya, Hapus'}
 				</button>
 			</form>
 		</div>

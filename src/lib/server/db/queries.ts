@@ -6,7 +6,9 @@ import {
 	pesantrenScores,
 	qualitativeInterviews,
 	finalRankings,
-	auditLogs
+	auditLogs,
+	majors,
+	examRooms
 } from '$lib/server/db/schema';
 import { calculateTpaScore, calculatePesantrenScore, type TpaInput, type PesantrenInput } from '$lib/server/scoring';
 import { eq, desc, asc, and } from 'drizzle-orm';
@@ -488,11 +490,21 @@ export async function createCandidate(data: {
 			.from(candidates)
 			.where(eq(candidates.waveId, data.waveId));
 		const count = existing.length + 1;
-		const deptCode = data.majorChoice.includes('Perangkat Lunak')
-			? 'RPL'
-			: data.majorChoice.includes('Komunikasi Visual')
-				? 'DKV'
-				: 'BD';
+		let deptCode = 'RPL';
+		const matchedMajor = await db.query.majors.findFirst({
+			where: eq(majors.name, data.majorChoice)
+		});
+		if (matchedMajor?.code) {
+			deptCode = matchedMajor.code.toUpperCase();
+		} else if (data.majorChoice.includes('Perangkat Lunak')) {
+			deptCode = 'RPL';
+		} else if (data.majorChoice.includes('Komunikasi Visual')) {
+			deptCode = 'DKV';
+		} else if (data.majorChoice.includes('Bisnis')) {
+			deptCode = 'BD';
+		} else {
+			deptCode = data.majorChoice.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'UMM';
+		}
 		testNumber = `G1-${deptCode}-${String(count).padStart(3, '0')}`;
 	}
 
@@ -580,6 +592,186 @@ export async function deleteCandidate(id: string) {
 			userName: 'Panitia Admisi',
 			actionType: 'DELETE_CANDIDATE',
 			details: `Menghapus calon santri: ${deleted.fullName} (${deleted.testNumber})`
+		});
+	}
+
+	return deleted;
+}
+
+/**
+ * Memastikan data awal Jurusan dan Ruang Ujian tersedia (Seed Default jika kosong)
+ */
+export async function ensureMasterData() {
+	const existingMajors = await db.select().from(majors);
+	if (existingMajors.length === 0) {
+		await db.insert(majors).values([
+			{ name: 'Rekayasa Perangkat Lunak', code: 'RPL', description: 'Pengembangan Software, Web & Mobile' },
+			{ name: 'Desain Komunikasi Visual', code: 'DKV', description: 'Desain Grafis, Animasi & Multimedia' },
+			{ name: 'Bisnis Digital', code: 'BD', description: 'E-Commerce, Digital Marketing & Startup' }
+		]);
+	}
+
+	const existingRooms = await db.select().from(examRooms);
+	if (existingRooms.length === 0) {
+		await db.insert(examRooms).values([
+			{ name: 'Ruang 1 (Lab RPL)', capacity: 30, location: 'Gedung A Lantai 1' },
+			{ name: 'Ruang 2 (Lab DKV)', capacity: 30, location: 'Gedung A Lantai 2' },
+			{ name: 'Ruang 3 (Kelas A)', capacity: 30, location: 'Gedung B Lantai 1' },
+			{ name: 'Ruang 4 (Kelas B)', capacity: 30, location: 'Gedung B Lantai 2' }
+		]);
+	}
+}
+
+/**
+ * Mengambil seluruh data Jurusan Pilihan
+ */
+export async function getMajors() {
+	await ensureMasterData();
+	return await db.query.majors.findMany({
+		orderBy: [asc(majors.name)]
+	});
+}
+
+/**
+ * Menambah Jurusan Pilihan baru
+ */
+export async function createMajor(data: { name: string; code: string; description?: string }) {
+	const [newMajor] = await db
+		.insert(majors)
+		.values({
+			name: data.name.trim(),
+			code: data.code.trim().toUpperCase(),
+			description: data.description?.trim() || null
+		})
+		.returning();
+
+	await db.insert(auditLogs).values({
+		userName: 'Panitia Admisi',
+		actionType: 'CREATE_MAJOR',
+		details: `Menambah jurusan baru: ${newMajor.name} (${newMajor.code})`
+	});
+
+	return newMajor;
+}
+
+/**
+ * Memperbarui data Jurusan Pilihan
+ */
+export async function updateMajor(
+	id: string,
+	data: { name?: string; code?: string; description?: string; isActive?: boolean }
+) {
+	const [updated] = await db
+		.update(majors)
+		.set({
+			name: data.name?.trim(),
+			code: data.code?.trim().toUpperCase(),
+			description: data.description?.trim(),
+			isActive: data.isActive
+		})
+		.where(eq(majors.id, id))
+		.returning();
+
+	if (updated) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'UPDATE_MAJOR',
+			details: `Memperbarui jurusan: ${updated.name} (${updated.code})`
+		});
+	}
+
+	return updated;
+}
+
+/**
+ * Menghapus data Jurusan Pilihan
+ */
+export async function deleteMajor(id: string) {
+	const [deleted] = await db.delete(majors).where(eq(majors.id, id)).returning();
+
+	if (deleted) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'DELETE_MAJOR',
+			details: `Menghapus jurusan: ${deleted.name}`
+		});
+	}
+
+	return deleted;
+}
+
+/**
+ * Mengambil seluruh data Alokasi Ruang Ujian
+ */
+export async function getExamRooms() {
+	await ensureMasterData();
+	return await db.query.examRooms.findMany({
+		orderBy: [asc(examRooms.name)]
+	});
+}
+
+/**
+ * Menambah Ruang Ujian baru
+ */
+export async function createExamRoom(data: { name: string; capacity?: number; location?: string }) {
+	const [newRoom] = await db
+		.insert(examRooms)
+		.values({
+			name: data.name.trim(),
+			capacity: data.capacity || 30,
+			location: data.location?.trim() || null
+		})
+		.returning();
+
+	await db.insert(auditLogs).values({
+		userName: 'Panitia Admisi',
+		actionType: 'CREATE_ROOM',
+		details: `Menambah ruang ujian baru: ${newRoom.name}`
+	});
+
+	return newRoom;
+}
+
+/**
+ * Memperbarui data Ruang Ujian
+ */
+export async function updateExamRoom(
+	id: string,
+	data: { name?: string; capacity?: number; location?: string; isActive?: boolean }
+) {
+	const [updated] = await db
+		.update(examRooms)
+		.set({
+			name: data.name?.trim(),
+			capacity: data.capacity,
+			location: data.location?.trim(),
+			isActive: data.isActive
+		})
+		.where(eq(examRooms.id, id))
+		.returning();
+
+	if (updated) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'UPDATE_ROOM',
+			details: `Memperbarui ruang ujian: ${updated.name}`
+		});
+	}
+
+	return updated;
+}
+
+/**
+ * Menghapus data Ruang Ujian
+ */
+export async function deleteExamRoom(id: string) {
+	const [deleted] = await db.delete(examRooms).where(eq(examRooms.id, id)).returning();
+
+	if (deleted) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'DELETE_ROOM',
+			details: `Menghapus ruang ujian: ${deleted.name}`
 		});
 	}
 

@@ -5,7 +5,15 @@ import {
 	getActiveWave,
 	createCandidate,
 	updateCandidate,
-	deleteCandidate
+	deleteCandidate,
+	getMajors,
+	getExamRooms,
+	createMajor,
+	updateMajor,
+	deleteMajor,
+	createExamRoom,
+	updateExamRoom,
+	deleteExamRoom
 } from '$lib/server/db/queries';
 import { seedDatabase } from '$lib/server/seed';
 import { asc } from 'drizzle-orm';
@@ -23,21 +31,27 @@ export const load: PageServerLoad = async () => {
 		orderBy: (w, { desc }) => [desc(w.testDate)]
 	});
 
-	const candidateList = await db.query.candidates.findMany({
-		with: {
-			wave: true,
-			tpaScore: true,
-			pesantrenScore: true,
-			interview: true,
-			ranking: true
-		},
-		orderBy: [asc(candidates.testNumber)]
-	});
+	const [candidateList, majorList, roomList] = await Promise.all([
+		db.query.candidates.findMany({
+			with: {
+				wave: true,
+				tpaScore: true,
+				pesantrenScore: true,
+				interview: true,
+				ranking: true
+			},
+			orderBy: [asc(candidates.testNumber)]
+		}),
+		getMajors(),
+		getExamRooms()
+	]);
 
 	return {
 		activeWave,
 		allWaves,
-		candidates: candidateList
+		candidates: candidateList,
+		majors: majorList,
+		examRooms: roomList
 	};
 };
 
@@ -141,6 +155,148 @@ export const actions: Actions = {
 		} catch (e: any) {
 			console.error('Error deleteCandidate:', e);
 			return fail(500, { error: e.message || 'Gagal menghapus calon santri' });
+		}
+	},
+
+	// =========================================================================
+	// CRUD: MASTER JURUSAN PILIHAN
+	// =========================================================================
+	createMajor: async ({ request }) => {
+		const data = await request.formData();
+		const name = ((data.get('name') as string) || '').trim();
+		const code = ((data.get('code') as string) || '').trim().toUpperCase();
+		const description = ((data.get('description') as string) || '').trim();
+
+		if (!name || !code) {
+			return fail(400, { error: 'Nama dan kode jurusan wajib diisi' });
+		}
+
+		try {
+			const created = await createMajor({ name, code, description });
+			return {
+				success: true,
+				action: 'createMajor',
+				message: `Jurusan ${created.name} (${created.code}) berhasil ditambahkan.`
+			};
+		} catch (e: any) {
+			console.error('Error createMajor:', e);
+			return fail(500, { error: e.message || 'Gagal menambahkan jurusan baru' });
+		}
+	},
+
+	updateMajor: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+		const name = ((data.get('name') as string) || '').trim();
+		const code = ((data.get('code') as string) || '').trim().toUpperCase();
+		const description = ((data.get('description') as string) || '').trim();
+
+		if (!id || !name || !code) {
+			return fail(400, { error: 'ID, nama, dan kode jurusan wajib diisi' });
+		}
+
+		try {
+			const updated = await updateMajor(id, { name, code, description });
+			return {
+				success: true,
+				action: 'updateMajor',
+				message: `Jurusan ${updated?.name} berhasil diperbarui.`
+			};
+		} catch (e: any) {
+			console.error('Error updateMajor:', e);
+			return fail(500, { error: e.message || 'Gagal memperbarui jurusan' });
+		}
+	},
+
+	deleteMajor: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+
+		if (!id) {
+			return fail(400, { error: 'ID Jurusan tidak valid' });
+		}
+
+		try {
+			const deleted = await deleteMajor(id);
+			return {
+				success: true,
+				action: 'deleteMajor',
+				message: `Jurusan ${deleted?.name} berhasil dihapus.`
+			};
+		} catch (e: any) {
+			console.error('Error deleteMajor:', e);
+			return fail(500, { error: e.message || 'Gagal menghapus jurusan' });
+		}
+	},
+
+	// =========================================================================
+	// CRUD: MASTER ALOKASI RUANG UJIAN
+	// =========================================================================
+	createExamRoom: async ({ request }) => {
+		const data = await request.formData();
+		const name = ((data.get('name') as string) || '').trim();
+		const capacity = parseInt((data.get('capacity') as string) || '30', 10);
+		const location = ((data.get('location') as string) || '').trim();
+
+		if (!name) {
+			return fail(400, { error: 'Nama ruang ujian wajib diisi' });
+		}
+
+		try {
+			const created = await createExamRoom({ name, capacity, location });
+			return {
+				success: true,
+				action: 'createExamRoom',
+				message: `Ruang ujian ${created.name} berhasil ditambahkan.`
+			};
+		} catch (e: any) {
+			console.error('Error createExamRoom:', e);
+			return fail(500, { error: e.message || 'Gagal menambahkan ruang ujian baru' });
+		}
+	},
+
+	updateExamRoom: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+		const name = ((data.get('name') as string) || '').trim();
+		const capacity = parseInt((data.get('capacity') as string) || '30', 10);
+		const location = ((data.get('location') as string) || '').trim();
+
+		if (!id || !name) {
+			return fail(400, { error: 'ID dan nama ruang ujian wajib diisi' });
+		}
+
+		try {
+			const updated = await updateExamRoom(id, { name, capacity, location });
+			return {
+				success: true,
+				action: 'updateExamRoom',
+				message: `Ruang ujian ${updated?.name} berhasil diperbarui.`
+			};
+		} catch (e: any) {
+			console.error('Error updateExamRoom:', e);
+			return fail(500, { error: e.message || 'Gagal memperbarui ruang ujian' });
+		}
+	},
+
+	deleteExamRoom: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+
+		if (!id) {
+			return fail(400, { error: 'ID Ruang ujian tidak valid' });
+		}
+
+		try {
+			const deleted = await deleteExamRoom(id);
+			return {
+				success: true,
+				action: 'deleteExamRoom',
+				message: `Ruang ujian ${deleted?.name} berhasil dihapus.`
+			};
+		} catch (e: any) {
+			console.error('Error deleteExamRoom:', e);
+			return fail(500, { error: e.message || 'Gagal menghapus ruang ujian' });
 		}
 	}
 };

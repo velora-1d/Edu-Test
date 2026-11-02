@@ -405,9 +405,15 @@
 				class="text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
 			>
 				<option value="ALL">Semua Jurusan</option>
-				<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
-				<option value="Desain Komunikasi Visual">Desain Komunikasi Visual</option>
-				<option value="Bisnis Digital">Bisnis Digital</option>
+				{#if data.majors && data.majors.length > 0}
+					{#each data.majors as m}
+						<option value={m.name}>{m.name} ({m.code})</option>
+					{/each}
+				{:else}
+					<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
+					<option value="Desain Komunikasi Visual">Desain Komunikasi Visual</option>
+					<option value="Bisnis Digital">Bisnis Digital</option>
+				{/if}
 			</select>
 		</div>
 

@@ -150,6 +150,26 @@ export const auditLogs = pgTable('audit_logs', {
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
+// 8. Master Data Jurusan Pilihan (Majors)
+export const majors = pgTable('majors', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: text('name').notNull().unique(), // e.g. Rekayasa Perangkat Lunak
+	code: text('code').notNull().unique(), // e.g. RPL
+	description: text('description'),
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
+// 9. Master Data Alokasi Ruang Ujian (Exam Rooms)
+export const examRooms = pgTable('exam_rooms', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: text('name').notNull().unique(), // e.g. Ruang 1 (Lab RPL)
+	capacity: integer('capacity').default(30).notNull(),
+	location: text('location'),
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
 // Relations
 export const wavesRelations = relations(waves, ({ many }) => ({
 	candidates: many(candidates),

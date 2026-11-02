@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { candidates, waves } from '$lib/server/db/schema';
-import { getActiveWave, getCandidatesWithScores, calculateAndSaveParallelRankings } from '$lib/server/db/queries';
+import { getActiveWave, getCandidatesWithScores, calculateAndSaveParallelRankings, getMajors } from '$lib/server/db/queries';
 import { seedDatabase } from '$lib/server/seed';
 import { eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
@@ -26,12 +26,16 @@ export const load: PageServerLoad = async () => {
 		orderBy: (w, { desc }) => [desc(w.testDate)]
 	});
 
-	const candidateList = await getCandidatesWithScores(activeWave?.id);
+	const [candidateList, majorList] = await Promise.all([
+		getCandidatesWithScores(activeWave?.id),
+		getMajors()
+	]);
 
 	return {
 		activeWave,
 		allWaves,
-		candidates: candidateList
+		candidates: candidateList,
+		majors: majorList
 	};
 };
 
