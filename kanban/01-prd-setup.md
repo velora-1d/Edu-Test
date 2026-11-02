@@ -1,0 +1,80 @@
+# Kanban Board: Edu-Test
+
+## 📋 Task List
+
+### [TASK-001] Setup & Normalisasi Folder PRD Edu-Test
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Membersihkan file-file peninggalan modul ERP Edu-sistem dan menyiapkan template PRD murni di 15 folder standar PRD.
+- **Sub-tasks**:
+  - [x] Konfirmasi kebutuhan dengan user
+  - [x] Buat Obsidian AGY-Memory (`CONTEXT.md` & `Sesi-00_Init.md`)
+  - [x] Bersihkan file warisan Edu-sistem di folder `PRD/`
+  - [x] Buat template murni di 15 folder PRD (`01-overview-vision` s/d `15-uat-maintenance` + `README.md`)
+  - [x] Verifikasi integritas folder dan isi template PRD
+
+### [TASK-002] Penulisan PRD Komprehensif Edu-Test
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Menulis dan mendokumentasikan spesifikasi PRD lengkap untuk seluruh 15 modul berdasarkan hasil persetujuan plan.
+- **Sub-tasks**:
+  - [x] Pembuatan subdirektori 06, 07, 08, 09
+  - [x] Penulisan Modul 01 - 05
+  - [x] Penulisan Modul 06 (7 Menu & Fitur)
+  - [x] Penulisan Modul 07 (User Flow & Diagram)
+  - [x] Penulisan Modul 08 (Functional Requirements & Formula Matematis)
+  - [x] Penulisan Modul 09 (Business Process & Waiting List SOP)
+  - [x] Penulisan Modul 10 - 15 (Tech Stack, Security, KPI, UAT)
+  - [x] Update Master Index PRD/README.md & Verifikasi Kualitas
+
+### [TASK-003] Penyesuaian Tech Stack PRD: SvelteKit Fullstack & PostgreSQL
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Mengadaptasi modul 10-technical-stack ke SvelteKit fullstack dan PostgreSQL, lengkap dengan arsitektur server actions, reaktivitas Svelte 5 runes, dan skema database PostgreSQL.
+- **Sub-tasks**:
+  - [x] Perbarui dokumen PRD/10-technical-stack/README.md
+  - [x] Verifikasi konsistensi arsitektur dan relasi skema database
+  - [x] Update status task ke Done
+
+### [TASK-004] Penyelarasan Form Wawancara dengan TES WAWANCARA.docx
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Mengintegrasikan rincian butir pertanyaan spesifik dari dokumen TES WAWANCARA.docx (Wawancara Umum: prestasi, screening perilaku, anti-bullying, kemandirian; Wawancara Kepesantrenan: tes hafalan juz, kitab, komitmen spiritual) ke dalam PRD Modul 06 dan Modul 08.
+- **Sub-tasks**:
+  - [x] Update PRD/06-menu-features/05-wawancara-kualitatif/01-deskripsi-menu.md & 02-list-fitur.md
+  - [x] Update PRD/08-functional-requirements/04-fr-dossier-wawancara.md
+  - [x] Sinkronisasi skema database PostgreSQL di Modul 10 jika ada penambahan kolom
+  - [x] Update status ke Done
+
+### [TASK-005] Provisioning Database Neon PostgreSQL (Singapore)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Membuat project database baru di Neon MCP dengan nama Edu-Test di region AWS Singapore (aws-ap-southeast-1), mengambil connection string, dan menguji konektivitas SQL.
+- **Sub-tasks**:
+  - [x] Eksekusi create_project Neon MCP (Edu-Test, PG 18, aws-ap-southeast-1)
+  - [x] Ambil dan simpan connection string ke .env.example
+  - [x] Uji eksekusi query (SELECT version()) via run_sql
+  - [x] Sinkronisasi Obsidian AGY-Memory CONTEXT.md
+
+### [TASK-006] Implementasi Paralel Edu-Test (3 Sub-Agents)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Menjalankan 3 sub-agent paralel secara simultan untuk membangun arsitektur penuh Edu-Test.
+- **Sub-tasks**:
+  - [x] Inisialisasi SvelteKit + Tailwind + Drizzle + Neon Database Migrasi (Fase 1)
+  - [x] Launch Sub-Agent 1: Backend & Database Engineer (Selesai: Zod validation, queries, server endpoints)
+  - [x] Launch Sub-Agent 2: Frontend UI Specialist (Selesai: Layout tablet, Form TPA grid, Rubrik 7-domain, Form wawancara 26 butir)
+  - [x] Launch Sub-Agent 3: Analytics & Ranking Specialist (Selesai: Dashboard, Peserta, Ledger, Pleno, Excel Export)
+  - [x] Verifikasi laporan selesai dari ketiga sub-agent
+  - [x] Final check pnpm check & build verification (0 errors, 100% build pass)
+
+### [TASK-007] Penyelarasan Rute Penilaian & Navigasi (Fix 404 Meja Penilaian)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Memperbaiki 404 error saat mengklik Meja TPA, Kepesantrenan, dan Wawancara dengan menyelaraskan link navigasi di layout dan menambahkan route alias/redirector di /penilaian/*.
+- **Sub-tasks**:
+  - [x] Update navItems di `src/routes/+layout.svelte` (/tpa, /rubrik, /wawancara)
+  - [x] Tambahkan route redirector di `/penilaian/tpa`, `/penilaian/pesantren`, `/penilaian/rubrik`, `/penilaian/wawancara`
+  - [x] Verifikasi `pnpm check` dan `pnpm build` (0 error, build lulus)
+  - [x] Verifikasi empiris via curl HTTP status (200 OK & 302 Redirect)
+
