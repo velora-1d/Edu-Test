@@ -136,3 +136,17 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
   - [x] Update status ke Done
 
+### [TASK-013] Penyederhanaan UI/UX Sesuai Kebutuhan Bahan (Eliminasi Kata Meja & 3-Peran Alur)
+- **Status**: In Progress
+- **Prioritas**: High
+- **Deskripsi**: Menghapus total kata "meja" dari seluruh antarmuka dan menggantinya dengan istilah natural akademik/pesantren (Tes TPA, Tes Kepesantrenan, Wawancara), menyederhanakan alur navigasi menjadi 3 peran utama (Data Santri, Penilaian Seleksi, Rekap & Kelulusan), serta menyatukan fitur rekap nilai dengan kontrol kuota pleno.
+- **Sub-tasks**:
+  - [ ] Eliminasi total kata "meja" di `+layout.svelte`, `peserta/+page.svelte`, `+page.svelte`, `tpa/+page.svelte`, `rubrik/+page.svelte`, `wawancara/+page.svelte`, dan `ledger/+page.svelte`
+  - [ ] Sederhanakan topbar layout menjadi 3 tab peran: Data Santri, Penilaian Seleksi, Rekap & Kelulusan
+  - [ ] Perjelas istilah status: Belum Diuji, Sedang Ujian, Sudah Lengkap
+  - [ ] Pertegas rumus nilai akhir: Rata-rata 50% TPA + 50% Kepesantrenan (Wawancara sebagai profil kualitatif)
+  - [ ] Integrasikan kontrol kuota pleno langsung di tabel Rekap Nilai & Kelulusan
+  - [ ] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
+  - [ ] Update status ke Done
+
+

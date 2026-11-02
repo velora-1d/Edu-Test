@@ -158,7 +158,7 @@ export const load: PageServerLoad = async () => {
 		quotaCapacity: activeWave?.quotaCapacity || 20,
 		lulusCount,
 		waitingListCount,
-		mejaProgress: {
+		testProgress: {
 			tpa: {
 				count: tpaCompletedCount,
 				percentage: totalCandidates > 0 ? Math.round((tpaCompletedCount / totalCandidates) * 100) : 0

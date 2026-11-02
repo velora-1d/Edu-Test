@@ -182,7 +182,7 @@
 			</a>
 			<span class="text-slate-300">→</span>
 			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-700 text-white font-bold shadow-2xs">
-				<span>Master Ledger (Aktif)</span>
+				<span>Rekap Nilai (Aktif)</span>
 			</span>
 		</div>
 
@@ -190,7 +190,7 @@
 			href="/pleno"
 			class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold transition ml-auto shadow-xs"
 		>
-			<span>Lanjut ke Sidang Pleno</span>
+			<span>Sidang Pleno & Penetapan Kuota</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
@@ -198,13 +198,13 @@
 	<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
 		<div>
 			<div class="flex items-center gap-2">
-				<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Master Ledger & Ranking Paralel</h1>
+				<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Rekap Nilai & Peringkat Seleksi</h1>
 				<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
 					{data.activeWave?.waveName || 'Gelombang 1'}
 				</span>
 			</div>
 			<p class="text-sm text-slate-500 mt-1">
-				Rekapitulasi komposit paralel terpadu dengan aturan seri multi-tingkat (FR-RNK-003) & ekspor panitia
+				Rekapitulasi nilai gabungan (50% TPA + 50% Kepesantrenan), peringkat otomatis paralel, dan berkas ekspor kelulusan
 			</p>
 		</div>
 

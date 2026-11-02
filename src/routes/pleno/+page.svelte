@@ -162,11 +162,11 @@
 				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Master Ledger</span>
+				<span>Rekap Nilai</span>
 			</a>
 			<span class="text-slate-300">→</span>
 			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-700 text-white font-bold shadow-2xs">
-				<span>Sidang Pleno (Ketuk Palu SK)</span>
+				<span>Sidang Pleno (Ketuk Palu Kelulusan)</span>
 			</span>
 		</div>
 
@@ -174,7 +174,7 @@
 			href="/peserta"
 			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition ml-auto"
 		>
-			<span>Kembali ke Data Peserta</span>
+			<span>Kembali ke Data Santri</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>

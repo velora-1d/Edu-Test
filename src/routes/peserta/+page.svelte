@@ -177,7 +177,7 @@
 				</div>
 				<h1 class="text-2xl font-black tracking-tight text-white">Master Data & Admisi Calon Santri</h1>
 				<p class="text-xs sm:text-sm text-blue-100/80 mt-1 max-w-2xl">
-					Langkah awal dari seluruh siklus ujian: daftarkan calon santri, pantau kehadiran di 3 meja seleksi asesor, dan kawal yudisium pleno.
+					Langkah awal siklus seleksi: daftarkan calon santri, pantau kelengkapan 3 bidang ujian, dan kawal rekapitulasi kelulusan.
 				</p>
 			</div>
 
@@ -194,7 +194,7 @@
 					href="/ledger"
 					class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700/60 hover:bg-blue-600/80 text-white font-semibold text-sm border border-white/20 transition"
 				>
-					<span>Lihat Master Ledger</span>
+					<span>Lihat Rekap Nilai</span>
 					<ArrowRight class="w-4 h-4" />
 				</a>
 			</div>
@@ -208,25 +208,25 @@
 					<span class="text-[11px] font-black uppercase tracking-wider text-blue-200">Fase 1 • Admisi (Aktif)</span>
 					<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-400/30 text-white">Langkah 1</span>
 				</div>
-				<h3 class="font-bold text-base text-white">Input & Kelola Master Santri</h3>
+				<h3 class="font-bold text-base text-white">Pendaftaran & Data Santri</h3>
 				<p class="text-xs text-blue-100/70 mt-1">
-					Pendaftaran santri, penetapan No Tes, NISN, penjurusan (RPL/DKV/BD), serta alokasi sesi ruangan.
+					Pendaftaran santri, penetapan No Tes, NISN, penjurusan (RPL/DKV/BD), serta alokasi ruangan.
 				</p>
 				<div class="mt-3 flex items-center gap-1.5 text-xs font-semibold text-blue-200">
 					<CheckCircle2 class="w-3.5 h-3.5 text-emerald-400" />
-					<span>Halaman ini (CRUD Aktif)</span>
+					<span>Halaman ini (Kelola Santri)</span>
 				</div>
 			</div>
 
-			<!-- Step 2 (Meja Asesor) -->
+			<!-- Step 2 (Ujian Seleksi) -->
 			<div class="bg-white/5 backdrop-blur-xs rounded-2xl p-4 border border-white/10 hover:bg-white/10 transition">
 				<div class="flex items-center justify-between mb-2">
-					<span class="text-[11px] font-semibold uppercase tracking-wider text-blue-200/80">Fase 2 • Meja Ujian</span>
+					<span class="text-[11px] font-semibold uppercase tracking-wider text-blue-200/80">Fase 2 • Penilaian Seleksi</span>
 					<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/10 text-white/80">Langkah 2</span>
 				</div>
-				<h3 class="font-bold text-base text-white">3 Meja Pengujian Asesor</h3>
+				<h3 class="font-bold text-base text-white">3 Bidang Ujian Seleksi</h3>
 				<p class="text-xs text-blue-100/70 mt-1">
-					Pengisian nilai independen oleh majelis penguji di 3 ruang seleksi.
+					Penilaian terstandarisasi oleh majelis penguji di ruang tes.
 				</p>
 				<div class="mt-3 flex items-center gap-2 text-xs">
 					<a href="/tpa" class="px-2 py-0.5 rounded bg-blue-500/40 hover:bg-blue-400/50 text-white font-medium border border-blue-400/40">
@@ -247,13 +247,13 @@
 					<span class="text-[11px] font-semibold uppercase tracking-wider text-blue-200/80">Fase 3 • Yudisium</span>
 					<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/10 text-white/80">Langkah 3</span>
 				</div>
-				<h3 class="font-bold text-base text-white">Master Ledger & Sidang Pleno</h3>
+				<h3 class="font-bold text-base text-white">Rekap Nilai & Sidang Pleno</h3>
 				<p class="text-xs text-blue-100/70 mt-1">
-					Kalkulasi otomatis bobot 30-40-30, ranking paralel, kuota kelulusan, dan ketuk palu pimpinan.
+					Nilai gabungan (50% TPA + 50% Pesantren), ranking otomatis, kuota, dan pengesahan hasil.
 				</p>
 				<div class="mt-3 flex items-center gap-2 text-xs">
 					<a href="/ledger" class="px-2.5 py-0.5 rounded bg-indigo-500/40 hover:bg-indigo-400/50 text-white font-medium border border-indigo-400/40">
-						Master Ledger
+						Rekap Nilai
 					</a>
 					<a href="/pleno" class="px-2.5 py-0.5 rounded bg-blue-600/50 hover:bg-blue-500/60 text-white font-bold border border-blue-300/40">
 						Sidang Pleno
@@ -278,7 +278,7 @@
 
 		<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
 			<div>
-				<span class="text-xs text-slate-500 font-medium">Selesai Semua Meja</span>
+				<span class="text-xs text-slate-500 font-medium">Selesai Seluruh Ujian</span>
 				<p class="text-2xl font-black text-emerald-600 mt-0.5">{counts.completed}</p>
 				<span class="text-[11px] text-emerald-600 font-medium">Siap Sidang Pleno</span>
 			</div>
@@ -291,7 +291,7 @@
 			<div>
 				<span class="text-xs text-slate-500 font-medium">Sedang Berjalan Ujian</span>
 				<p class="text-2xl font-black text-sky-600 mt-0.5">{counts.inTest}</p>
-				<span class="text-[11px] text-sky-600 font-medium">Dalam Proses Asesor</span>
+				<span class="text-[11px] text-sky-600 font-medium">Dalam Proses Penguji</span>
 			</div>
 			<div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
 				<Clock class="w-5 h-5" />
@@ -302,7 +302,7 @@
 			<div>
 				<span class="text-xs text-slate-500 font-medium">Belum Diuji</span>
 				<p class="text-2xl font-black text-amber-600 mt-0.5">{counts.registered}</p>
-				<span class="text-[11px] text-amber-600 font-medium">Menunggu Antrian Meja</span>
+				<span class="text-[11px] text-amber-600 font-medium">Menunggu Giliran Ujian</span>
 			</div>
 			<div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
 				<AlertCircle class="w-5 h-5" />
@@ -376,10 +376,10 @@
 						<th class="py-3.5 px-4">Nama Calon Santri</th>
 						<th class="py-3.5 px-4">Asal Sekolah</th>
 						<th class="py-3.5 px-4">Jurusan</th>
-						<th class="py-3.5 px-4">Sesi Ruang</th>
-						<th class="py-3.5 px-4 text-center">Meja Ujian (Klik Uji)</th>
-						<th class="py-3.5 px-4 text-center">Status Pipeline</th>
-						<th class="py-3.5 px-4 text-center">Aksi Manajemen</th>
+						<th class="py-3.5 px-4">Ruangan</th>
+						<th class="py-3.5 px-4 text-center">Kelengkapan Tes (T • K • W)</th>
+						<th class="py-3.5 px-4 text-center">Status</th>
+						<th class="py-3.5 px-4 text-center">Aksi</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-slate-100">
@@ -452,7 +452,7 @@
 										<!-- TPA Desk Link -->
 										<a
 											href="/tpa?candidateId={c.id}"
-											title="Meja 1 TPA: {isTpaLocked ? 'Terkunci (Skor: ' + c.tpaScore?.finalScore100 + ')' : 'Draf/Belum Ujian'} - Klik untuk buka"
+											title="Tes TPA: {isTpaLocked ? 'Selesai (Skor: ' + c.tpaScore?.finalScore100 + ')' : 'Belum Diuji'} - Klik untuk buka"
 											class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition shadow-2xs {isTpaLocked
 												? 'bg-blue-700 text-white hover:bg-blue-800'
 												: 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50'}"
@@ -463,7 +463,7 @@
 										<!-- Pesantren Desk Link -->
 										<a
 											href="/rubrik?candidateId={c.id}"
-											title="Meja 2 Kepesantrenan: {isPesantrenLocked ? 'Terkunci (Rata: ' + c.pesantrenScore?.averageScore + ')' : 'Draf/Belum Ujian'} - Klik untuk buka"
+											title="Tes Kepesantrenan: {isPesantrenLocked ? 'Selesai (Rata: ' + c.pesantrenScore?.averageScore + ')' : 'Belum Diuji'} - Klik untuk buka"
 											class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition shadow-2xs {isPesantrenLocked
 												? 'bg-emerald-700 text-white hover:bg-emerald-800'
 												: 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'}"
@@ -474,7 +474,7 @@
 										<!-- Wawancara Desk Link -->
 										<a
 											href="/wawancara?candidateId={c.id}"
-											title="Meja 3 Wawancara: {isInterviewDone ? 'Selesai (26 Butir Lengkap)' : 'Draf/Belum Lengkap'} - Klik untuk buka"
+											title="Wawancara: {isInterviewDone ? 'Selesai (Lengkap)' : 'Belum Diisi'} - Klik untuk buka"
 											class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition shadow-2xs {isInterviewDone
 												? 'bg-sky-700 text-white hover:bg-sky-800'
 												: 'bg-white text-sky-700 border border-sky-200 hover:bg-sky-50'}"
@@ -488,7 +488,7 @@
 								<td class="py-3.5 px-4 text-center whitespace-nowrap">
 									{#if c.statusPipeline === 'COMPLETED'}
 										<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-											<Check class="w-3 h-3 stroke-[3]" /> Selesai
+											<Check class="w-3 h-3 stroke-[3]" /> Lengkap
 										</span>
 									{:else if c.statusPipeline === 'IN_TEST'}
 										<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">
@@ -496,7 +496,7 @@
 										</span>
 									{:else}
 										<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-											Terdaftar
+											Belum Diuji
 										</span>
 									{/if}
 								</td>
@@ -507,10 +507,10 @@
 										<!-- Direct Test Action -->
 										<a
 											href="/tpa?candidateId={c.id}"
-											class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] shadow-2xs transition"
-											title="Buka Meja Penilaian Ujian"
+											class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] shadow-2xs transition"
+											title="Mulai Penilaian Ujian"
 										>
-											<span>Uji</span>
+											<span>Nilai</span>
 											<ArrowRight class="w-3 h-3" />
 										</a>
 
@@ -547,15 +547,15 @@
 			<div class="flex items-center gap-4 text-slate-500 font-medium text-[11px]">
 				<span class="flex items-center gap-1">
 					<span class="w-4 h-4 rounded bg-blue-700 text-white font-black text-[9px] flex items-center justify-center">T</span>
-					<span>= Meja 1 TPA</span>
+					<span>= Tes Potensi Akademik (TPA)</span>
 				</span>
 				<span class="flex items-center gap-1">
 					<span class="w-4 h-4 rounded bg-emerald-700 text-white font-black text-[9px] flex items-center justify-center">K</span>
-					<span>= Meja 2 Kepesantrenan</span>
+					<span>= Tes Kepesantrenan (Ibadah)</span>
 				</span>
 				<span class="flex items-center gap-1">
 					<span class="w-4 h-4 rounded bg-sky-700 text-white font-black text-[9px] flex items-center justify-center">W</span>
-					<span>= Meja 3 Wawancara</span>
+					<span>= Wawancara Santri & Ortu</span>
 				</span>
 			</div>
 		</div>
@@ -702,7 +702,7 @@
 				<!-- Helper Note -->
 				<div class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
 					<Sparkles class="w-4 h-4 text-blue-700 shrink-0" />
-					<span>Setelah santri ditambahkan, entri penilaian di Meja TPA, Kepesantrenan, dan Wawancara langsung otomatis disiapkan.</span>
+					<span>Setelah santri didaftarkan, lembar penilaian Tes TPA, Kepesantrenan, dan Wawancara langsung otomatis disiapkan.</span>
 				</div>
 
 				<!-- Modal Actions -->
@@ -880,9 +880,9 @@
 						bind:value={editStatusPipeline}
 						class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 					>
-						<option value="REGISTERED">REGISTERED (Terdaftar, Belum Mulai)</option>
-						<option value="IN_TEST">IN_TEST (Sedang Ujian di Meja Seleksi)</option>
-						<option value="COMPLETED">COMPLETED (Selesai Seluruh Meja & Siap Pleno)</option>
+						<option value="REGISTERED">Belum Diuji (Santri Terdaftar)</option>
+						<option value="IN_TEST">Sedang Ujian (Dalam Proses Penilaian)</option>
+						<option value="COMPLETED">Sudah Lengkap (Siap Rekap & Pleno)</option>
 					</select>
 				</div>
 
@@ -933,7 +933,7 @@
 				</div>
 				<h2 class="text-xl font-black text-slate-900">Hapus Calon Santri?</h2>
 				<p class="text-xs text-slate-500 leading-relaxed">
-					Anda akan menghapus data calon santri berikut beserta seluruh riwayat skor ujiannya di Meja TPA, Kepesantrenan, dan Wawancara secara permanen:
+					Anda akan menghapus data calon santri berikut beserta seluruh riwayat skor ujiannya di Tes TPA, Kepesantrenan, dan Wawancara secara permanen:
 				</p>
 			</div>
 

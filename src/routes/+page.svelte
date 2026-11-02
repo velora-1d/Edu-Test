@@ -106,7 +106,7 @@
 			</div>
 			<div class="mt-3 flex items-baseline gap-2">
 				<span class="text-3xl font-extrabold text-amber-700">{data.pendingCount}</span>
-				<span class="text-xs text-slate-500">antrean meja</span>
+				<span class="text-xs text-slate-500">santri belum selesai</span>
 			</div>
 			<div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
 				<span>Menunggu verifikasi nilai</span>
@@ -135,21 +135,21 @@
 		</div>
 	</div>
 
-	<!-- Progress Tracker Per Meja Penguji -->
+	<!-- Progress Tracker Per Bidang Ujian -->
 	<div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
 		<div class="flex items-center justify-between mb-4">
 			<div>
 				<h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
 					<Layers class="w-4 h-4 text-blue-600" />
-					Progres Penilaian per Meja Penguji
+					Progres Penilaian Seleksi
 				</h2>
-				<p class="text-xs text-slate-500">Status kelengkapan penguncian formulir penilaian seleksi</p>
+				<p class="text-xs text-slate-500">Status kelengkapan formulir penilaian santri per materi tes</p>
 			</div>
-			<span class="text-xs text-slate-400">Total 3 Pos Pengujian</span>
+			<span class="text-xs text-slate-400">Total 3 Bidang Uji</span>
 		</div>
 
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-			<!-- Meja TPA -->
+			<!-- Tes TPA -->
 			<a
 				href="/tpa"
 				class="group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-blue-50/50 hover:border-blue-300 transition block shadow-2xs"
@@ -161,27 +161,27 @@
 						</div>
 						<div>
 							<h3 class="text-sm font-semibold text-slate-900 group-hover:text-blue-800 transition flex items-center gap-1">
-								<span>Meja 1: TPA</span>
+								<span>Tes Potensi Akademik (TPA)</span>
 								<ArrowUpRight class="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition" />
 							</h3>
 							<p class="text-[11px] text-slate-500">12 Subtes (Skor Max 69 &rarr; 100)</p>
 						</div>
 					</div>
-					<span class="text-sm font-bold text-blue-700">{data.mejaProgress.tpa.percentage}%</span>
+					<span class="text-sm font-bold text-blue-700">{data.testProgress.tpa.percentage}%</span>
 				</div>
 				<div class="mt-3 w-full bg-slate-200 h-2 rounded-full overflow-hidden">
 					<div
 						class="bg-blue-600 h-full rounded-full transition-all duration-500"
-						style="width: {data.mejaProgress.tpa.percentage}%"
+						style="width: {data.testProgress.tpa.percentage}%"
 					></div>
 				</div>
 				<div class="mt-2 text-right text-xs text-slate-500 flex items-center justify-between">
-					<span class="text-blue-700 font-semibold group-hover:underline">Buka Meja TPA &rarr;</span>
-					<span>{data.mejaProgress.tpa.count} dari {data.totalCandidates} terkunci</span>
+					<span class="text-blue-700 font-semibold group-hover:underline">Buka Lembar TPA &rarr;</span>
+					<span>{data.testProgress.tpa.count} dari {data.totalCandidates} dinilai</span>
 				</div>
 			</a>
 
-			<!-- Meja Kepesantrenan -->
+			<!-- Tes Kepesantrenan -->
 			<a
 				href="/rubrik"
 				class="group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-emerald-50/50 hover:border-emerald-300 transition block shadow-2xs"
@@ -193,27 +193,27 @@
 						</div>
 						<div>
 							<h3 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-800 transition flex items-center gap-1">
-								<span>Meja 2: Kepesantrenan</span>
+								<span>Tes Kepesantrenan</span>
 								<ArrowUpRight class="w-3.5 h-3.5 text-emerald-500 opacity-0 group-hover:opacity-100 transition" />
 							</h3>
-							<p class="text-[11px] text-slate-500">7 Bidang Uji Praktik Ibadah</p>
+							<p class="text-[11px] text-slate-500">7 Bidang Praktik Ibadah & Bahasa</p>
 						</div>
 					</div>
-					<span class="text-sm font-bold text-emerald-700">{data.mejaProgress.pesantren.percentage}%</span>
+					<span class="text-sm font-bold text-emerald-700">{data.testProgress.pesantren.percentage}%</span>
 				</div>
 				<div class="mt-3 w-full bg-slate-200 h-2 rounded-full overflow-hidden">
 					<div
 						class="bg-emerald-600 h-full rounded-full transition-all duration-500"
-						style="width: {data.mejaProgress.pesantren.percentage}%"
+						style="width: {data.testProgress.pesantren.percentage}%"
 					></div>
 				</div>
 				<div class="mt-2 text-right text-xs text-slate-500 flex items-center justify-between">
-					<span class="text-emerald-700 font-semibold group-hover:underline">Buka Meja Kepesantrenan &rarr;</span>
-					<span>{data.mejaProgress.pesantren.count} dari {data.totalCandidates} terkunci</span>
+					<span class="text-emerald-700 font-semibold group-hover:underline">Buka Lembar Kepesantrenan &rarr;</span>
+					<span>{data.testProgress.pesantren.count} dari {data.totalCandidates} dinilai</span>
 				</div>
 			</a>
 
-			<!-- Meja Wawancara -->
+			<!-- Wawancara Santri -->
 			<a
 				href="/wawancara"
 				class="group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-sky-50/50 hover:border-sky-300 transition block shadow-2xs"
@@ -225,23 +225,23 @@
 						</div>
 						<div>
 							<h3 class="text-sm font-semibold text-slate-900 group-hover:text-sky-800 transition flex items-center gap-1">
-								<span>Meja 3: Wawancara</span>
+								<span>Wawancara Santri & Ortu</span>
 								<ArrowUpRight class="w-3.5 h-3.5 text-sky-500 opacity-0 group-hover:opacity-100 transition" />
 							</h3>
-							<p class="text-[11px] text-slate-500">26 Butir Dossier Santri & Ortu</p>
+							<p class="text-[11px] text-slate-500">26 Butir Catatan Profil & Kesiapan</p>
 						</div>
 					</div>
-					<span class="text-sm font-bold text-sky-700">{data.mejaProgress.interview.percentage}%</span>
+					<span class="text-sm font-bold text-sky-700">{data.testProgress.interview.percentage}%</span>
 				</div>
 				<div class="mt-3 w-full bg-slate-200 h-2 rounded-full overflow-hidden">
 					<div
 						class="bg-sky-600 h-full rounded-full transition-all duration-500"
-						style="width: {data.mejaProgress.interview.percentage}%"
+						style="width: {data.testProgress.interview.percentage}%"
 					></div>
 				</div>
 				<div class="mt-2 text-right text-xs text-slate-500 flex items-center justify-between">
-					<span class="text-sky-700 font-semibold group-hover:underline">Buka Meja Wawancara &rarr;</span>
-					<span>{data.mejaProgress.interview.count} dari {data.totalCandidates} selesai</span>
+					<span class="text-sky-700 font-semibold group-hover:underline">Buka Lembar Wawancara &rarr;</span>
+					<span>{data.testProgress.interview.count} dari {data.totalCandidates} selesai</span>
 				</div>
 			</a>
 		</div>

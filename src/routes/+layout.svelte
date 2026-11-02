@@ -18,24 +18,24 @@
 
 	const navSections = [
 		{
-			title: "Master & Admisi",
+			title: "Admisi",
 			items: [
 				{ href: "/", label: "Dashboard", icon: LayoutDashboard },
-				{ href: "/peserta", label: "Data Peserta", icon: Users }
+				{ href: "/peserta", label: "Data Santri", icon: Users }
 			]
 		},
 		{
-			title: "Meja Ujian Seleksi",
+			title: "Penilaian Seleksi",
 			items: [
-				{ href: "/tpa", label: "1. Meja TPA", icon: ClipboardCheck },
+				{ href: "/tpa", label: "1. Tes TPA", icon: ClipboardCheck },
 				{ href: "/rubrik", label: "2. Kepesantrenan", icon: BookOpen },
 				{ href: "/wawancara", label: "3. Wawancara", icon: MessageSquareText }
 			]
 		},
 		{
-			title: "Yudisium & Hasil",
+			title: "Hasil & Kelulusan",
 			items: [
-				{ href: "/ledger", label: "Master Ledger", icon: FileSpreadsheet },
+				{ href: "/ledger", label: "Rekap Nilai", icon: FileSpreadsheet },
 				{ href: "/pleno", label: "Sidang Pleno", icon: Award }
 			]
 		}

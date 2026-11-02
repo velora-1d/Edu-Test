@@ -192,7 +192,7 @@
 				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Meja 1: TPA</span>
+				<span>1. Tes TPA</span>
 			</a>
 			<span class="text-slate-300">→</span>
 			<a
@@ -200,11 +200,11 @@
 				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50 font-semibold transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Meja 2: Kepesantrenan</span>
+				<span>2. Tes Kepesantrenan</span>
 			</a>
 			<span class="text-slate-300">→</span>
 			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-sky-700 text-white font-bold shadow-2xs">
-				<span>Meja 3: Wawancara (Aktif)</span>
+				<span>3. Wawancara (Aktif)</span>
 			</span>
 		</div>
 
@@ -212,7 +212,7 @@
 			href="/ledger"
 			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition ml-auto"
 		>
-			<span>Buka Master Ledger</span>
+			<span>Buka Rekap Nilai</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
@@ -222,7 +222,7 @@
 			<div>
 				<h2 class="text-xl font-extrabold text-blue-900 tracking-tight flex items-center gap-2">
 					<MessageSquare class="w-6 h-6 text-blue-700" />
-					Meja Uji Wawancara Kualitatif & Dossier Santri
+					Wawancara Kualitatif Santri & Orang Tua
 				</h2>
 				<p class="text-xs md:text-sm text-slate-500">
 					26 Butir Wawancara Mendalam • Screening Perilaku & Anti-Bullying • Rekomendasi Sidang Pleno

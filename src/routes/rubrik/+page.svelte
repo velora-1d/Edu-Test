@@ -265,18 +265,18 @@
 				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Meja 1: TPA</span>
+				<span>1. Tes TPA</span>
 			</a>
 			<span class="text-slate-300">→</span>
 			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-700 text-white font-bold shadow-2xs">
-				<span>Meja 2: Kepesantrenan (Aktif)</span>
+				<span>2. Tes Kepesantrenan (Aktif)</span>
 			</span>
 			<span class="text-slate-300">→</span>
 			<a
 				href={currentCandidate ? `/wawancara?candidateId=${currentCandidate.id}` : '/wawancara'}
 				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sky-800 hover:bg-sky-50 font-semibold transition"
 			>
-				<span>Meja 3: Wawancara</span>
+				<span>3. Wawancara</span>
 				<ArrowRight class="w-3.5 h-3.5" />
 			</a>
 		</div>
@@ -285,7 +285,7 @@
 			href="/ledger"
 			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition ml-auto"
 		>
-			<span>Buka Master Ledger</span>
+			<span>Buka Rekap Nilai</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
@@ -301,7 +301,7 @@
 					class="text-xl font-extrabold text-blue-900 tracking-tight flex items-center gap-2"
 				>
 					<ScrollText class="w-6 h-6 text-blue-700" />
-					Meja Uji Rubrik Kepesantrenan
+					Penilaian Tes Kepesantrenan
 				</h2>
 				<p class="text-xs md:text-sm text-slate-500">
 					7 Bidang Uji Praktik • Skala Sentuh 1-4 • Standar Kelulusan
@@ -465,7 +465,7 @@
 									<Unlock
 										class="w-3.5 h-3.5 text-amber-600"
 									/>
-									<span>DRAF PENILAIAN MEJA</span>
+									<span>DRAF PENILAIAN</span>
 								</div>
 							{/if}
 						</div>
@@ -2533,7 +2533,7 @@
 								class="w-full py-3 px-4 rounded-xl bg-blue-800 text-white hover:bg-blue-900 font-bold text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all active:scale-98 shadow-md shadow-blue-950/20"
 							>
 								<Lock class="w-4 h-4" />
-								<span>Kunci Nilai Meja Kepesantrenan</span>
+								<span>Kunci Nilai Kepesantrenan</span>
 							</button>
 						</div>
 					{:else}
