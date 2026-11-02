@@ -88,3 +88,14 @@
   - [x] Pengujian empiris via curl ke seluruh 7 route (seluruhnya 200 OK)
   - [x] Verifikasi `pnpm check` (0 error, 0 warning)
 
+### [TASK-009] Fix Effect Loop di Wawancara (effect_update_depth_exceeded)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Memperbaiki loop reaktivitas di form wawancara (+page.svelte:100) dengan memisahkan DEFAULT_FORM_DATA dan membungkus mutasi state form ke dalam untrack().
+- **Sub-tasks**:
+  - [x] Definisikan konstanta DEFAULT_FORM_DATA murni non-reaktif
+  - [x] Bungkus sinkronisasi interview data di $effect dengan untrack()
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings)
+  - [x] Verifikasi `pnpm build` (100% lulus build)
+  - [x] Pengujian beban request via curl ke /wawancara (200 OK konsisten)
+
