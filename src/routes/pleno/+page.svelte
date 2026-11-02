@@ -18,7 +18,9 @@
 		ChevronRight,
 		Save,
 		Edit3,
-		Sparkles
+		Sparkles,
+		ArrowLeft,
+		ArrowRight
 	} from 'lucide-svelte';
 
 	let { data, form }: PageProps = $props();
@@ -144,6 +146,38 @@
 </svelte:head>
 
 <div class="space-y-6">
+	<!-- Sequential Selection Workflow Banner -->
+	<div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+		<div class="flex items-center gap-2 flex-wrap">
+			<a
+				href="/peserta"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+			>
+				<ArrowLeft class="w-3.5 h-3.5" />
+				<span>Data Calon Santri</span>
+			</a>
+			<span class="text-slate-300">/</span>
+			<a
+				href="/ledger"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition"
+			>
+				<ArrowLeft class="w-3.5 h-3.5" />
+				<span>Master Ledger</span>
+			</a>
+			<span class="text-slate-300">→</span>
+			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-700 text-white font-bold shadow-2xs">
+				<span>Sidang Pleno (Ketuk Palu SK)</span>
+			</span>
+		</div>
+
+		<a
+			href="/peserta"
+			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition ml-auto"
+		>
+			<span>Kembali ke Data Peserta</span>
+			<ArrowRight class="w-3.5 h-3.5" />
+		</a>
+	</div>
 	<!-- Page Header -->
 	<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
 		<div>

@@ -16,26 +16,29 @@
 
 	let { children }: LayoutProps = $props();
 
-	const navItems = [
-		{ href: "/", label: "Dashboard", icon: LayoutDashboard },
-		{ href: "/peserta", label: "Data Peserta", icon: Users },
-		{ href: "/tpa", label: "Meja TPA", icon: ClipboardCheck },
+	const navSections = [
 		{
-			href: "/rubrik",
-			label: "Meja Kepesantrenan",
-			icon: BookOpen,
+			title: "Master & Admisi",
+			items: [
+				{ href: "/", label: "Dashboard", icon: LayoutDashboard },
+				{ href: "/peserta", label: "Data Peserta", icon: Users }
+			]
 		},
 		{
-			href: "/wawancara",
-			label: "Meja Wawancara",
-			icon: MessageSquareText,
+			title: "Meja Ujian Seleksi",
+			items: [
+				{ href: "/tpa", label: "1. Meja TPA", icon: ClipboardCheck },
+				{ href: "/rubrik", label: "2. Kepesantrenan", icon: BookOpen },
+				{ href: "/wawancara", label: "3. Wawancara", icon: MessageSquareText }
+			]
 		},
 		{
-			href: "/ledger",
-			label: "Master Ledger & Ranking",
-			icon: FileSpreadsheet,
-		},
-		{ href: "/pleno", label: "Sidang Pleno", icon: Award },
+			title: "Yudisium & Hasil",
+			items: [
+				{ href: "/ledger", label: "Master Ledger", icon: FileSpreadsheet },
+				{ href: "/pleno", label: "Sidang Pleno", icon: Award }
+			]
+		}
 	];
 </script>
 
@@ -98,31 +101,43 @@
 			</div>
 		</div>
 
-		<!-- Main Nav Items -->
+		<!-- Main Nav Items (Grouped by Selection Workflow) -->
 		<nav
 			class="bg-blue-800 border-t border-blue-700/60 overflow-x-auto scrollbar-none"
 		>
 			<div
-				class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-2 py-1 text-sm font-medium"
+				class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center py-1.5 text-xs font-medium gap-1 sm:gap-3"
 			>
-				{#each navItems as item}
-					{@const isActive =
-						item.href === "/"
-							? page.url.pathname === "/"
-							: page.url.pathname.startsWith(item.href)}
-					<a
-						href={item.href}
-						class="flex items-center gap-2 px-3 py-2 rounded-md whitespace-nowrap transition-colors {isActive
-							? 'bg-white text-blue-800 shadow-sm font-semibold'
-							: 'text-sky-100 hover:bg-blue-700 hover:text-white'}"
-					>
-						<item.icon
-							class="w-4 h-4 {isActive
-								? 'text-blue-700'
-								: 'text-sky-200'}"
-						/>
-						<span>{item.label}</span>
-					</a>
+				{#each navSections as section, sIdx}
+					<div class="flex items-center gap-1 sm:gap-1.5">
+						<span
+							class="hidden md:inline-block text-[10px] font-bold uppercase tracking-wider text-sky-300/80 mr-1 px-1.5 py-0.5 rounded bg-blue-900/60"
+						>
+							{section.title}
+						</span>
+						{#each section.items as item}
+							{@const isActive =
+								item.href === "/"
+									? page.url.pathname === "/"
+									: page.url.pathname.startsWith(item.href)}
+							<a
+								href={item.href}
+								class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all {isActive
+									? 'bg-white text-blue-900 shadow-sm font-bold'
+									: 'text-sky-100 hover:bg-blue-700/80 hover:text-white'}"
+							>
+								<item.icon
+									class="w-3.5 h-3.5 {isActive
+										? 'text-blue-700'
+										: 'text-sky-200'}"
+								/>
+								<span>{item.label}</span>
+							</a>
+						{/each}
+					</div>
+					{#if sIdx < navSections.length - 1}
+						<div class="h-4 w-[1px] bg-blue-700 mx-1 sm:mx-2 hidden sm:block"></div>
+					{/if}
 				{/each}
 			</div>
 		</nav>

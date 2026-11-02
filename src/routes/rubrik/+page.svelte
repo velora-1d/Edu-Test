@@ -19,6 +19,8 @@
 		Check,
 		Info,
 		Layers,
+		ArrowLeft,
+		ArrowRight
 	} from "lucide-svelte";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -247,6 +249,46 @@
 </script>
 
 <div class="max-w-7xl mx-auto space-y-6">
+	<!-- Sequential Selection Workflow Banner -->
+	<div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+		<div class="flex items-center gap-2 flex-wrap">
+			<a
+				href="/peserta"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+			>
+				<ArrowLeft class="w-3.5 h-3.5" />
+				<span>Data Calon Santri</span>
+			</a>
+			<span class="text-slate-300">/</span>
+			<a
+				href={currentCandidate ? `/tpa?candidateId=${currentCandidate.id}` : '/tpa'}
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
+			>
+				<ArrowLeft class="w-3.5 h-3.5" />
+				<span>Meja 1: TPA</span>
+			</a>
+			<span class="text-slate-300">→</span>
+			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-700 text-white font-bold shadow-2xs">
+				<span>Meja 2: Kepesantrenan (Aktif)</span>
+			</span>
+			<span class="text-slate-300">→</span>
+			<a
+				href={currentCandidate ? `/wawancara?candidateId=${currentCandidate.id}` : '/wawancara'}
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sky-800 hover:bg-sky-50 font-semibold transition"
+			>
+				<span>Meja 3: Wawancara</span>
+				<ArrowRight class="w-3.5 h-3.5" />
+			</a>
+		</div>
+
+		<a
+			href="/ledger"
+			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition ml-auto"
+		>
+			<span>Buka Master Ledger</span>
+			<ArrowRight class="w-3.5 h-3.5" />
+		</a>
+	</div>
 	<!-- Top Candidate Roster Bar (Horizontal Scroll) -->
 	<div
 		class="bg-white rounded-2xl p-4 md:p-5 shadow-xs border border-slate-200"

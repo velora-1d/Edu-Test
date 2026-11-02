@@ -18,7 +18,9 @@
 		BookOpen,
 		ClipboardCheck,
 		Sparkles,
-		Layers
+		Layers,
+		ArrowLeft,
+		ArrowRight
 	} from 'lucide-svelte';
 
 	let { data, form }: PageProps = $props();
@@ -147,6 +149,51 @@
 </svelte:head>
 
 <div class="space-y-6">
+	<!-- Sequential Selection Workflow Banner -->
+	<div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+		<div class="flex items-center gap-2 flex-wrap">
+			<a
+				href="/peserta"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+			>
+				<ArrowLeft class="w-3.5 h-3.5" />
+				<span>Data Calon Santri</span>
+			</a>
+			<span class="text-slate-300">/</span>
+			<a
+				href="/tpa"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
+			>
+				<span>1. TPA</span>
+			</a>
+			<span class="text-slate-300">/</span>
+			<a
+				href="/rubrik"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50 font-semibold transition"
+			>
+				<span>2. Kepesantrenan</span>
+			</a>
+			<span class="text-slate-300">/</span>
+			<a
+				href="/wawancara"
+				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sky-800 hover:bg-sky-50 font-semibold transition"
+			>
+				<span>3. Wawancara</span>
+			</a>
+			<span class="text-slate-300">→</span>
+			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-700 text-white font-bold shadow-2xs">
+				<span>Master Ledger (Aktif)</span>
+			</span>
+		</div>
+
+		<a
+			href="/pleno"
+			class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold transition ml-auto shadow-xs"
+		>
+			<span>Lanjut ke Sidang Pleno</span>
+			<ArrowRight class="w-3.5 h-3.5" />
+		</a>
+	</div>
 	<!-- Page Header -->
 	<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
 		<div>

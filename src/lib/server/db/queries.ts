@@ -468,3 +468,120 @@ export async function calculateAndSaveParallelRankings(waveId: string) {
 		rankings: rankingResults
 	};
 }
+
+/**
+ * Menambahkan data calon santri baru
+ */
+export async function createCandidate(data: {
+	waveId: string;
+	testNumber?: string;
+	fullName: string;
+	nisn?: string | null;
+	schoolOrigin: string;
+	majorChoice: string;
+	roomAssignment?: string | null;
+}) {
+	let testNumber = data.testNumber;
+	if (!testNumber) {
+		const existing = await db
+			.select()
+			.from(candidates)
+			.where(eq(candidates.waveId, data.waveId));
+		const count = existing.length + 1;
+		const deptCode = data.majorChoice.includes('Perangkat Lunak')
+			? 'RPL'
+			: data.majorChoice.includes('Komunikasi Visual')
+				? 'DKV'
+				: 'BD';
+		testNumber = `G1-${deptCode}-${String(count).padStart(3, '0')}`;
+	}
+
+	const [newCandidate] = await db
+		.insert(candidates)
+		.values({
+			waveId: data.waveId,
+			testNumber,
+			fullName: data.fullName,
+			nisn: data.nisn || null,
+			schoolOrigin: data.schoolOrigin,
+			majorChoice: data.majorChoice,
+			roomAssignment: data.roomAssignment || 'Ruang 1',
+			statusPipeline: 'REGISTERED'
+		})
+		.returning();
+
+	// Inisialisasi record kosong untuk TPA, Pesantren, Wawancara agar konsisten
+	await db.insert(tpaScores).values({
+		candidateId: newCandidate.id,
+		lockStatus: 'DRAFT'
+	});
+
+	await db.insert(pesantrenScores).values({
+		candidateId: newCandidate.id,
+		lockStatus: 'DRAFT'
+	});
+
+	await db.insert(qualitativeInterviews).values({
+		candidateId: newCandidate.id,
+		completionStatus: 'DRAFT'
+	});
+
+	// Audit Log
+	await db.insert(auditLogs).values({
+		userName: 'Panitia Admisi',
+		actionType: 'CREATE_CANDIDATE',
+		details: `Menambahkan calon santri baru: ${newCandidate.fullName} (${newCandidate.testNumber})`
+	});
+
+	return newCandidate;
+}
+
+/**
+ * Memperbarui data calon santri
+ */
+export async function updateCandidate(
+	id: string,
+	data: {
+		fullName?: string;
+		nisn?: string | null;
+		schoolOrigin?: string;
+		majorChoice?: string;
+		roomAssignment?: string | null;
+	}
+) {
+	const [updated] = await db
+		.update(candidates)
+		.set(data)
+		.where(eq(candidates.id, id))
+		.returning();
+
+	if (updated) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'UPDATE_CANDIDATE',
+			details: `Memperbarui data calon santri: ${updated.fullName} (${updated.testNumber})`
+		});
+	}
+
+	return updated;
+}
+
+/**
+ * Menghapus calon santri beserta relasi nilainya (Cascade)
+ */
+export async function deleteCandidate(id: string) {
+	const [deleted] = await db
+		.delete(candidates)
+		.where(eq(candidates.id, id))
+		.returning();
+
+	if (deleted) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'DELETE_CANDIDATE',
+			details: `Menghapus calon santri: ${deleted.fullName} (${deleted.testNumber})`
+		});
+	}
+
+	return deleted;
+}

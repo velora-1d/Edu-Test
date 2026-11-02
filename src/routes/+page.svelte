@@ -150,14 +150,20 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 			<!-- Meja TPA -->
-			<div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition">
+			<a
+				href="/tpa"
+				class="group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-blue-50/50 hover:border-blue-300 transition block shadow-2xs"
+			>
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+						<div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
 							<ClipboardCheck class="w-4 h-4" />
 						</div>
 						<div>
-							<h3 class="text-sm font-semibold text-slate-900">Meja 1: TPA</h3>
+							<h3 class="text-sm font-semibold text-slate-900 group-hover:text-blue-800 transition flex items-center gap-1">
+								<span>Meja 1: TPA</span>
+								<ArrowUpRight class="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition" />
+							</h3>
 							<p class="text-[11px] text-slate-500">12 Subtes (Skor Max 69 &rarr; 100)</p>
 						</div>
 					</div>
@@ -169,20 +175,27 @@
 						style="width: {data.mejaProgress.tpa.percentage}%"
 					></div>
 				</div>
-				<div class="mt-2 text-right text-xs text-slate-500">
-					{data.mejaProgress.tpa.count} dari {data.totalCandidates} terkunci
+				<div class="mt-2 text-right text-xs text-slate-500 flex items-center justify-between">
+					<span class="text-blue-700 font-semibold group-hover:underline">Buka Meja TPA &rarr;</span>
+					<span>{data.mejaProgress.tpa.count} dari {data.totalCandidates} terkunci</span>
 				</div>
-			</div>
+			</a>
 
 			<!-- Meja Kepesantrenan -->
-			<div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition">
+			<a
+				href="/rubrik"
+				class="group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-emerald-50/50 hover:border-emerald-300 transition block shadow-2xs"
+			>
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+						<div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition">
 							<BookOpen class="w-4 h-4" />
 						</div>
 						<div>
-							<h3 class="text-sm font-semibold text-slate-900">Meja 2: Kepesantrenan</h3>
+							<h3 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-800 transition flex items-center gap-1">
+								<span>Meja 2: Kepesantrenan</span>
+								<ArrowUpRight class="w-3.5 h-3.5 text-emerald-500 opacity-0 group-hover:opacity-100 transition" />
+							</h3>
 							<p class="text-[11px] text-slate-500">7 Bidang Uji Praktik Ibadah</p>
 						</div>
 					</div>
@@ -194,20 +207,27 @@
 						style="width: {data.mejaProgress.pesantren.percentage}%"
 					></div>
 				</div>
-				<div class="mt-2 text-right text-xs text-slate-500">
-					{data.mejaProgress.pesantren.count} dari {data.totalCandidates} terkunci
+				<div class="mt-2 text-right text-xs text-slate-500 flex items-center justify-between">
+					<span class="text-emerald-700 font-semibold group-hover:underline">Buka Meja Kepesantrenan &rarr;</span>
+					<span>{data.mejaProgress.pesantren.count} dari {data.totalCandidates} terkunci</span>
 				</div>
-			</div>
+			</a>
 
 			<!-- Meja Wawancara -->
-			<div class="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition">
+			<a
+				href="/wawancara"
+				class="group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-sky-50/50 hover:border-sky-300 transition block shadow-2xs"
+			>
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center">
+						<div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition">
 							<MessageSquareText class="w-4 h-4" />
 						</div>
 						<div>
-							<h3 class="text-sm font-semibold text-slate-900">Meja 3: Wawancara</h3>
+							<h3 class="text-sm font-semibold text-slate-900 group-hover:text-sky-800 transition flex items-center gap-1">
+								<span>Meja 3: Wawancara</span>
+								<ArrowUpRight class="w-3.5 h-3.5 text-sky-500 opacity-0 group-hover:opacity-100 transition" />
+							</h3>
 							<p class="text-[11px] text-slate-500">26 Butir Dossier Santri & Ortu</p>
 						</div>
 					</div>
@@ -219,10 +239,11 @@
 						style="width: {data.mejaProgress.interview.percentage}%"
 					></div>
 				</div>
-				<div class="mt-2 text-right text-xs text-slate-500">
-					{data.mejaProgress.interview.count} dari {data.totalCandidates} selesai
+				<div class="mt-2 text-right text-xs text-slate-500 flex items-center justify-between">
+					<span class="text-sky-700 font-semibold group-hover:underline">Buka Meja Wawancara &rarr;</span>
+					<span>{data.mejaProgress.interview.count} dari {data.totalCandidates} selesai</span>
 				</div>
-			</div>
+			</a>
 		</div>
 	</div>
 

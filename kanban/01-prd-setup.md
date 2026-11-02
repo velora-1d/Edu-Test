@@ -122,3 +122,17 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
   - [x] Verifikasi 0 `confirm/alert/prompt` tersisa di seluruh codebase
 
+### [TASK-012] Penataan Arsitektur Flow Seleksi & CRUD Master Peserta Komprehensif
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Menata ulang relasi antar menu dengan hierarki alur seleksi (Admisi -> 3 Meja Penilaian -> Ledger -> Pleno), menambahkan navigasi berantai antar meja, dan membangun fitur CRUD lengkap (Create, Edit, Delete) pada Data Peserta.
+- **Sub-tasks**:
+  - [x] Tambahkan helper CRUD candidate (create, update, delete) di `src/lib/server/db/queries.ts`
+  - [x] Implementasikan server actions (create, update, delete) di `src/routes/peserta/+page.server.ts`
+  - [x] Bangun Modal Tambah Santri, Modal Edit Santri, dan Modal Hapus Santri di `src/routes/peserta/+page.svelte`
+  - [x] Tautkan badge meja (T, K, W) dan aksi tabel peserta langsung ke meja ujian masing-masing kandidat
+  - [x] Reorganisasi navigasi topbar layout dengan pengelompokan hierarki alur (Admisi, Meja Seleksi, Yudisium Pleno)
+  - [x] Tambahkan breadcrumb dan tombol alur berantai di meja TPA, Rubrik, Wawancara, dan Ledger
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
+  - [x] Update status ke Done
+
