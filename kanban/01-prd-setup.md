@@ -162,5 +162,21 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
   - [x] Update status ke Done
 
+### [TASK-015] Instalasi shadcn-svelte & Restrukturisasi Layout Shell dengan Sidebar Navigasi Modern
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Mengintegrasikan shadcn-svelte (bits-ui, clsx, tailwind-merge) dan merestrukturisasi layout global aplikasi (`src/routes/+layout.svelte`) menjadi Modern App Shell berbasis Sidebar Navigasi yang estetik, responsif, collapsible, berpalet biru (non-ungu), dan terbagi rapi ke dalam 3 alur seleksi utama (Admisi, Penilaian Seleksi, Hasil & Pleno).
+- **Sub-tasks**:
+  - [x] Setup shadcn-svelte dependencies (`clsx`, `tailwind-merge`, `bits-ui`) dan konfigurasi `components.json`
+  - [x] Pasang utilitas helper `cn` di `src/lib/utils.ts`
+  - [x] Desain dan bangun komponen Sidebar Navigasi terstruktur di `src/routes/+layout.svelte`
+  - [x] Sediakan Toggle Sidebar (Expand/Collapse) responsif untuk desktop dan mobile
+  - [x] Navigasi sidebar terbagi jelas: Admisi (Dashboard, Santri), Penilaian (1. TPA, 2. Kepesantrenan, 3. Wawancara), Hasil (Rekap Nilai, Sidang Pleno)
+  - [x] Quick Action / Status Footer di Sidebar (Akses Cepat Kelola Jurusan & Ruang, Status Sesi Gelombang)
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
+  - [x] Verifikasi seluruh route (`/`, `/peserta`, `/tpa`, `/rubrik`, `/wawancara`, `/ledger`, `/pleno`)
+
+
+
 
 

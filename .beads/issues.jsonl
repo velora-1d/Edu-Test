@@ -11,3 +11,5 @@
 {"id":"EDU-TEST-11","title":"Eliminasi Dialog Bawaan Browser & Implementasi Modal Custom Estetik","status":"closed","created_at":"2026-11-02T12:04:00Z","priority":"high"}
 {"id":"EDU-TEST-12","title":"Penataan Arsitektur Flow Seleksi & CRUD Master Peserta Komprehensif","status":"closed","created_at":"2026-11-02T12:15:00Z","priority":"high"}
 {"id":"EDU-TEST-13","title":"Penyederhanaan UI/UX Berdasarkan Bahan (Eliminasi Kata Meja, 3-Peran Alur, & Rekap Terpadu)","status":"closed","created_at":"2026-11-02T14:03:00Z","priority":"high"}
+{"id":"EDU-TEST-14","title":"Implementasi CRUD Master Data Jurusan & Alokasi Ruang Ujian","status":"closed","created_at":"2026-11-02T14:40:00Z","priority":"high"}
+{"id":"EDU-TEST-15","title":"Instalasi shadcn-svelte & Restrukturisasi Layout Shell dengan Sidebar Navigasi Modern","status":"closed","created_at":"2026-11-02T14:46:00Z","priority":"high"}
