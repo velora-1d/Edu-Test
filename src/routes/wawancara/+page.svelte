@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { PageData, ActionData } from './$types';
 	import { goto } from '$app/navigation';
 	import {
@@ -38,8 +39,8 @@
 	// Interviewer
 	let interviewerName = $state('Dra. Hj. Siti Aminah');
 
-	// 26 Butir Form Data JSON
-	let fd = $state<Record<string, any>>({
+	// 26 Butir Form Data Default Constant
+	const DEFAULT_FORM_DATA = {
 		// A. Umum & Screening
 		prestasi: '',
 		anak_ke: 1,
@@ -77,7 +78,9 @@
 		beda_pendapat: '',
 		ibadah_malam: '',
 		bukti_kesiapan: ''
-	});
+	};
+
+	let fd = $state<Record<string, any>>({ ...DEFAULT_FORM_DATA });
 
 	// Summaries & Recommendation
 	let studentGeneralSummary = $state('');
@@ -85,28 +88,35 @@
 	let parentCommitmentSummary = $state('');
 	let specialRecommendation = $state('Sangat direkomendasikan masuk kuota utama');
 
-	// Sync state when candidate changes
+	// Sync state when candidate changes (using untrack to prevent infinite loop)
 	$effect(() => {
-		if (currentCandidate) {
-			const inv = currentCandidate.interview;
-			if (inv) {
-				interviewerName = inv.interviewerName || interviewerName;
-				studentGeneralSummary = inv.studentGeneralSummary || '';
-				studentPesantrenSummary = inv.studentPesantrenSummary || '';
-				parentCommitmentSummary = inv.parentCommitmentSummary || '';
-				specialRecommendation = inv.specialRecommendation || specialRecommendation;
+		const candidate = currentCandidate;
+		untrack(() => {
+			if (candidate) {
+				const inv = candidate.interview;
+				if (inv) {
+					interviewerName = inv.interviewerName || 'Dra. Hj. Siti Aminah';
+					studentGeneralSummary = inv.studentGeneralSummary || '';
+					studentPesantrenSummary = inv.studentPesantrenSummary || '';
+					parentCommitmentSummary = inv.parentCommitmentSummary || '';
+					specialRecommendation = inv.specialRecommendation || 'Sangat direkomendasikan masuk kuota utama';
 
-				if (inv.formData && typeof inv.formData === 'object') {
-					fd = { ...fd, ...(inv.formData as Record<string, any>) };
+					if (inv.formData && typeof inv.formData === 'object') {
+						fd = { ...DEFAULT_FORM_DATA, ...(inv.formData as Record<string, any>) };
+					} else {
+						fd = { ...DEFAULT_FORM_DATA };
+					}
+				} else {
+					// Reset defaults
+					interviewerName = 'Dra. Hj. Siti Aminah';
+					studentGeneralSummary = '';
+					studentPesantrenSummary = '';
+					parentCommitmentSummary = '';
+					specialRecommendation = 'Sangat direkomendasikan masuk kuota utama';
+					fd = { ...DEFAULT_FORM_DATA };
 				}
-			} else {
-				// Reset defaults
-				studentGeneralSummary = '';
-				studentPesantrenSummary = '';
-				parentCommitmentSummary = '';
-				specialRecommendation = 'Sangat direkomendasikan masuk kuota utama';
 			}
-		}
+		});
 	});
 
 	// Filtered candidates
