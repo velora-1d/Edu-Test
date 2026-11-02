@@ -39,11 +39,6 @@
 	];
 </script>
 
-<svelte:head>
-	<link rel="icon" href="/favicon.svg" />
-	<title>Edu-Test | Sistem Seleksi Santri Baru & Admisi Terpadu</title>
-</svelte:head>
-
 <div class="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans">
 	<!-- Top Bar -->
 	<header class="bg-blue-700 text-white shadow-sm border-b border-blue-800">
