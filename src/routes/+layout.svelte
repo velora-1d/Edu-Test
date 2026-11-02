@@ -1,6 +1,5 @@
 <script lang="ts">
 	import "./layout.css";
-	import favicon from "#lib/assets/favicon.svg";
 	import type { LayoutProps } from "./$types";
 	import { page } from "$app/state";
 	import {
@@ -41,7 +40,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href="/favicon.svg" />
 	<title>Edu-Test | Sistem Seleksi Santri Baru & Admisi Terpadu</title>
 </svelte:head>
 
