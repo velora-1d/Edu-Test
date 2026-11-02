@@ -1,7 +1,8 @@
 import { db } from '$lib/server/db';
-import { candidates } from '$lib/server/db/schema';
+import { candidates, waves } from '$lib/server/db/schema';
 import { getActiveWave, getCandidatesWithScores, calculateAndSaveParallelRankings } from '$lib/server/db/queries';
 import { seedDatabase } from '$lib/server/seed';
+import { eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -51,6 +52,28 @@ export const actions: Actions = {
 			return { success: true, message: 'Pemeringkatan paralel berhasil dihitung ulang!', result };
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'Gagal menghitung ulang ranking';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	updateQuota: async ({ request }) => {
+		const formData = await request.formData();
+		const waveId = formData.get('waveId')?.toString();
+		const quota = parseInt(formData.get('quota')?.toString() || '20', 10);
+
+		const activeWave = waveId ? null : await getActiveWave();
+		const targetWaveId = waveId || activeWave?.id;
+
+		if (!targetWaveId) {
+			return { success: false, error: 'Gelombang seleksi tidak ditemukan' };
+		}
+
+		try {
+			await db.update(waves).set({ quotaCapacity: quota }).where(eq(waves.id, targetWaveId));
+			await calculateAndSaveParallelRankings(targetWaveId);
+			return { success: true, message: `Kuota kelulusan berhasil diperbarui menjadi ${quota} santri!` };
+		} catch (err: unknown) {
+			const errorMessage = err instanceof Error ? err.message : 'Gagal memperbarui kuota kelulusan';
 			return { success: false, error: errorMessage };
 		}
 	}

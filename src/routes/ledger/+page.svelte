@@ -20,7 +20,11 @@
 		Sparkles,
 		Layers,
 		ArrowLeft,
-		ArrowRight
+		ArrowRight,
+		Sliders,
+		FileText,
+		ShieldCheck,
+		X
 	} from 'lucide-svelte';
 
 	let { data, form }: PageProps = $props();
@@ -32,6 +36,24 @@
 	let sortDirection = $state<'asc' | 'desc'>('asc');
 	let expandedCandidateId = $state<string | null>(null);
 	let isRecalculating = $state(false);
+
+	// Quota Cut-off & Dossier Modal State
+	let quotaInput = $state(20);
+	$effect(() => {
+		if (data.activeWave?.quotaCapacity) {
+			quotaInput = data.activeWave.quotaCapacity;
+		}
+	});
+	let isUpdatingQuota = $state(false);
+	let selectedDossierCandidate = $state<(typeof data.candidates)[0] | null>(null);
+
+	function openDossier(c: (typeof data.candidates)[0]) {
+		selectedDossierCandidate = c;
+	}
+
+	function closeDossier() {
+		selectedDossierCandidate = null;
+	}
 
 	function toggleSort(col: typeof sortColumn) {
 		if (sortColumn === col) {
@@ -273,17 +295,17 @@
 	<!-- Stats Summary Bar -->
 	<div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
 		<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-			<span class="text-xs text-slate-500 font-medium">Total Kandidat</span>
+			<span class="text-xs text-slate-500 font-medium">Total Calon Santri</span>
 			<p class="text-xl font-extrabold text-slate-900 mt-1">{stats().total}</p>
 		</div>
 
 		<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-			<span class="text-xs text-slate-500 font-medium">Skor Tertinggi Komposit</span>
+			<span class="text-xs text-slate-500 font-medium">Skor Tertinggi Nilai Akhir</span>
 			<p class="text-xl font-extrabold text-emerald-600 mt-1">{stats().highest}</p>
 		</div>
 
 		<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-			<span class="text-xs text-slate-500 font-medium">Rata-rata Komposit</span>
+			<span class="text-xs text-slate-500 font-medium">Rata-rata Nilai Akhir</span>
 			<p class="text-xl font-extrabold text-blue-700 mt-1">{stats().average}</p>
 		</div>
 
@@ -295,6 +317,70 @@
 		<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
 			<span class="text-xs text-slate-500 font-medium">Waiting List</span>
 			<p class="text-xl font-extrabold text-amber-600 mt-1">{stats().waiting} santri</p>
+		</div>
+	</div>
+
+	<!-- Quota Capacity Control & Cut-Off Simulator -->
+	<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+		<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+			<div>
+				<div class="flex items-center gap-2">
+					<Sliders class="w-5 h-5 text-blue-700" />
+					<h3 class="font-bold text-slate-900 text-base">Simulasi & Penetapan Kuota Kelulusan</h3>
+					<span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-xs border border-blue-200">
+						Daya Tampung: {quotaInput} Santri
+					</span>
+				</div>
+				<p class="text-xs text-slate-500 mt-1">
+					Geser kuota untuk melihat simulasi garis batas kelulusan. Santri peringkat 1 s/d {quotaInput} berstatus <strong>LULUS</strong>, peringkat seterusnya berstatus <strong>WAITING LIST GELOMBANG BERIKUTNYA</strong>.
+				</p>
+			</div>
+
+			<form
+				method="POST"
+				action="?/updateQuota"
+				use:enhance={() => {
+					isUpdatingQuota = true;
+					return async ({ update }) => {
+						isUpdatingQuota = false;
+						await update();
+					};
+				}}
+				class="flex items-center gap-2 shrink-0"
+			>
+				<input type="hidden" name="waveId" value={data.activeWave?.id || ''} />
+				<input type="hidden" name="quota" value={quotaInput} />
+				<button
+					type="submit"
+					disabled={isUpdatingQuota}
+					class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-700 text-white font-bold text-xs hover:bg-blue-800 transition shadow-sm disabled:opacity-50 min-h-[40px]"
+				>
+					<ShieldCheck class="w-4 h-4" />
+					<span>{isUpdatingQuota ? 'Menerapkan Kuota...' : 'Simpan Kuota Resmi'}</span>
+				</button>
+			</form>
+		</div>
+
+		<!-- Interactive Range Slider -->
+		<div class="flex items-center gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+			<span class="text-xs font-semibold text-slate-700 shrink-0">Batas Kuota:</span>
+			<input
+				type="range"
+				min="1"
+				max={Math.max(data.candidates.length, 30)}
+				bind:value={quotaInput}
+				class="w-full accent-blue-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
+			/>
+			<div class="flex items-center gap-1.5 shrink-0">
+				<input
+					type="number"
+					min="1"
+					max={Math.max(data.candidates.length, 100)}
+					bind:value={quotaInput}
+					class="w-16 px-2.5 py-1 text-center font-bold text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+				/>
+				<span class="text-xs text-slate-500">Santri</span>
+			</div>
 		</div>
 	</div>
 
@@ -409,7 +495,7 @@
 						<!-- Composite Score (Sortable) -->
 						<th class="py-3 px-4 text-right cursor-pointer hover:bg-blue-800 transition" onclick={() => toggleSort('compositeScore')}>
 							<div class="inline-flex items-center justify-end gap-1 w-full font-bold">
-								<span>Skor Komposit</span>
+								<span>Nilai Akhir (50:50)</span>
 								{#if sortColumn === 'compositeScore'}
 									{#if sortDirection === 'asc'}<ArrowUp class="w-3 h-3 text-sky-300" />{:else}<ArrowDown class="w-3 h-3 text-sky-300" />{/if}
 								{:else}
@@ -421,8 +507,8 @@
 						<!-- Status Pleno -->
 						<th class="py-3 px-3 text-center">Status Kelulusan</th>
 
-						<!-- Expand Details Action -->
-						<th class="py-3 px-3 text-center w-12">Rincian</th>
+						<!-- Action Buttons (Dossier & Rincian) -->
+						<th class="py-3 px-3 text-center w-24">Aksi</th>
 					</tr>
 				</thead>
 
@@ -510,22 +596,47 @@
 									{/if}
 								</td>
 
-								<!-- Toggle Detail Accordion Button -->
-								<td class="py-3 px-3 text-center">
-									<button
-										type="button"
-										onclick={() => toggleExpand(c.id)}
-										class="p-1 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-slate-200 transition"
-										title="Lihat rincian 12 subtes TPA dan 7 bidang Kepesantrenan"
-									>
-										{#if isExpanded}
-											<ChevronUp class="w-4 h-4 text-blue-700" />
-										{:else}
-											<ChevronDown class="w-4 h-4" />
-										{/if}
-									</button>
+								<!-- Action Buttons (Dossier & Rincian) -->
+								<td class="py-3 px-3 text-center whitespace-nowrap">
+									<div class="inline-flex items-center gap-1">
+										<button
+											type="button"
+											onclick={() => openDossier(c)}
+											class="p-1.5 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition"
+											title="Buka Catatan Kualitatif Wawancara Santri & Ortu"
+										>
+											<FileText class="w-3.5 h-3.5" />
+										</button>
+										<button
+											type="button"
+											onclick={() => toggleExpand(c.id)}
+											class="p-1.5 rounded-lg text-slate-600 bg-slate-100 hover:text-blue-700 hover:bg-slate-200 border border-slate-200 transition"
+											title="Lihat rincian 12 subtes TPA dan 7 bidang Kepesantrenan"
+										>
+											{#if isExpanded}
+												<ChevronUp class="w-3.5 h-3.5 text-blue-700" />
+											{:else}
+												<ChevronDown class="w-3.5 h-3.5" />
+											{/if}
+										</button>
+									</div>
 								</td>
 							</tr>
+
+							<!-- Cut-off Line Indicator -->
+							{#if sortColumn === 'rankParallel' && c.ranking?.rankParallel === quotaInput}
+								<tr class="bg-gradient-to-r from-emerald-50 via-sky-50 to-amber-50 border-y-2 border-dashed border-emerald-400">
+									<td colspan="9" class="py-2.5 px-4 text-center">
+										<div class="flex items-center justify-center gap-2 text-xs font-black text-slate-800">
+											<span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+											<span class="tracking-wide uppercase text-emerald-900">BATAS KUOTA PENERIMAAN: {quotaInput} SANTRI TERATAS DINYATAKAN LULUS</span>
+											<span class="text-slate-300">|</span>
+											<span class="text-amber-800 font-semibold text-[11px]">Peringkat #{quotaInput + 1} ke bawah berstatus WAITING LIST</span>
+											<span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+										</div>
+									</td>
+								</tr>
+							{/if}
 
 							<!-- Expanded Accordion Row -->
 							{#if isExpanded}
@@ -664,11 +775,153 @@
 		<!-- Footer info -->
 		<div class="p-4 border-t border-slate-200 bg-slate-50 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
 			<div>
-				Aturan Seri (Tie-Breaker Hierarchy): <strong>Komposit &rarr; Rata-rata Kepesantrenan &rarr; Gabungan Tahsin/Tahfidz &rarr; Logika + Karakter TPA &rarr; Waktu Pendaftaran</strong>.
+				Aturan Seri (Tie-Breaker Hierarchy): <strong>Nilai Akhir &rarr; Rata-rata Kepesantrenan &rarr; Gabungan Tahsin/Tahfidz &rarr; Logika + Karakter TPA &rarr; Waktu Pendaftaran</strong>.
 			</div>
 			<div>
 				Menampilkan <strong>{processedCandidates.length}</strong> santri
 			</div>
 		</div>
 	</div>
+
+	<!-- ========================================================================= -->
+	<!-- CUSTOM AESTHETIC MODAL: DOSSIER WAWANCARA SANTRI & ORANG TUA -->
+	<!-- ========================================================================= -->
+	{#if selectedDossierCandidate}
+		{@const cand = selectedDossierCandidate}
+		{@const formD = (cand.interview?.formData as Record<string, unknown>) || {}}
+
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+			<div class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+				<!-- Modal Header -->
+				<div class="bg-blue-700 text-white p-6 flex items-center justify-between">
+					<div class="flex items-center gap-3">
+						<div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-black text-sky-200 text-lg border border-white/20">
+							#{cand.ranking?.rankParallel || '-'}
+						</div>
+						<div>
+							<h3 class="text-lg font-bold leading-tight">{cand.fullName}</h3>
+							<p class="text-xs text-sky-100 font-mono mt-0.5">
+								{cand.testNumber} &bull; {cand.schoolOrigin} &bull; {cand.majorChoice}
+							</p>
+						</div>
+					</div>
+					<button
+						type="button"
+						onclick={closeDossier}
+						class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+					>
+						<X class="w-5 h-5" />
+					</button>
+				</div>
+
+				<!-- Modal Body (Scrollable) -->
+				<div class="p-6 space-y-6 overflow-y-auto flex-1 text-xs">
+					<!-- Score Recap Cards -->
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+						<div class="p-3.5 rounded-2xl bg-blue-50 border border-blue-100">
+							<span class="text-slate-500 block text-[11px] font-medium">Skor TPA (Skala 100)</span>
+							<p class="text-2xl font-black text-blue-700 mt-1">{cand.tpaScore?.finalScore100 || '-'}</p>
+							<span class="text-[10px] text-blue-600 font-medium">
+								{cand.tpaScore?.category || '-'} &bull; Mentah {cand.tpaScore?.rawTotalScore || 0}/69
+							</span>
+						</div>
+
+						<div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-100">
+							<span class="text-slate-500 block text-[11px] font-medium">Skor Kepesantrenan</span>
+							<p class="text-2xl font-black text-emerald-700 mt-1">{cand.pesantrenScore?.averageScore || '-'}</p>
+							<span class="text-[10px] text-emerald-600 font-medium">
+								Rata-rata 7 Bidang Ibadah & Bahasa
+							</span>
+						</div>
+
+						<div class="p-3.5 rounded-2xl bg-sky-50 border border-sky-100">
+							<span class="text-slate-500 block text-[11px] font-medium">Nilai Akhir Gabungan</span>
+							<p class="text-2xl font-black text-sky-800 mt-1">{cand.ranking?.compositeScore || '-'}</p>
+							<span class="text-[10px] text-sky-600 font-medium">
+								50% TPA + 50% Kepesantrenan
+							</span>
+						</div>
+					</div>
+
+					<!-- Rincian Catatan Kualitatif Wawancara (26 Butir / 4 Dimensi) -->
+					<div class="space-y-4">
+						<h4 class="font-bold text-slate-900 text-sm border-b pb-2 flex items-center gap-2">
+							<FileText class="w-4 h-4 text-blue-600" />
+							<span>Dossier Kualitatif Wawancara Santri & Orang Tua</span>
+						</h4>
+
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							<div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+								<span class="font-bold text-slate-700 block text-[11px]">Prestasi yang Pernah Diraih:</span>
+								<p class="text-slate-900 mt-1">{formD.prestasi || '-'}</p>
+							</div>
+
+							<div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+								<span class="font-bold text-slate-700 block text-[11px]">Riwayat Perilaku (Pacaran & Merokok):</span>
+								<p class="text-slate-900 mt-1">
+									Pacaran: <strong>{formD.riwayat_pacaran || '-'}</strong> |
+									Merokok: <strong>{formD.riwayat_merokok || '-'}</strong>
+								</p>
+							</div>
+
+							<div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+								<span class="font-bold text-slate-700 block text-[11px]">Kecakapan Komputer & Editing:</span>
+								<p class="text-slate-900 mt-1">
+									Aplikasi: {formD.aplikasi_komputer || '-'}, Editing: {formD.aplikasi_editing || '-'}
+								</p>
+							</div>
+
+							<div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 md:col-span-2">
+								<span class="font-bold text-slate-700 block text-[11px]">Respons terhadap Ejekan / Bullying:</span>
+								<p class="text-slate-900 mt-1">{formD.respons_ejekan || '-'}</p>
+							</div>
+						</div>
+
+						<!-- Ringkasan Naratif Pewawancara -->
+						<div class="space-y-3 pt-2">
+							<div class="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200">
+								<span class="font-bold text-blue-900 block text-[11px]">Ringkasan Umum Calon Santri:</span>
+								<p class="text-slate-800 mt-1">{cand.interview?.studentGeneralSummary || '-'}</p>
+							</div>
+
+							<div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+								<span class="font-bold text-emerald-900 block text-[11px]">Kesiapan Berasrama & Komitmen Spiritual:</span>
+								<p class="text-slate-800 mt-1">{cand.interview?.studentPesantrenSummary || '-'}</p>
+							</div>
+
+							<div class="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200">
+								<span class="font-bold text-amber-900 block text-[11px]">Komitmen Orang Tua / Wali:</span>
+								<p class="text-slate-800 mt-1">{cand.interview?.parentCommitmentSummary || '-'}</p>
+							</div>
+
+							<div class="p-3.5 rounded-xl bg-slate-100 border border-slate-300">
+								<span class="font-bold text-slate-900 block text-[11px]">Rekomendasi Khusus Pewawancara:</span>
+								<p class="text-slate-800 mt-1 font-semibold">{cand.interview?.specialRecommendation || '-'}</p>
+								<div class="mt-2 text-[10px] text-slate-500 text-right">
+									Pewawancara: <strong>{cand.interview?.interviewerName || 'Panitia Wawancara'}</strong>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Modal Footer -->
+				<div class="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
+					<div class="text-xs text-slate-600">
+						Status Seleksi:
+						<strong class={cand.ranking?.admissionStatus === 'LULUS' ? 'text-emerald-700' : 'text-amber-700'}>
+							{cand.ranking?.admissionStatus || 'WAITING_LIST'}
+						</strong>
+					</div>
+					<button
+						type="button"
+						onclick={closeDossier}
+						class="px-5 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-white hover:bg-slate-900 transition"
+					>
+						Tutup Dossier
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
