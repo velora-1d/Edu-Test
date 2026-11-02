@@ -377,8 +377,13 @@
 							</td>
 
 							<!-- TPA -->
-							<td class="py-3 px-3 text-right font-medium text-slate-700">
-								{c.tpaScore?.finalScore100 || '-'}
+							<td class="py-3 px-3 text-right">
+								{#if c.tpaScore}
+									<div class="font-bold text-slate-900">{c.tpaScore.finalScore100}</div>
+									<div class="text-[10px] text-slate-400 font-mono">({c.tpaScore.rawTotalScore}/69 poin)</div>
+								{:else}
+									<span class="text-slate-400">-</span>
+								{/if}
 							</td>
 
 							<!-- Pesantren -->
@@ -513,7 +518,7 @@
 							<span class="text-slate-500 block text-[11px]">Skor TPA (Skala 100)</span>
 							<p class="text-2xl font-black text-blue-700 mt-1">{cand.tpaScore?.finalScore100 || '-'}</p>
 							<span class="text-[10px] text-blue-600 font-medium">
-								{cand.tpaScore?.category || '-'} &bull; Mentah {cand.tpaScore?.rawTotalScore}/69
+								{cand.tpaScore?.category || '-'} &bull; ({cand.tpaScore?.rawTotalScore || 0}/69 poin)
 							</span>
 						</div>
 

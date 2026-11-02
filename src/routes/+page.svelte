@@ -164,7 +164,7 @@
 								<span>Tes Potensi Akademik (TPA)</span>
 								<ArrowUpRight class="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition" />
 							</h3>
-							<p class="text-[11px] text-slate-500">12 Subtes (Skor Max 69 &rarr; 100)</p>
+							<p class="text-[11px] text-slate-500">12 Subtes (Max 69 Poin &bull; Skala 100)</p>
 						</div>
 					</div>
 					<span class="text-sm font-bold text-blue-700">{data.testProgress.tpa.percentage}%</span>
@@ -456,7 +456,12 @@
 									<td class="py-2.5 px-3 font-semibold text-slate-800">{c.fullName}</td>
 									<td class="py-2.5 px-3 text-slate-500">{c.majorChoice}</td>
 									<td class="py-2.5 px-3 text-right font-medium text-slate-700">
-										{c.tpaScore?.finalScore100 || '-'}
+										{#if c.tpaScore}
+											<div class="font-bold text-slate-900">{c.tpaScore.finalScore100}</div>
+											<div class="text-[10px] text-slate-400 font-mono">({c.tpaScore.rawTotalScore}/69 poin)</div>
+										{:else}
+											<span class="text-slate-400">-</span>
+										{/if}
 									</td>
 									<td class="py-2.5 px-3 text-right font-medium text-slate-700">
 										{c.pesantrenScore?.averageScore || '-'}

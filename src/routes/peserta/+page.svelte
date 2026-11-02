@@ -496,7 +496,7 @@
 										<!-- TPA Desk Link -->
 										<a
 											href="/tpa?candidateId={c.id}"
-											title="Tes TPA: {isTpaLocked ? 'Selesai (Skor: ' + c.tpaScore?.finalScore100 + ')' : 'Belum Diuji'} - Klik untuk buka"
+											title="Tes TPA: {isTpaLocked ? 'Selesai (Skor: ' + c.tpaScore?.finalScore100 + ' • ' + c.tpaScore?.rawTotalScore + '/69 poin)' : 'Belum Diuji'} - Klik untuk buka"
 											class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition shadow-2xs {isTpaLocked
 												? 'bg-blue-700 text-white hover:bg-blue-800'
 												: 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50'}"

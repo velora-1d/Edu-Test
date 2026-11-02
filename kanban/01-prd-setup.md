@@ -225,6 +225,20 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
   - [x] Verifikasi secara empiris via curl pada `/peserta` dan `/peserta?manageMaster=true`
 
+### [TASK-020] Implementasi Format Dual-Display Skor TPA (Skala 100 + Poin Mentah /69)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Menerapkan format tampilan ganda (Dual-Display) untuk skor Tes Potensi Akademik (TPA) di seluruh halaman: Dashboard (`/`), Peserta (`/peserta`), Lembar Penilaian TPA (`/tpa`), Master Ledger (`/ledger`), dan Sidang Pleno (`/pleno`). Menampilkan skor normalisasi 0–100 untuk perankingan adil, sekaligus menyertakan rincian poin mentah asli (`{rawTotalScore}/69 poin`) agar transparan bagi penguji dan panitia.
+- **Sub-tasks**:
+  - [x] Perbarui tabel Top 5 Peringkat dan kartu ringkasan di `src/routes/+page.svelte` (Dashboard) dengan format dual-display
+  - [x] Perbarui kolom skor TPA dan badge aksi di `src/routes/peserta/+page.svelte`
+  - [x] Perbarui header dan ringkasan skor di `src/routes/tpa/+page.svelte` (menampilkan formula poin mentah /69 dan kategori)
+  - [x] Perbarui kolom TPA di tabel master dan kartu dossier di `src/routes/ledger/+page.svelte`
+  - [x] Perbarui kolom TPA di tabel pleno dan modal dossier di `src/routes/pleno/+page.svelte`
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
+  - [x] Verifikasi empiris rendering via curl pada seluruh rute (HTTP 200 OK & skor poin mentah tampil)
+
+
 
 
 

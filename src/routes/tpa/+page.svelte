@@ -199,10 +199,10 @@
 						<div class={`text-[11px] truncate flex items-center gap-1 ${active ? 'text-blue-200' : 'text-slate-500'}`}>
 							{#if scoreLocked}
 								<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-								<span>Terkunci ({c.tpaScore?.finalScore100})</span>
+								<span>Terkunci ({c.tpaScore?.finalScore100} • {c.tpaScore?.rawTotalScore}/69)</span>
 							{:else if scoreDraft}
 								<span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-								<span>Draf ({c.tpaScore?.finalScore100})</span>
+								<span>Draf ({c.tpaScore?.finalScore100} • {c.tpaScore?.rawTotalScore}/69)</span>
 							{:else}
 								<span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
 								<span>Belum Dinilai</span>
