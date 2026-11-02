@@ -214,6 +214,19 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
   - [x] Verifikasi rendering di browser pada berbagai ukuran layar
 
+### [TASK-019] Perbaikan Logika Status Active Menu Navigasi (Mencegah Dual Active Menu)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Memperbaiki logika deteksi rute aktif (`isActive`) pada `src/routes/+layout.svelte` yang menyebabkan menu "Data Calon Santri" dan "Kelola Jurusan & Ruang" aktif bersamaan karena keduanya berbagi path dasar `/peserta`. Memperketat pengecekan query parameter sehingga hanya tepat 1 menu yang berstatus aktif.
+- **Sub-tasks**:
+  - [x] Implementasikan fungsi `checkIsActive(itemHref, currentUrl)` dengan validasi path dan query parameter yang presisi
+  - [x] Pastikan `/peserta` hanya aktif ketika `manageMaster` tidak bernilai `true`
+  - [x] Pastikan `/peserta?manageMaster=true` hanya aktif ketika parameter `manageMaster=true` ada di URL
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
+  - [x] Verifikasi secara empiris via curl pada `/peserta` dan `/peserta?manageMaster=true`
+
+
+
 
 
 

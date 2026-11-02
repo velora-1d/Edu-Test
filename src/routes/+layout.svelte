@@ -106,12 +106,44 @@
 	};
 
 	let currentRoute = $derived(
-		pageMeta[page.url.pathname] || {
-			title: "Edu-Test Seleksi PPDB",
-			category: "PPDB Santri",
-			description: "Sistem Seleksi Terpadu Calon Santri Baru",
-		}
+		page.url.pathname === "/peserta" && page.url.searchParams.get("manageMaster") === "true"
+			? {
+					title: "Kelola Master Jurusan & Ruang",
+					category: "Master Data",
+					description: "Pengaturan dinamis jurusan pilihan dan daftar alokasi ruang ujian",
+			  }
+			: pageMeta[page.url.pathname] || {
+					title: "Edu-Test Seleksi PPDB",
+					category: "PPDB Santri",
+					description: "Sistem Seleksi Terpadu Calon Santri Baru",
+			  }
 	);
+
+	function isRouteActive(href: string): boolean {
+		const [targetPath, queryString] = href.split("?");
+		if (targetPath === "/") {
+			return page.url.pathname === "/";
+		}
+
+		if (queryString) {
+			const targetParams = new URLSearchParams(queryString);
+			const matchesPath =
+				page.url.pathname === targetPath || page.url.pathname.startsWith(targetPath + "/");
+			const matchesParams = Array.from(targetParams.entries()).every(
+				([key, val]) => page.url.searchParams.get(key) === val
+			);
+			return matchesPath && matchesParams;
+		}
+
+		if (targetPath === "/peserta") {
+			if (page.url.searchParams.get("manageMaster") === "true") {
+				return false;
+			}
+			return page.url.pathname === "/peserta" || page.url.pathname.startsWith("/peserta/");
+		}
+
+		return page.url.pathname === targetPath || page.url.pathname.startsWith(targetPath + "/");
+	}
 </script>
 
 <svelte:head>
@@ -147,10 +179,7 @@
 					<SidebarGroupContent>
 						<SidebarMenu class="space-y-0.5 group-data-[collapsible=icon]:space-y-1">
 							{#each section.items as item}
-								{@const isActive =
-									item.href === "/"
-										? page.url.pathname === "/"
-										: page.url.pathname.startsWith(item.href.split("?")[0])}
+								{@const isActive = isRouteActive(item.href)}
 								<SidebarMenuItem>
 									<SidebarMenuButton tooltipContent={item.label} {isActive} class="p-0 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
 										{#snippet child({ props })}
