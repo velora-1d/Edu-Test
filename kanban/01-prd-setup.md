@@ -149,4 +149,18 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
   - [x] Update status ke Done
 
+### [TASK-014] Implementasi CRUD Master Data Jurusan & Alokasi Ruang Ujian
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Mengubah opsi pilihan jurusan dan alokasi ruang ujian dari hardcoded static menjadi entitas database dinamis di PostgreSQL lengkap dengan CRUD (Create, Read, Update, Delete) dan modal kustom estetik.
+- **Sub-tasks**:
+  - [x] Tambahkan tabel `majors` dan `exam_rooms` di `src/lib/server/db/schema.ts` dan eksekusi migrasi Drizzle
+  - [x] Buat query helper dan auto-seed default master data di `src/lib/server/db/queries.ts`
+  - [x] Implementasikan server actions di `src/routes/peserta/+page.server.ts` (`createMajor`, `updateMajor`, `deleteMajor`, `createExamRoom`, `updateExamRoom`, `deleteExamRoom`)
+  - [x] Buat Modal Kustom Estetik "Kelola Jurusan & Ruang" dengan tab switcher dan dialog hapus di `src/routes/peserta/+page.svelte`
+  - [x] Sinkronisasi opsi dropdown dinamis di form Tambah Santri, Edit Santri, dan Toolbar Filter (Peserta & Ledger)
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
+  - [x] Update status ke Done
+
+
 
