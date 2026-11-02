@@ -13,3 +13,4 @@
 {"id":"EDU-TEST-13","title":"Penyederhanaan UI/UX Berdasarkan Bahan (Eliminasi Kata Meja, 3-Peran Alur, & Rekap Terpadu)","status":"closed","created_at":"2026-11-02T14:03:00Z","priority":"high"}
 {"id":"EDU-TEST-14","title":"Implementasi CRUD Master Data Jurusan & Alokasi Ruang Ujian","status":"closed","created_at":"2026-11-02T14:40:00Z","priority":"high"}
 {"id":"EDU-TEST-15","title":"Instalasi shadcn-svelte & Restrukturisasi Layout Shell dengan Sidebar Navigasi Modern","status":"closed","created_at":"2026-11-02T14:46:00Z","priority":"high"}
+{"id":"EDU-TEST-16","title":"Redesign Total Sidebar Navigasi (Sleek Pro SaaS, Eliminasi Truncate & Bubbly Bloat)","status":"closed","created_at":"2026-11-02T15:01:00Z","priority":"high"}

@@ -176,6 +176,22 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus build)
   - [x] Verifikasi seluruh route (`/`, `/peserta`, `/tpa`, `/rubrik`, `/wawancara`, `/ledger`, `/pleno`)
 
+### [TASK-016] Redesign Total Sidebar Navigasi (Sleek Pro SaaS, Eliminasi Truncate & Bubbly Bloat)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Melakukan redesign total terhadap sidebar navigasi agar tidak terpotong (truncate teks), menghilangkan bentuk bubble/pill yang tebal, menghapus badge berlebih yang menyempitkan label, mengatur lebar ideal sidebar (280px / 17.5rem), menerapkan tipografi modern clean ala dashboard profesional (Linear/Supabase/Stripe), serta memperbaiki hierarki visual header dan footer.
+- **Sub-tasks**:
+  - [x] Audit ukuran sidebar width dan padding di CSS & constants (`--sidebar-width: 17.5rem / 280px`)
+  - [x] Fix bug `data-active` di `sidebar-menu-button.svelte` agar elemen non-aktif tidak terkena styling background
+  - [x] Hapus badge berlebih yang menyebabkan teks menu terpotong dengan elipsis (`...`)
+  - [x] Desain ulang item navigasi: background transparan default, indikator aktif solid blue `bg-blue-600` yang tegas dan elegan, icon stroke halus
+  - [x] Perbaiki visual header (logo kompak modern 36x36px, title & subtitle serasi)
+  - [x] Rampingkan footer menjadi 1 consolidated widget elegan (status gelombang aktif LIVE + user card)
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
+  - [x] Uji responsivitas & visual rendering di seluruh rute aplikasi (HTTP 200 OK)
+
+
+
 
 
 
