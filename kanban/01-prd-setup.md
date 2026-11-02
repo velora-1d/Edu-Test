@@ -203,6 +203,19 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
   - [x] Verifikasi rendering collapsed icon di browser
 
+### [TASK-018] Optimasi Layout Canvas Full-Width (Eliminasi Margin Kiri-Kanan Berlebih & Whitespace Kosong)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Menghapus pembatasan `max-w-7xl mx-auto` yang menyebabkan margin kiri-kanan terlalu lebar dan banyak ruang kosong pada layar monitor lebar/desktop. Mengubah container layout dan halaman utama menjadi fluid responsive layout (`w-full px-4 sm:px-6 md:px-8 py-6`) ala modern SaaS dashboard sehingga dashboard cards, tabel peserta, rubric grid, dan ledger memanfaatkan layar secara optimal.
+- **Sub-tasks**:
+  - [x] Ubah container `<main>` di `src/routes/+layout.svelte` dari `max-w-7xl mx-auto` menjadi `w-full px-4 sm:px-6 md:px-8 py-6`
+  - [x] Sesuaikan container header, subheader, dan footer di `src/routes/+layout.svelte` agar konsisten full-width
+  - [x] Hapus `max-w-7xl mx-auto` di `src/routes/rubrik/+page.svelte`, `src/routes/tpa/+page.svelte`, dan `src/routes/wawancara/+page.svelte`
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
+  - [x] Verifikasi rendering di browser pada berbagai ukuran layar
+
+
+
 
 
 

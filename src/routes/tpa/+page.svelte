@@ -106,7 +106,7 @@
 	}
 </script>
 
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="w-full space-y-6">
 	<!-- Sequential Selection Workflow Banner -->
 	<div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
 		<div class="flex items-center gap-2 flex-wrap">

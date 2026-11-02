@@ -293,13 +293,13 @@
 		</div>
 
 		<!-- Page Content Inset -->
-		<main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+		<main class="flex-1 p-4 sm:p-6 lg:p-8 w-full">
 			{@render children()}
 		</main>
 
 		<!-- Modern Minimal Footer -->
 		<footer class="border-t border-slate-200/80 bg-white py-3.5 px-6 text-center text-xs text-slate-500">
-			<div class="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto">
+			<div class="flex flex-col sm:flex-row items-center justify-between gap-2 w-full">
 				<span>Edu-Test &copy; 2026/2027 • Sistem Seleksi Terpadu Calon Santri Baru</span>
 				<div class="flex items-center gap-3 text-[11px] text-slate-400">
 					<span>Neon PostgreSQL Singapore</span>
