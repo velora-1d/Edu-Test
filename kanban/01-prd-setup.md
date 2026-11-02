@@ -78,3 +78,13 @@
   - [x] Verifikasi `pnpm check` dan `pnpm build` (0 error, build lulus)
   - [x] Verifikasi empiris via curl HTTP status (200 OK & 302 Redirect)
 
+### [TASK-008] Fix SSR Head Favicon Import (500 Error di /wawancara)
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Memperbaiki error SSR saat evaluasi <svelte:head> yang memicu 500 error di /wawancara dengan memindahkan favicon langsung ke `static/favicon.svg`.
+- **Sub-tasks**:
+  - [x] Salin `favicon.svg` ke folder `static/`
+  - [x] Bersihkan runtime asset import di `src/routes/+layout.svelte`
+  - [x] Pengujian empiris via curl ke seluruh 7 route (seluruhnya 200 OK)
+  - [x] Verifikasi `pnpm check` (0 error, 0 warning)
+

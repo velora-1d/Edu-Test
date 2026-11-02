@@ -5,3 +5,4 @@
 {"id":"EDU-TEST-5","title":"Provisioning Database Neon PostgreSQL (Singapore)","status":"closed","created_at":"2026-11-01T20:54:00Z","priority":"high"}
 {"id":"EDU-TEST-6","title":"Implementasi Paralel Edu-Test (3 Sub-Agents Aktif)","status":"closed","created_at":"2026-11-02T11:18:00Z","priority":"high"}
 {"id":"EDU-TEST-7","title":"Penyelarasan Rute Penilaian & Navigasi (Fix 404)","status":"closed","created_at":"2026-11-02T11:40:00Z","priority":"high"}
+{"id":"EDU-TEST-8","title":"Fix SSR Head Favicon Import (500 Error di /wawancara)","status":"closed","created_at":"2026-11-02T11:47:00Z","priority":"high"}
