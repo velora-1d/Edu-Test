@@ -146,35 +146,35 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<!-- Sequential Selection Workflow Banner -->
-	<div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-		<div class="flex items-center gap-2 flex-wrap">
+	<!-- Top Navigation Workflow Bar (Clean & Compact) -->
+	<div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs text-xs">
+		<div class="flex items-center gap-1.5 flex-wrap">
 			<a
 				href="/peserta"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Data Calon Santri</span>
+				<span>Data Santri</span>
 			</a>
 			<span class="text-slate-300">/</span>
 			<a
 				href="/ledger"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
 				<span>Rekap Nilai</span>
 			</a>
-			<span class="text-slate-300">→</span>
-			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-700 text-white font-bold shadow-2xs">
-				<span>Sidang Pleno (Ketuk Palu Kelulusan)</span>
+			<span class="text-slate-300">&rarr;</span>
+			<span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-700 text-white font-bold shadow-2xs">
+				Sidang Pleno
 			</span>
 		</div>
 
 		<a
 			href="/peserta"
-			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition ml-auto"
+			class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition ml-auto"
 		>
-			<span>Kembali ke Data Santri</span>
+			<span>Data Santri</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
@@ -548,6 +548,18 @@
 
 						<!-- Grid Butir Pertanyaan Terpilih -->
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							{#if formD.stifin_category || formD.stifin_type}
+								<div class="p-3 rounded-lg bg-blue-50/70 border border-blue-200 md:col-span-2 flex items-center justify-between">
+									<div>
+										<span class="font-bold text-blue-900 block text-xs">Hasil Tes STIFIn (Mesin Kecerdasan):</span>
+										<p class="text-slate-800 text-xs mt-0.5">{formD.stifin_notes || 'Tidak ada catatan tambahan'}</p>
+									</div>
+									<span class="px-2.5 py-1 rounded-md bg-blue-700 text-white font-mono font-bold text-xs shrink-0">
+										{formD.stifin_category || 'STIFIn'} {formD.stifin_type ? `(${formD.stifin_type})` : ''}
+									</span>
+								</div>
+							{/if}
+
 							<div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
 								<span class="font-semibold text-slate-700 block">Prestasi yang Pernah Diraih:</span>
 								<p class="text-slate-900 mt-1">{formD.prestasi || '-'}</p>
@@ -587,6 +599,20 @@
 								<span class="font-semibold text-slate-700 block">Respons terhadap Ejekan / Bullying:</span>
 								<p class="text-slate-900 mt-1">{formD.respons_ejekan || '-'}</p>
 							</div>
+
+							{#if Array.isArray(formD.parent_qa) && formD.parent_qa.length > 0}
+								<div class="p-3 rounded-lg bg-slate-50 border border-slate-200 md:col-span-2 space-y-2">
+									<span class="font-bold text-slate-800 block text-xs">Butir Wawancara Orang Tua ({formD.parent_qa.length} Butir):</span>
+									<div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+										{#each formD.parent_qa as qa, idx}
+											<div class="p-2 bg-white rounded-lg border border-slate-200 text-xs">
+												<div class="font-semibold text-slate-800">{idx + 1}. {qa.question}</div>
+												<div class="text-slate-600 mt-0.5">{qa.answer || '-'}</div>
+											</div>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						</div>
 
 						<!-- Ringkasan Naratif Pewawancara -->

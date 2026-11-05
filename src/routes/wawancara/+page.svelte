@@ -23,17 +23,33 @@
 		Compass,
 		Info,
 		ArrowLeft,
-		ArrowRight
+		ArrowRight,
+		ChevronLeft,
+		ChevronRight,
+		X,
+		Users,
+		Building2,
+		GraduationCap,
+		Plus,
+		Trash2
 	} from 'lucide-svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let searchQuery = $state('');
-	let activeTab = $state<'umum' | 'pesantren' | 'dossier'>('umum');
+	let showCompleteModal = $state(false);
+	let showCandidateModal = $state(false);
+
+	// Modal Filters
+	let modalSearch = $state('');
+	let modalFilterStatus = $state<'ALL' | 'UNSCORED' | 'DRAFT' | 'LOCKED'>('ALL');
+	let modalFilterRoom = $state('ALL');
+	let modalFilterMajor = $state('ALL');
+
+	let activeTab = $state<'umum' | 'ortu' | 'pesantren' | 'dossier'>('umum');
 	let autosaveStatus = $state<'saved' | 'saving' | 'idle'>('idle');
 	let lastSavedTime = $state<string>('');
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-	let showCompleteModal = $state(false);
 
 	let currentCandidate = $derived(data.selectedCandidate);
 	let interviewData = $derived(currentCandidate?.interview);
@@ -42,12 +58,18 @@
 	// Interviewer
 	let interviewerName = $state('Dra. Hj. Siti Aminah');
 
-	// 26 Butir Form Data Default Constant
+	// Form Data Default Constant (Umum, STIFIn, Kepesantrenan, dan Ortu)
 	const DEFAULT_FORM_DATA = {
 		// A. Umum & Screening
 		prestasi: '',
 		anak_ke: 1,
 		dari_bersaudara: 3,
+
+		// STIFIn (Mesin Kecerdasan & Karakter)
+		stifin_category: '', // Sensing, Thinking, Intuiting, Feeling, Instinct
+		stifin_type: '', // Si, Se, Ti, Te, Ii, Ie, Fi, Fe, In, Belum Tes
+		stifin_notes: '',
+
 		pernah_pacaran: false,
 		catatan_pacaran: '',
 		pernah_merokok: false,
@@ -80,7 +102,14 @@
 		menerima_teguran: '',
 		beda_pendapat: '',
 		ibadah_malam: '',
-		bukti_kesiapan: ''
+		bukti_kesiapan: '',
+
+		// C. Wawancara Orang Tua (Tanya Jawab Bebas)
+		parent_qa: [
+			{ question: 'Bagaimana komitmen pembiayaan pendidikan santri selama di pesantren?', answer: '' },
+			{ question: 'Apakah ananda memiliki riwayat kesehatan khusus, alergi berat, atau kebutuhan pemantauan khusus?', answer: '' },
+			{ question: 'Bagaimana kesiapan orang tua mendukung kemandirian ananda dan mentaati tata tertib kunjungan asrama?', answer: '' }
+		]
 	};
 
 	let fd = $state<Record<string, any>>({ ...DEFAULT_FORM_DATA });
@@ -90,6 +119,21 @@
 	let studentPesantrenSummary = $state('');
 	let parentCommitmentSummary = $state('');
 	let specialRecommendation = $state('Sangat direkomendasikan masuk kuota utama');
+
+	function addParentQuestion(defaultQuestion = '') {
+		if (!fd.parent_qa) fd.parent_qa = [];
+		fd.parent_qa = [
+			...fd.parent_qa,
+			{ question: defaultQuestion || '', answer: '' }
+		];
+		triggerAutosave();
+	}
+
+	function removeParentQuestion(index: number) {
+		if (!fd.parent_qa) return;
+		fd.parent_qa = fd.parent_qa.filter((_: any, i: number) => i !== index);
+		triggerAutosave();
+	}
 
 	// Sync state when candidate changes (using untrack to prevent infinite loop)
 	$effect(() => {
@@ -105,7 +149,14 @@
 					specialRecommendation = inv.specialRecommendation || 'Sangat direkomendasikan masuk kuota utama';
 
 					if (inv.formData && typeof inv.formData === 'object') {
-						fd = { ...DEFAULT_FORM_DATA, ...(inv.formData as Record<string, any>) };
+						const raw = inv.formData as Record<string, any>;
+						fd = {
+							...DEFAULT_FORM_DATA,
+							...raw,
+							parent_qa: Array.isArray(raw.parent_qa) && raw.parent_qa.length > 0
+								? raw.parent_qa
+								: [...DEFAULT_FORM_DATA.parent_qa]
+						};
 					} else {
 						fd = { ...DEFAULT_FORM_DATA };
 					}
@@ -133,7 +184,57 @@
 	);
 
 	function selectCandidate(id: string) {
+		showCandidateModal = false;
 		goto(`/wawancara?candidateId=${id}`, { reset: false });
+	}
+
+	let currentIndex = $derived(
+		currentCandidate ? data.candidates.findIndex((c) => c.id === currentCandidate.id) : -1
+	);
+	let prevCandidate = $derived(
+		currentIndex > 0 ? data.candidates[currentIndex - 1] : null
+	);
+	let nextCandidate = $derived(
+		currentIndex >= 0 && currentIndex < data.candidates.length - 1
+			? data.candidates[currentIndex + 1]
+			: null
+	);
+
+	const availableRooms = $derived(
+		Array.from(new Set(data.candidates.map((c) => c.roomAssignment).filter(Boolean))) as string[]
+	);
+	const availableMajors = $derived(
+		Array.from(new Set(data.candidates.map((c) => c.majorChoice).filter(Boolean))) as string[]
+	);
+
+	const modalFilteredCandidates = $derived(
+		data.candidates.filter((c) => {
+			const query = modalSearch.toLowerCase().trim();
+			const matchSearch =
+				!query ||
+				c.fullName.toLowerCase().includes(query) ||
+				c.testNumber.toLowerCase().includes(query) ||
+				c.schoolOrigin.toLowerCase().includes(query);
+
+			const status = c.interview?.completionStatus;
+			let matchStatus = true;
+			if (modalFilterStatus === 'LOCKED') matchStatus = status === 'COMPLETED';
+			else if (modalFilterStatus === 'DRAFT') matchStatus = status === 'IN_PROGRESS';
+			else if (modalFilterStatus === 'UNSCORED') matchStatus = !status;
+
+			const matchRoom = modalFilterRoom === 'ALL' || c.roomAssignment === modalFilterRoom;
+			const matchMajor = modalFilterMajor === 'ALL' || c.majorChoice === modalFilterMajor;
+
+			return matchSearch && matchStatus && matchRoom && matchMajor;
+		})
+	);
+
+	function goToPrev() {
+		if (prevCandidate) selectCandidate(prevCandidate.id);
+	}
+
+	function goToNext() {
+		if (nextCandidate) selectCandidate(nextCandidate.id);
 	}
 
 	// Trigger autosave on field change
@@ -176,108 +277,132 @@
 </script>
 
 <div class="w-full space-y-6">
-	<!-- Sequential Selection Workflow Banner -->
-	<div class="bg-sky-50/70 border border-sky-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-		<div class="flex items-center gap-2 flex-wrap">
+	<!-- Top Navigation Workflow Bar (Clean & Compact) -->
+	<div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs text-xs">
+		<div class="flex items-center gap-1.5 flex-wrap">
 			<a
 				href="/peserta"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Data Calon Santri</span>
+				<span>Data Santri</span>
 			</a>
 			<span class="text-slate-300">/</span>
 			<a
 				href={currentCandidate ? `/tpa?candidateId=${currentCandidate.id}` : '/tpa'}
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition"
 			>
-				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>1. Tes TPA</span>
+				<span>1. Tes TPA &rarr;</span>
 			</a>
-			<span class="text-slate-300">→</span>
 			<a
 				href={currentCandidate ? `/rubrik?candidateId=${currentCandidate.id}` : '/rubrik'}
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium transition"
 			>
-				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>2. Tes Kepesantrenan</span>
+				<span>2. Kepesantrenan &rarr;</span>
 			</a>
-			<span class="text-slate-300">→</span>
-			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-sky-700 text-white font-bold shadow-2xs">
-				<span>3. Wawancara (Aktif)</span>
+			<span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-700 text-white font-bold shadow-2xs">
+				3. Wawancara
 			</span>
 		</div>
 
 		<a
 			href="/ledger"
-			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition ml-auto"
+			class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition ml-auto"
 		>
-			<span>Buka Rekap Nilai</span>
+			<span>Rekap Nilai</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
-	<!-- Top Candidate Roster Bar (Horizontal Scroll) -->
-	<div class="bg-white rounded-2xl p-4 md:p-5 shadow-xs border border-slate-200">
-		<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-			<div>
-				<h2 class="text-xl font-extrabold text-blue-900 tracking-tight flex items-center gap-2">
-					<MessageSquare class="w-6 h-6 text-blue-700" />
-					Wawancara Kualitatif Santri & Orang Tua
-				</h2>
-				<p class="text-xs md:text-sm text-slate-500">
-					26 Butir Wawancara Mendalam • Screening Perilaku & Anti-Bullying • Rekomendasi Sidang Pleno
-				</p>
-			</div>
+	<!-- UNIFIED CANDIDATE NAVIGATOR (Zero Horizontal Scroll • Prev/Next Stepper • Modal Popup Selector) -->
+	<div class="bg-white rounded-2xl p-4 shadow-2xs border border-slate-200">
+		<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+			<!-- Prev Candidate Button -->
+			<button
+				type="button"
+				onclick={goToPrev}
+				disabled={!prevCandidate}
+				class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs shrink-0"
+				title={prevCandidate ? `Santri sebelumnya: ${prevCandidate.fullName}` : 'Santri pertama'}
+			>
+				<ChevronLeft class="w-4 h-4" />
+				<span class="hidden sm:inline">Sebelumnya</span>
+			</button>
 
-			<div class="relative w-full md:w-72">
-				<Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-				<input
-					type="text"
-					bind:value={searchQuery}
-					placeholder="Cari santri..."
-					class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
-				/>
-			</div>
-		</div>
-
-		<!-- Candidate Quick Selector Pills -->
-		<div class="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
-			{#each filteredCandidates as c}
-				{@const active = currentCandidate?.id === c.id}
-				{@const status = c.interview?.completionStatus}
-				<button
-					type="button"
-					onclick={() => selectCandidate(c.id)}
-					class={`shrink-0 px-3.5 py-2.5 rounded-xl text-left border transition-all select-none min-h-[48px] flex items-center gap-3 ${
-						active
-							? 'bg-blue-800 text-white border-blue-800 shadow-md ring-2 ring-blue-500/40'
-							: 'bg-white hover:bg-blue-50/50 border-slate-200 text-slate-700'
-					}`}
-				>
-					<div
-						class={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-							active ? 'bg-blue-700 text-white' : 'bg-blue-100 text-blue-800'
-						}`}
-					>
-						{c.testNumber.slice(-3)}
+			<!-- Center Candidate Identity & Selector Trigger -->
+			{#if currentCandidate}
+				<div class="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left flex-1 justify-center min-w-0">
+					<div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-sm border border-blue-200 shrink-0">
+						{currentCandidate.fullName.substring(0, 2).toUpperCase()}
 					</div>
-					<div class="min-w-0 pr-1">
-						<div class="font-bold text-xs md:text-sm truncate max-w-[130px] md:max-w-[160px]">{c.fullName}</div>
-						<div class={`text-[11px] truncate flex items-center gap-1 ${active ? 'text-blue-200' : 'text-slate-500'}`}>
-							{#if status === 'COMPLETED'}
-								<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-								<span>Selesai</span>
-							{:else if status === 'IN_PROGRESS'}
-								<span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-								<span>Sedang Diisi</span>
+
+					<div class="min-w-0">
+						<div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+							<span class="font-bold text-sm text-slate-900 truncate">{currentCandidate.fullName}</span>
+							<span class="font-mono text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200">
+								{currentCandidate.testNumber}
+							</span>
+							{#if isCompleted}
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+									<CheckCircle2 class="w-3 h-3 text-emerald-600" />
+									<span>Selesai</span>
+								</span>
+							{:else if currentCandidate.interview?.completionStatus === 'IN_PROGRESS'}
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">
+									<Clock class="w-3 h-3 text-blue-600" />
+									<span>Sedang Diisi</span>
+								</span>
 							{:else}
-								<span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-								<span>Belum Dimulai</span>
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold">
+									<span>Belum Dimulai</span>
+								</span>
 							{/if}
 						</div>
+
+						<div class="text-[11px] text-slate-500 flex items-center justify-center sm:justify-start gap-2 mt-0.5 flex-wrap">
+							<span>{currentCandidate.schoolOrigin}</span>
+							<span>&bull;</span>
+							<span class="font-medium text-slate-700">{currentCandidate.majorChoice}</span>
+							<span>&bull;</span>
+							<span class="text-blue-700 font-medium">{currentCandidate.roomAssignment || 'Ruang 1'}</span>
+							<span>&bull;</span>
+							<span class="text-slate-400">Santri <strong class="text-slate-700 font-mono">{currentIndex + 1}</strong> dari {data.candidates.length}</span>
+						</div>
 					</div>
-				</button>
-			{/each}
+
+					<!-- Popup Modal Trigger Button -->
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = true)}
+						class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 transition shrink-0 active:scale-95 ml-0 sm:ml-2"
+					>
+						<Search class="w-3.5 h-3.5" />
+						<span>Pilih Santri</span>
+					</button>
+				</div>
+			{:else}
+				<div class="text-center text-xs text-slate-500">
+					Belum ada santri dipilih.
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = true)}
+						class="text-blue-700 font-bold underline ml-1"
+					>
+						Buka Daftar Santri
+					</button>
+				</div>
+			{/if}
+
+			<!-- Next Candidate Button -->
+			<button
+				type="button"
+				onclick={goToNext}
+				disabled={!nextCandidate}
+				class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition disabled:opacity-30 disabled:pointer-events-none shadow-xs shadow-blue-700/20 shrink-0"
+				title={nextCandidate ? `Santri berikutnya: ${nextCandidate.fullName}` : 'Santri terakhir'}
+			>
+				<span class="hidden sm:inline">Berikutnya</span>
+				<ChevronRight class="w-4 h-4" />
+			</button>
 		</div>
 	</div>
 
@@ -336,12 +461,12 @@
 					{#if isCompleted}
 						<div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
 							<Lock class="w-3.5 h-3.5 text-emerald-600" />
-							<span>DOSSIER SELESAI</span>
+							<span>Selesai</span>
 						</div>
 					{:else}
 						<div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
 							<Unlock class="w-3.5 h-3.5 text-blue-600" />
-							<span>SESI AKTIF</span>
+							<span>Sesi Aktif</span>
 						</div>
 					{/if}
 				</div>
@@ -368,44 +493,57 @@
 
 		<!-- Section Tabs (Tablet Touch Friendly - min 48px) -->
 		<div class="bg-white rounded-2xl p-2 shadow-xs border border-slate-200">
-			<div class="grid grid-cols-3 gap-2">
+			<div class="grid grid-cols-2 md:grid-cols-4 gap-2">
 				<button
 					type="button"
 					onclick={() => (activeTab = 'umum')}
-					class={`py-3 px-4 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
+					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
 						activeTab === 'umum'
 							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
 							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
 					}`}
 				>
 					<User class="w-4 h-4" />
-					<span>1. Wawancara Umum (18 Butir)</span>
+					<span>1. Wawancara Umum</span>
+				</button>
+
+				<button
+					type="button"
+					onclick={() => (activeTab = 'ortu')}
+					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
+						activeTab === 'ortu'
+							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
+							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+					}`}
+				>
+					<Users class="w-4 h-4" />
+					<span>2. Wawancara Orang Tua</span>
 				</button>
 
 				<button
 					type="button"
 					onclick={() => (activeTab = 'pesantren')}
-					class={`py-3 px-4 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
+					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
 						activeTab === 'pesantren'
 							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
 							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
 					}`}
 				>
 					<BookOpen class="w-4 h-4" />
-					<span>2. Kepesantrenan (9 Butir)</span>
+					<span>3. Kepesantrenan</span>
 				</button>
 
 				<button
 					type="button"
 					onclick={() => (activeTab = 'dossier')}
-					class={`py-3 px-4 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
+					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
 						activeTab === 'dossier'
 							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
 							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
 					}`}
 				>
 					<FileText class="w-4 h-4" />
-					<span>3. Dossier & Rekomendasi</span>
+					<span>4. Dossier & Rekomendasi</span>
 				</button>
 			</div>
 		</div>
@@ -470,11 +608,83 @@
 						</div>
 					</div>
 
-					<!-- A.2 Screening Perilaku & Keterampilan Digital -->
+					<!-- A.2 Hasil Tes STIFIn (Mesin Kecerdasan) -->
+					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
+						<div class="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
+							<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2">
+								<span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span>
+								A.2 Hasil Tes STIFIn (Mesin Kecerdasan)
+							</h3>
+							<span class="text-[11px] px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-semibold border border-blue-200">
+								Tipologi Karakter & Gaya Belajar Santri
+							</span>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div class="space-y-1.5">
+								<label for="stifin-category" class="block text-xs font-bold text-slate-700">
+									Mesin Kecerdasan:
+								</label>
+								<select
+									id="stifin-category"
+									disabled={isCompleted}
+									bind:value={fd.stifin_category}
+									class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium"
+								>
+									<option value="">-- Pilih Mesin Kecerdasan --</option>
+									<option value="Sensing">Sensing (Memori & Fisik)</option>
+									<option value="Thinking">Thinking (Logika & Struktur)</option>
+									<option value="Intuiting">Intuiting (Kreativitas & Konsep)</option>
+									<option value="Feeling">Feeling (Emosi & Hubungan)</option>
+									<option value="Instinct">Instinct (Spontanitas & Naluri)</option>
+								</select>
+							</div>
+
+							<div class="space-y-1.5">
+								<label for="stifin-type" class="block text-xs font-bold text-slate-700">
+									Tipe Karakter / Personality:
+								</label>
+								<select
+									id="stifin-type"
+									disabled={isCompleted}
+									bind:value={fd.stifin_type}
+									class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium"
+								>
+									<option value="">-- Pilih Tipe Karakter --</option>
+									<option value="Si">Si - Sensing Introvert (Rajin, Ulet, Teliti)</option>
+									<option value="Se">Se - Sensing Extrovert (Petualang, Aksi Nyata)</option>
+									<option value="Ti">Ti - Thinking Introvert (Analitis, Mandiri, Ahli)</option>
+									<option value="Te">Te - Thinking Extrovert (Manajerial, Berwibawa)</option>
+									<option value="Ii">Ii - Intuiting Introvert (Penggagas, Inovatif)</option>
+									<option value="Ie">Ie - Intuiting Extrovert (Kreatif, Percaya Diri)</option>
+									<option value="Fi">Fi - Feeling Introvert (Pemimpin Kharismatik, Empatis)</option>
+									<option value="Fe">Fe - Feeling Extrovert (Komunikator, Bersahabat)</option>
+									<option value="In">In - Instinct (Serba Bisa, Respons Cepat, Rela Berkorban)</option>
+									<option value="Belum Tes">Belum Mengikuti Tes STIFIn</option>
+								</select>
+							</div>
+
+							<div class="space-y-1.5 md:col-span-2">
+								<label for="stifin-notes" class="block text-xs font-bold text-slate-700">
+									Catatan Hasil Tes STIFIn / Gaya Belajar:
+								</label>
+								<input
+									type="text"
+									id="stifin-notes"
+									disabled={isCompleted}
+									bind:value={fd.stifin_notes}
+									placeholder="Contoh: Belajar optimal dengan stimulus visual, butuh target terukur..."
+									class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
+								/>
+							</div>
+						</div>
+					</div>
+
+					<!-- A.3 Screening Perilaku & Keterampilan Digital -->
 					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
 						<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2 border-b border-slate-100 pb-3">
 							<span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span>
-							A.2 Screening Perilaku & Keterampilan Digital
+							A.3 Screening Perilaku & Keterampilan Digital
 						</h3>
 
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -868,7 +1078,161 @@
 				</div>
 			{/if}
 
-			<!-- TAB 2: WAWANCARA KEPESANTRENAN -->
+			<!-- TAB 2: WAWANCARA ORANG TUA -->
+			{#if activeTab === 'ortu'}
+				<div class="space-y-6">
+					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-5">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+							<div>
+								<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2">
+									<Users class="w-5 h-5 text-blue-700" />
+									Wawancara Orang Tua / Wali
+								</h3>
+								<p class="text-xs text-slate-500 mt-0.5">
+									Pertanyaan dan jawaban bebas diisi serta dapat ditambah atau diedit bebas oleh penguji/admin.
+								</p>
+							</div>
+
+							{#if !isCompleted}
+								<button
+									type="button"
+									onclick={() => addParentQuestion()}
+									class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition shadow-xs shadow-blue-700/20 shrink-0 self-start sm:self-auto"
+								>
+									<Plus class="w-4 h-4" />
+									<span>Tambah Pertanyaan</span>
+								</button>
+							{/if}
+						</div>
+
+						<!-- Quick Template Chips (untuk kemudahan admin) -->
+						{#if !isCompleted}
+							<div class="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 space-y-2">
+								<span class="text-[11px] font-bold text-blue-900 block">Templat Pertanyaan Cepat (Klik untuk menambah):</span>
+								<div class="flex flex-wrap gap-2">
+									<button
+										type="button"
+										onclick={() => addParentQuestion('Bagaimana komitmen pembiayaan SPP, uang pangkal, dan kebutuhan santri selama masa studi?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Komitmen Pembiayaan
+									</button>
+									<button
+										type="button"
+										onclick={() => addParentQuestion('Bagaimana kesiapan orang tua mendukung disiplin asrama dan mematuhi jadwal kunjungan (tidak sering menjenguk)?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Kepatuhan Disiplin & Kunjungan
+									</button>
+									<button
+										type="button"
+										onclick={() => addParentQuestion('Apakah ananda memiliki riwayat trauma psikologis, alergi khusus, atau penyakit kronis yang perlu pantauan khusus?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Riwayat Kesehatan & Alergi
+									</button>
+									<button
+										type="button"
+										onclick={() => addParentQuestion('Bagaimana pola asuh dan komunikasi antara orang tua dengan ananda selama di rumah?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Pola Asuh di Rumah
+									</button>
+									<button
+										type="button"
+										onclick={() => addParentQuestion('Apa harapan terbesar orang tua terhadap perkembangan akhlak dan akademik ananda setelah masuk pondok?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Harapan untuk Santri
+									</button>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Daftar Pertanyaan & Jawaban Bebas -->
+						<div class="space-y-4 pt-1">
+							{#if !fd.parent_qa || fd.parent_qa.length === 0}
+								<div class="py-10 text-center text-slate-400 bg-slate-50/60 rounded-xl border border-dashed border-slate-200">
+									<Users class="w-8 h-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
+									<p class="text-xs font-semibold text-slate-600">Belum ada butir pertanyaan wawancara orang tua</p>
+									<p class="text-[11px] text-slate-400 mt-1">Klik tombol "+ Tambah Pertanyaan" atau pilih templat cepat di atas.</p>
+								</div>
+							{:else}
+								{#each fd.parent_qa as qa, idx}
+									<div class="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-3">
+										<div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+											<div class="flex items-center gap-2">
+												<span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 text-xs font-bold flex items-center justify-center font-mono">
+													{idx + 1}
+												</span>
+												<span class="text-xs font-bold text-slate-700">Pertanyaan #{idx + 1}</span>
+											</div>
+
+											{#if !isCompleted}
+												<button
+													type="button"
+													onclick={() => removeParentQuestion(idx)}
+													class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+													title="Hapus pertanyaan ini"
+												>
+													<Trash2 class="w-4 h-4" />
+												</button>
+											{/if}
+										</div>
+
+										<div class="space-y-2.5">
+											<div>
+												<label for={`qa-q-${idx}`} class="block text-[11px] font-semibold text-slate-600 mb-1">
+													Teks Pertanyaan:
+												</label>
+												<input
+													id={`qa-q-${idx}`}
+													type="text"
+													disabled={isCompleted}
+													bind:value={qa.question}
+													placeholder="Ketik pertanyaan untuk orang tua/wali..."
+													class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium"
+												/>
+											</div>
+
+											<div>
+												<label for={`qa-a-${idx}`} class="block text-[11px] font-semibold text-slate-600 mb-1">
+													Jawaban / Catatan Respons Orang Tua:
+												</label>
+												<textarea
+													id={`qa-a-${idx}`}
+													disabled={isCompleted}
+													bind:value={qa.answer}
+													rows="3"
+													placeholder="Ketik ringkasan jawaban orang tua/wali..."
+													class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
+												></textarea>
+											</div>
+										</div>
+									</div>
+								{/each}
+							{/if}
+						</div>
+
+						<!-- Ringkasan Kesediaan & Komitmen Orang Tua -->
+						<div class="pt-4 border-t border-slate-100 space-y-2">
+							<label for="parent-commitment-summary" class="block text-xs font-bold text-slate-800">
+								Kesimpulan Komitmen & Catatan Khusus Orang Tua:
+							</label>
+							<textarea
+								id="parent-commitment-summary"
+								disabled={isCompleted}
+								bind:value={parentCommitmentSummary}
+								rows="3"
+								class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
+								placeholder="Catatan ringkas pewawancara mengenai kesiapan wali santri (finansial, mental mendukung pesantren, dll)..."
+							></textarea>
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			<!-- TAB 3: WAWANCARA KEPESANTRENAN -->
 			{#if activeTab === 'pesantren'}
 				<div class="space-y-6">
 					<!-- B.1 Capaian Riil -->
@@ -1024,7 +1388,7 @@
 				</div>
 			{/if}
 
-			<!-- TAB 3: DOSSIER & REKOMENDASI -->
+			<!-- TAB 4: DOSSIER & REKOMENDASI -->
 			{#if activeTab === 'dossier'}
 				<div class="space-y-6">
 					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-5">
@@ -1037,6 +1401,44 @@
 								<p class="text-xs text-slate-500">
 									Catatan kualitatif penguji untuk pertimbangan Dewan Penguji pada Sidang Pleno Kelulusan
 								</p>
+							</div>
+						</div>
+
+						<!-- Glanceable STIFIn & Ortu Status Summary -->
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+							<div class="space-y-1">
+								<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Hasil Tes STIFIn</span>
+								<div class="flex items-center gap-2">
+									{#if fd.stifin_category || fd.stifin_type}
+										<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 text-xs font-bold font-mono">
+											<span>{fd.stifin_category || 'STIFIn'}</span>
+											{#if fd.stifin_type}
+												<span class="px-1.5 py-0.2 rounded bg-blue-200 text-blue-900 font-extrabold">{fd.stifin_type}</span>
+											{/if}
+										</span>
+									{:else}
+										<span class="text-xs text-slate-400 italic">Belum diisi di Wawancara Umum</span>
+									{/if}
+								</div>
+								{#if fd.stifin_notes}
+									<p class="text-[11px] text-slate-600 truncate">{fd.stifin_notes}</p>
+								{/if}
+							</div>
+
+							<div class="space-y-1">
+								<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Status Wawancara Orang Tua</span>
+								<div>
+									{#if fd.parent_qa && fd.parent_qa.length > 0}
+										<span class="text-xs font-semibold text-slate-700">
+											{fd.parent_qa.filter((q: any) => q.answer && q.answer.trim()).length} dari {fd.parent_qa.length} butir terisi
+										</span>
+									{:else}
+										<span class="text-xs text-slate-400 italic">Belum ada butir pertanyaan</span>
+									{/if}
+								</div>
+								{#if parentCommitmentSummary}
+									<p class="text-[11px] text-slate-600 truncate">{parentCommitmentSummary}</p>
+								{/if}
 							</div>
 						</div>
 
@@ -1226,6 +1628,171 @@
 			<AlertCircle class="w-12 h-12 text-slate-400 mx-auto mb-3" />
 			<h3 class="font-bold text-slate-800 text-lg">Tidak Ada Data Peserta</h3>
 			<p class="text-xs text-slate-500 mt-1">Belum ada peserta seleksi aktif yang terdaftar di sistem.</p>
+		</div>
+	{/if}
+
+	<!-- MODAL POPUP PEMILIHAN SANTRI (DENGAN FILTER STATUS, RUANGAN, JURUSAN) -->
+	{#if showCandidateModal}
+		<div
+			class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+			tabindex="-1"
+			role="dialog"
+			aria-modal="true"
+		>
+			<div class="bg-white rounded-3xl max-w-2xl w-full p-5 md:p-6 shadow-2xl border border-slate-200 space-y-4 relative max-h-[88vh] flex flex-col">
+				<!-- Header Modal -->
+				<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+					<div class="flex items-center gap-2.5">
+						<div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
+							<Users class="w-4 h-4" />
+						</div>
+						<div>
+							<h3 class="text-base font-bold text-slate-900">Pilih Santri Wawancara</h3>
+							<p class="text-xs text-slate-500">Pilih santri untuk membuka lembar wawancara</p>
+						</div>
+					</div>
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = false)}
+						class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+					>
+						<X class="w-5 h-5" />
+					</button>
+				</div>
+
+				<!-- Filter Toolbar di dalam Modal -->
+				<div class="space-y-2.5">
+					<!-- Search Input -->
+					<div class="relative">
+						<Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+						<input
+							type="text"
+							bind:value={modalSearch}
+							placeholder="Cari nama santri, no tes, asal sekolah..."
+							class="w-full pl-9 pr-3 py-2 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
+						/>
+					</div>
+
+					<!-- Filters: Status, Ruangan, Jurusan -->
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+						<!-- Filter Status -->
+						<div>
+							<label for="filter-status-wawancara" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Status Wawancara</label>
+							<select
+								id="filter-status-wawancara"
+								bind:value={modalFilterStatus}
+								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+							>
+								<option value="ALL">Semua Status</option>
+								<option value="UNSCORED">Belum Dimulai</option>
+								<option value="DRAFT">Sedang Diisi</option>
+								<option value="LOCKED">Selesai (Terkunci)</option>
+							</select>
+						</div>
+
+						<!-- Filter Ruangan -->
+						<div>
+							<label for="filter-room-wawancara" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Ruang Ujian</label>
+							<select
+								id="filter-room-wawancara"
+								bind:value={modalFilterRoom}
+								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+							>
+								<option value="ALL">Semua Ruangan</option>
+								{#each availableRooms as r}
+									<option value={r}>{r}</option>
+								{/each}
+							</select>
+						</div>
+
+						<!-- Filter Jurusan -->
+						<div>
+							<label for="filter-major-wawancara" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Jurusan</label>
+							<select
+								id="filter-major-wawancara"
+								bind:value={modalFilterMajor}
+								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+							>
+								<option value="ALL">Semua Jurusan</option>
+								{#each availableMajors as m}
+									<option value={m}>{m}</option>
+								{/each}
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- Candidate List (Vertikal Scroll) -->
+				<div class="overflow-y-auto space-y-1.5 flex-1 pr-1 border-t border-slate-100 pt-2">
+					{#if modalFilteredCandidates.length === 0}
+						<div class="py-10 text-center text-slate-400">
+							<Users class="w-8 h-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
+							<p class="text-xs font-semibold text-slate-600">Tidak ada santri yang sesuai filter</p>
+						</div>
+					{:else}
+						{#each modalFilteredCandidates as c}
+							{@const isCurrent = currentCandidate?.id === c.id}
+							{@const status = c.interview?.completionStatus}
+
+							<button
+								type="button"
+								onclick={() => selectCandidate(c.id)}
+								class={`w-full p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-3 ${
+									isCurrent
+										? 'bg-blue-50/80 border-blue-400 ring-2 ring-blue-500/20'
+										: 'bg-white hover:bg-slate-50 border-slate-200'
+								}`}
+							>
+								<div class="flex items-center gap-2.5 min-w-0">
+									<span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+										{c.testNumber.slice(-3)}
+									</span>
+									<div class="min-w-0">
+										<div class="flex items-center gap-2">
+											<span class="font-bold text-xs text-slate-900 truncate">{c.fullName}</span>
+											{#if isCurrent}
+												<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-700 text-white">Sedang Wawancara</span>
+											{/if}
+										</div>
+										<div class="text-[11px] text-slate-400 truncate">
+											<span>{c.schoolOrigin}</span> &bull; <span>{c.majorChoice}</span> &bull; <span class="text-slate-600">{c.roomAssignment || 'Ruang 1'}</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="shrink-0 text-right">
+									{#if status === 'COMPLETED'}
+										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+											<CheckCircle2 class="w-2.5 h-2.5 text-emerald-600" />
+											<span>Selesai</span>
+										</span>
+									{:else if status === 'IN_PROGRESS'}
+										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+											<span>Sedang Diisi</span>
+										</span>
+									{:else}
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500">
+											Belum Dimulai
+										</span>
+									{/if}
+								</div>
+							</button>
+						{/each}
+					{/if}
+				</div>
+
+				<!-- Modal Footer -->
+				<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+					<span>Ditemukan <strong class="text-slate-800 font-mono">{modalFilteredCandidates.length}</strong> dari {data.candidates.length} santri</span>
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = false)}
+						class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+					>
+						Tutup
+					</button>
+				</div>
+			</div>
 		</div>
 	{/if}
 </div>
