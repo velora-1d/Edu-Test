@@ -67,41 +67,34 @@
 		},
 	];
 
-	const pageMeta: Record<string, { title: string; category: string; description: string }> = {
+	const pageMeta: Record<string, { title: string; category: string }> = {
 		"/": {
 			title: "Dashboard Seleksi",
 			category: "Admisi",
-			description: "Ringkasan statistik calon santri, kuota jurusan & progres ujian",
 		},
 		"/peserta": {
 			title: "Data Calon Santri",
 			category: "Admisi",
-			description: "Kelola pendaftaran peserta, alokasi ruang ujian & master jurusan",
 		},
 		"/tpa": {
 			title: "1. Tes Potensi Akademik (TPA)",
 			category: "Penilaian Seleksi",
-			description: "Pemeriksaan skor TPA & passing grade akademik santri",
 		},
 		"/rubrik": {
 			title: "2. Tes Kepesantrenan",
 			category: "Penilaian Seleksi",
-			description: "Penilaian terperinci 7 bidang kepesantrenan (Tahsin, Kitab, dll)",
 		},
 		"/wawancara": {
 			title: "3. Tes Wawancara",
 			category: "Penilaian Seleksi",
-			description: "Eksplorasi kesiapan santri & wali, komitmen, serta catatan dossier",
 		},
 		"/ledger": {
 			title: "Rekap Nilai & Simulasi Kuota",
 			category: "Hasil & Kelulusan",
-			description: "Peringkat gabungan 50% TPA + 50% Kepesantrenan & cut-off kuota",
 		},
 		"/pleno": {
 			title: "Sidang Yudisium Pleno",
 			category: "Hasil & Kelulusan",
-			description: "Keputusan final kelulusan, override diskresi & berita acara",
 		},
 	};
 
@@ -110,12 +103,10 @@
 			? {
 					title: "Kelola Master Jurusan & Ruang",
 					category: "Master Data",
-					description: "Pengaturan dinamis jurusan pilihan dan daftar alokasi ruang ujian",
 			  }
 			: pageMeta[page.url.pathname] || {
 					title: "Edu-Test Seleksi PPDB",
 					category: "PPDB Santri",
-					description: "Sistem Seleksi Terpadu Calon Santri Baru",
 			  }
 	);
 
@@ -286,40 +277,23 @@
 				</div>
 			</div>
 
-			<!-- Right Header Actions -->
-			<div class="flex items-center gap-2 shrink-0">
+			<!-- Right Header Actions (Clean, Glanceable) -->
+			<div class="flex items-center gap-2.5 shrink-0">
 				<!-- Active Gelombang Pill -->
-				<div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50/80 border border-blue-200/60 text-xs text-blue-900 font-medium">
+				<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200/70 text-xs text-blue-900 font-semibold shadow-2xs">
 					<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-					<span class="text-[11px] font-semibold">Gelombang 1</span>
+					<span class="text-[11px]">Gelombang 1</span>
 				</div>
 
-				<!-- Direct Quick Links -->
 				<a
 					href="/ledger"
-					class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition shadow-2xs"
+					class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition shadow-2xs"
 				>
 					<FileSpreadsheet class="w-3.5 h-3.5 text-blue-600" />
-					<span>Rekap Nilai</span>
-				</a>
-
-				<a
-					href="/peserta"
-					class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs shadow-blue-600/20"
-				>
-					<Users class="w-3.5 h-3.5" />
-					<span class="hidden sm:inline">Data Santri</span>
+					<span class="hidden sm:inline">Rekap Nilai</span>
 				</a>
 			</div>
 		</header>
-
-		<!-- Subheader description bar for context clarity -->
-		<div class="bg-white/60 border-b border-slate-200/60 px-4 sm:px-6 py-2 hidden md:block">
-			<p class="text-xs text-slate-500 flex items-center gap-2 font-medium">
-				<span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-				<span>{currentRoute.description}</span>
-			</p>
-		</div>
 
 		<!-- Page Content Inset -->
 		<main class="flex-1 p-4 sm:p-6 lg:p-8 w-full">
@@ -327,12 +301,12 @@
 		</main>
 
 		<!-- Modern Minimal Footer -->
-		<footer class="border-t border-slate-200/80 bg-white py-3.5 px-6 text-center text-xs text-slate-500">
-			<div class="flex flex-col sm:flex-row items-center justify-between gap-2 w-full">
-				<span>Edu-Test &copy; 2026/2027 • Sistem Seleksi Terpadu Calon Santri Baru</span>
-				<div class="flex items-center gap-3 text-[11px] text-slate-400">
+		<footer class="border-t border-slate-200/80 bg-white py-3 px-6 text-xs text-slate-500">
+			<div class="flex flex-col sm:flex-row items-center justify-between gap-2 w-full text-[11px]">
+				<span class="font-medium text-slate-600">Edu-Test &bull; Sistem Seleksi Terpadu Calon Santri Baru</span>
+				<div class="flex items-center gap-2 text-slate-400">
 					<span>Neon PostgreSQL Singapore</span>
-					<span>•</span>
+					<span>&bull;</span>
 					<span>shadcn-svelte</span>
 				</div>
 			</div>

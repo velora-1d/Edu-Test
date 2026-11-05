@@ -171,48 +171,45 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<!-- Sequential Selection Workflow Banner -->
-	<div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-		<div class="flex items-center gap-2 flex-wrap">
+	<!-- Top Navigation Workflow Bar (Clean & Compact) -->
+	<div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs text-xs">
+		<div class="flex items-center gap-1.5 flex-wrap">
 			<a
 				href="/peserta"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Data Calon Santri</span>
+				<span>Data Santri</span>
 			</a>
 			<span class="text-slate-300">/</span>
 			<a
 				href="/tpa"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition"
 			>
-				<span>1. TPA</span>
+				<span>1. TPA &rarr;</span>
 			</a>
-			<span class="text-slate-300">/</span>
 			<a
 				href="/rubrik"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 font-medium transition"
 			>
-				<span>2. Kepesantrenan</span>
+				<span>2. Kepesantrenan &rarr;</span>
 			</a>
-			<span class="text-slate-300">/</span>
 			<a
 				href="/wawancara"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sky-800 hover:bg-sky-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition"
 			>
-				<span>3. Wawancara</span>
+				<span>3. Wawancara &rarr;</span>
 			</a>
-			<span class="text-slate-300">→</span>
-			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-700 text-white font-bold shadow-2xs">
-				<span>Rekap Nilai (Aktif)</span>
+			<span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-700 text-white font-bold shadow-2xs">
+				Rekap Nilai
 			</span>
 		</div>
 
 		<a
 			href="/pleno"
-			class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold transition ml-auto shadow-xs"
+			class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold transition ml-auto shadow-xs shadow-blue-700/20"
 		>
-			<span>Sidang Pleno & Penetapan Kuota</span>
+			<span>Sidang Pleno</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
@@ -332,7 +329,7 @@
 					</span>
 				</div>
 				<p class="text-xs text-slate-500 mt-1">
-					Geser kuota untuk melihat simulasi garis batas kelulusan. Santri peringkat 1 s/d {quotaInput} berstatus <strong>LULUS</strong>, peringkat seterusnya berstatus <strong>WAITING LIST GELOMBANG BERIKUTNYA</strong>.
+					Geser kuota untuk melihat simulasi garis batas kelulusan. Santri peringkat 1 s/d {quotaInput} berstatus <strong>LULUS</strong>, peringkat seterusnya berstatus <strong>Cadangan / Waiting List</strong>.
 				</p>
 			</div>
 

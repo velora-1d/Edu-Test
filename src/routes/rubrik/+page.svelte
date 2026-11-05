@@ -21,13 +21,27 @@
 		Layers,
 		ArrowLeft,
 		ArrowRight,
-		Sparkles
+		Sparkles,
+		ChevronLeft,
+		ChevronRight,
+		X,
+		Users,
+		Building2,
+		GraduationCap
 	} from "lucide-svelte";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let searchQuery = $state("");
 	let showLockModal = $state(false);
+	let showCandidateModal = $state(false);
+
+	// Modal Filters
+	let modalSearch = $state("");
+	let modalFilterStatus = $state<"ALL" | "UNSCORED" | "DRAFT" | "LOCKED">("ALL");
+	let modalFilterRoom = $state("ALL");
+	let modalFilterMajor = $state("ALL");
+
 	let activeTab = $state<
 		"tahsin" | "kitab" | "inggris" | "arab" | "hadits" | "adzan" | "sholat"
 	>("tahsin");
@@ -193,7 +207,57 @@
 	);
 
 	function selectCandidate(id: string) {
+		showCandidateModal = false;
 		goto(`/rubrik?candidateId=${id}`, { reset: false });
+	}
+
+	let currentIndex = $derived(
+		currentCandidate ? data.candidates.findIndex((c) => c.id === currentCandidate.id) : -1
+	);
+	let prevCandidate = $derived(
+		currentIndex > 0 ? data.candidates[currentIndex - 1] : null
+	);
+	let nextCandidate = $derived(
+		currentIndex >= 0 && currentIndex < data.candidates.length - 1
+			? data.candidates[currentIndex + 1]
+			: null
+	);
+
+	const availableRooms = $derived(
+		Array.from(new Set(data.candidates.map((c) => c.roomAssignment).filter(Boolean))) as string[]
+	);
+	const availableMajors = $derived(
+		Array.from(new Set(data.candidates.map((c) => c.majorChoice).filter(Boolean))) as string[]
+	);
+
+	const modalFilteredCandidates = $derived(
+		data.candidates.filter((c) => {
+			const query = modalSearch.toLowerCase().trim();
+			const matchSearch =
+				!query ||
+				c.fullName.toLowerCase().includes(query) ||
+				c.testNumber.toLowerCase().includes(query) ||
+				c.schoolOrigin.toLowerCase().includes(query);
+
+			const lockStatus = c.pesantrenScore?.lockStatus;
+			let matchStatus = true;
+			if (modalFilterStatus === "LOCKED") matchStatus = lockStatus === "LOCKED";
+			else if (modalFilterStatus === "DRAFT") matchStatus = lockStatus === "DRAFT";
+			else if (modalFilterStatus === "UNSCORED") matchStatus = !lockStatus;
+
+			const matchRoom = modalFilterRoom === "ALL" || c.roomAssignment === modalFilterRoom;
+			const matchMajor = modalFilterMajor === "ALL" || c.majorChoice === modalFilterMajor;
+
+			return matchSearch && matchStatus && matchRoom && matchMajor;
+		})
+	);
+
+	function goToPrev() {
+		if (prevCandidate) selectCandidate(prevCandidate.id);
+	}
+
+	function goToNext() {
+		if (nextCandidate) selectCandidate(nextCandidate.id);
 	}
 
 	const tabs = [
@@ -250,140 +314,144 @@
 </script>
 
 <div class="w-full space-y-6">
-	<!-- Sequential Selection Workflow Banner -->
-	<div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-		<div class="flex items-center gap-2 flex-wrap">
+	<!-- Top Navigation Workflow Bar (Clean & Compact) -->
+	<div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs text-xs">
+		<div class="flex items-center gap-1.5 flex-wrap">
 			<a
 				href="/peserta"
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition"
 			>
 				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>Data Calon Santri</span>
+				<span>Data Santri</span>
 			</a>
 			<span class="text-slate-300">/</span>
 			<a
 				href={currentCandidate ? `/tpa?candidateId=${currentCandidate.id}` : '/tpa'}
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition"
 			>
-				<ArrowLeft class="w-3.5 h-3.5" />
-				<span>1. Tes TPA</span>
+				<span>1. Tes TPA &rarr;</span>
 			</a>
-			<span class="text-slate-300">→</span>
-			<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-700 text-white font-bold shadow-2xs">
-				<span>2. Tes Kepesantrenan (Aktif)</span>
+			<span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-700 text-white font-bold shadow-2xs">
+				2. Kepesantrenan
 			</span>
-			<span class="text-slate-300">→</span>
 			<a
 				href={currentCandidate ? `/wawancara?candidateId=${currentCandidate.id}` : '/wawancara'}
-				class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-sky-200 text-sky-800 hover:bg-sky-50 font-semibold transition"
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 font-medium transition"
 			>
-				<span>3. Wawancara</span>
-				<ArrowRight class="w-3.5 h-3.5" />
+				<span>3. Wawancara &rarr;</span>
 			</a>
 		</div>
 
 		<a
 			href="/ledger"
-			class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 hover:bg-indigo-50 font-semibold transition ml-auto"
+			class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold transition ml-auto"
 		>
-			<span>Buka Rekap Nilai</span>
+			<span>Rekap Nilai</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
-	<!-- Top Candidate Roster Bar (Horizontal Scroll) -->
-	<div
-		class="bg-white rounded-2xl p-4 md:p-5 shadow-xs border border-slate-200"
-	>
-		<div
-			class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4"
-		>
-			<div>
-				<h2
-					class="text-xl font-extrabold text-blue-900 tracking-tight flex items-center gap-2"
-				>
-					<ScrollText class="w-6 h-6 text-blue-700" />
-					Penilaian Tes Kepesantrenan
-				</h2>
-				<p class="text-xs md:text-sm text-slate-500">
-					7 Bidang Uji Praktik • Skala Sentuh 1-4 • Standar Kelulusan
-					Passing Grade
-				</p>
-			</div>
+	<!-- UNIFIED CANDIDATE NAVIGATOR (Zero Horizontal Scroll • Prev/Next Stepper • Modal Popup Selector) -->
+	<div class="bg-white rounded-2xl p-4 shadow-2xs border border-slate-200">
+		<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+			<!-- Prev Candidate Button -->
+			<button
+				type="button"
+				onclick={goToPrev}
+				disabled={!prevCandidate}
+				class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs shrink-0"
+				title={prevCandidate ? `Santri sebelumnya: ${prevCandidate.fullName}` : 'Santri pertama'}
+			>
+				<ChevronLeft class="w-4 h-4" />
+				<span class="hidden sm:inline">Sebelumnya</span>
+			</button>
 
-			<div class="relative w-full md:w-72">
-				<Search
-					class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
-				/>
-				<input
-					type="text"
-					bind:value={searchQuery}
-					placeholder="Cari santri antrean..."
-					class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
-				/>
-			</div>
-		</div>
-
-		<!-- Candidate Quick Selector Pills -->
-		<div
-			class="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-thin"
-		>
-			{#each filteredCandidates as c}
-				{@const active = currentCandidate?.id === c.id}
-				{@const scoreLocked = c.pesantrenScore?.lockStatus === "LOCKED"}
-				{@const scoreDraft = c.pesantrenScore?.lockStatus === "DRAFT"}
-				<button
-					type="button"
-					onclick={() => selectCandidate(c.id)}
-					class={`shrink-0 px-3.5 py-2.5 rounded-xl text-left border transition-all select-none min-h-[48px] flex items-center gap-3 ${
-						active
-							? "bg-blue-800 text-white border-blue-800 shadow-md ring-2 ring-blue-500/40"
-							: "bg-white hover:bg-blue-50/50 border-slate-200 text-slate-700"
-					}`}
-				>
-					<div
-						class={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-							active
-								? "bg-blue-700 text-white"
-								: "bg-blue-100 text-blue-800"
-						}`}
-					>
-						{c.testNumber.slice(-3)}
+			<!-- Center Candidate Identity & Selector Trigger -->
+			{#if currentCandidate}
+				<div class="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left flex-1 justify-center min-w-0">
+					<div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm border border-emerald-200 shrink-0">
+						{currentCandidate.fullName.substring(0, 2).toUpperCase()}
 					</div>
-					<div class="min-w-0 pr-1">
-						<div
-							class="font-bold text-xs md:text-sm truncate max-w-[130px] md:max-w-[160px]"
-						>
-							{c.fullName}
-						</div>
-						<div
-							class={`text-[11px] truncate flex items-center gap-1 ${active ? "text-blue-200" : "text-slate-500"}`}
-						>
-							{#if scoreLocked}
-								<span
-									class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"
-								></span>
-								<span
-									>Terkunci ({c.pesantrenScore
-										?.averageScore})</span
-								>
-							{:else if scoreDraft}
-								<span
-									class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"
-								></span>
-								<span
-									>Draf ({c.pesantrenScore
-										?.averageScore})</span
-								>
+
+					<div class="min-w-0">
+						<div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+							<span class="font-bold text-sm text-slate-900 truncate">{currentCandidate.fullName}</span>
+							<span class="font-mono text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200">
+								{currentCandidate.testNumber}
+							</span>
+							{#if isLocked}
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+									<Lock class="w-3 h-3 text-emerald-600" />
+									<span>Nilai Terkunci</span>
+								</span>
+							{:else if currentCandidate.pesantrenScore?.lockStatus === 'DRAFT'}
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
+									<Unlock class="w-3 h-3 text-amber-600" />
+									<span>Mode Draf</span>
+								</span>
 							{:else}
-								<span
-									class="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"
-								></span>
-								<span>Antrean</span>
+								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold">
+									<span>Belum Dinilai</span>
+								</span>
 							{/if}
 						</div>
+
+						<div class="text-[11px] text-slate-500 flex items-center justify-center sm:justify-start gap-2 mt-0.5 flex-wrap">
+							<span>{currentCandidate.schoolOrigin}</span>
+							<span>&bull;</span>
+							<span class="font-medium text-slate-700">{currentCandidate.majorChoice}</span>
+							<span>&bull;</span>
+							<span class="text-blue-700 font-medium">{currentCandidate.roomAssignment || 'Ruang 1'}</span>
+							<span>&bull;</span>
+							<span class="text-slate-400">Santri <strong class="text-slate-700 font-mono">{currentIndex + 1}</strong> dari {data.candidates.length}</span>
+						</div>
 					</div>
-				</button>
-			{/each}
+
+					<!-- Popup Modal Trigger Button -->
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = true)}
+						class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 transition shrink-0 active:scale-95 ml-0 sm:ml-2"
+					>
+						<Search class="w-3.5 h-3.5" />
+						<span>Pilih Santri</span>
+					</button>
+
+					{#if isLocked}
+						<form method="POST" action="?/unlockScore" class="shrink-0">
+							<input type="hidden" name="candidateId" value={currentCandidate.id} />
+							<button
+								type="submit"
+								class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium transition shadow-2xs"
+							>
+								Buka Kunci
+							</button>
+						</form>
+					{/if}
+				</div>
+			{:else}
+				<div class="text-center text-xs text-slate-500">
+					Belum ada santri dipilih.
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = true)}
+						class="text-blue-700 font-bold underline ml-1"
+					>
+						Buka Daftar Santri
+					</button>
+				</div>
+			{/if}
+
+			<!-- Next Candidate Button -->
+			<button
+				type="button"
+				onclick={goToNext}
+				disabled={!nextCandidate}
+				class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition disabled:opacity-30 disabled:pointer-events-none shadow-xs shadow-blue-700/20 shrink-0"
+				title={nextCandidate ? `Santri berikutnya: ${nextCandidate.fullName}` : 'Santri terakhir'}
+			>
+				<span class="hidden sm:inline">Berikutnya</span>
+				<ChevronRight class="w-4 h-4" />
+			</button>
 		</div>
 	</div>
 
@@ -457,7 +525,7 @@
 									<Lock
 										class="w-3.5 h-3.5 text-emerald-600"
 									/>
-									<span>NILAI KEPESANTRENAN TERKUNCI</span>
+									<span>Nilai Terkunci</span>
 								</div>
 							{:else}
 								<div
@@ -466,7 +534,7 @@
 									<Unlock
 										class="w-3.5 h-3.5 text-amber-600"
 									/>
-									<span>DRAF PENILAIAN</span>
+									<span>Mode Draf</span>
 								</div>
 							{/if}
 						</div>
@@ -2788,7 +2856,173 @@
 			</h3>
 			<p class="text-xs text-slate-500 mt-1">
 				Belum ada antrean santri aktif yang terdaftar.
-			</p>
+				</p>
+			</div>
+		{/if}
+
+	<!-- MODAL POPUP PEMILIHAN SANTRI (DENGAN FILTER STATUS, RUANGAN, JURUSAN) -->
+	{#if showCandidateModal}
+		<div
+			class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+			tabindex="-1"
+			role="dialog"
+			aria-modal="true"
+		>
+			<div class="bg-white rounded-3xl max-w-2xl w-full p-5 md:p-6 shadow-2xl border border-slate-200 space-y-4 relative max-h-[88vh] flex flex-col">
+				<!-- Header Modal -->
+				<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+					<div class="flex items-center gap-2.5">
+						<div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+							<Users class="w-4 h-4" />
+						</div>
+						<div>
+							<h3 class="text-base font-bold text-slate-900">Pilih Santri Ujian Kepesantrenan</h3>
+							<p class="text-xs text-slate-500">Pilih santri untuk membuka lembar penilaian</p>
+						</div>
+					</div>
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = false)}
+						class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+					>
+						<X class="w-5 h-5" />
+					</button>
+				</div>
+
+				<!-- Filter Toolbar di dalam Modal -->
+				<div class="space-y-2.5">
+					<!-- Search Input -->
+					<div class="relative">
+						<Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+						<input
+							type="text"
+							bind:value={modalSearch}
+							placeholder="Cari nama santri, no tes, asal sekolah..."
+							class="w-full pl-9 pr-3 py-2 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
+						/>
+					</div>
+
+					<!-- Filters: Status, Ruangan, Jurusan -->
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+						<!-- Filter Status -->
+						<div>
+							<label for="filter-status-rubrik" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Status Nilai</label>
+							<select
+								id="filter-status-rubrik"
+								bind:value={modalFilterStatus}
+								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+							>
+								<option value="ALL">Semua Status</option>
+								<option value="UNSCORED">Belum Dinilai</option>
+								<option value="DRAFT">Mode Draf</option>
+								<option value="LOCKED">Nilai Terkunci</option>
+							</select>
+						</div>
+
+						<!-- Filter Ruangan -->
+						<div>
+							<label for="filter-room-rubrik" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Ruang Ujian</label>
+							<select
+								id="filter-room-rubrik"
+								bind:value={modalFilterRoom}
+								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+							>
+								<option value="ALL">Semua Ruangan</option>
+								{#each availableRooms as r}
+									<option value={r}>{r}</option>
+								{/each}
+							</select>
+						</div>
+
+						<!-- Filter Jurusan -->
+						<div>
+							<label for="filter-major-rubrik" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Jurusan</label>
+							<select
+								id="filter-major-rubrik"
+								bind:value={modalFilterMajor}
+								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+							>
+								<option value="ALL">Semua Jurusan</option>
+								{#each availableMajors as m}
+									<option value={m}>{m}</option>
+								{/each}
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<!-- Candidate List (Vertikal Scroll) -->
+				<div class="overflow-y-auto space-y-1.5 flex-1 pr-1 border-t border-slate-100 pt-2">
+					{#if modalFilteredCandidates.length === 0}
+						<div class="py-10 text-center text-slate-400">
+							<Users class="w-8 h-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
+							<p class="text-xs font-semibold text-slate-600">Tidak ada santri yang sesuai filter</p>
+						</div>
+					{:else}
+						{#each modalFilteredCandidates as c}
+							{@const isCurrent = currentCandidate?.id === c.id}
+							{@const isLockedScore = c.pesantrenScore?.lockStatus === 'LOCKED'}
+							{@const isDraftScore = c.pesantrenScore?.lockStatus === 'DRAFT'}
+
+							<button
+								type="button"
+								onclick={() => selectCandidate(c.id)}
+								class={`w-full p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-3 ${
+									isCurrent
+										? 'bg-emerald-50/80 border-emerald-400 ring-2 ring-emerald-500/20'
+										: 'bg-white hover:bg-slate-50 border-slate-200'
+								}`}
+							>
+								<div class="flex items-center gap-2.5 min-w-0">
+									<span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+										{c.testNumber.slice(-3)}
+									</span>
+									<div class="min-w-0">
+										<div class="flex items-center gap-2">
+											<span class="font-bold text-xs text-slate-900 truncate">{c.fullName}</span>
+											{#if isCurrent}
+												<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-700 text-white">Sedang Dinilai</span>
+											{/if}
+										</div>
+										<div class="text-[11px] text-slate-400 truncate">
+											<span>{c.schoolOrigin}</span> &bull; <span>{c.majorChoice}</span> &bull; <span class="text-slate-600">{c.roomAssignment || 'Ruang 1'}</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="shrink-0 text-right">
+									{#if isLockedScore}
+										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+											<Lock class="w-2.5 h-2.5 text-emerald-600" />
+											<span>{c.pesantrenScore?.averageScore}</span>
+										</span>
+									{:else if isDraftScore}
+										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+											<span>Draf ({c.pesantrenScore?.averageScore})</span>
+										</span>
+									{:else}
+										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500">
+											Belum Dinilai
+										</span>
+									{/if}
+								</div>
+							</button>
+						{/each}
+					{/if}
+				</div>
+
+				<!-- Modal Footer -->
+				<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+					<span>Ditemukan <strong class="text-slate-800 font-mono">{modalFilteredCandidates.length}</strong> dari {data.candidates.length} santri</span>
+					<button
+						type="button"
+						onclick={() => (showCandidateModal = false)}
+						class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold" data-footer="true"
+					>
+						Tutup
+					</button>
+				</div>
+			</div>
 		</div>
 	{/if}
 </div>
