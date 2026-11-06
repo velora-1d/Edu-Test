@@ -24,6 +24,7 @@
 		Sparkles,
 		ChevronLeft,
 		ChevronRight,
+		ChevronDown,
 		X,
 		Users,
 		Building2,
@@ -350,86 +351,139 @@
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
-	<!-- UNIFIED CANDIDATE NAVIGATOR (Zero Horizontal Scroll • Prev/Next Stepper • Modal Popup Selector) -->
-	<div class="bg-white rounded-2xl p-4 shadow-2xs border border-slate-200">
-		<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-			<!-- Prev Candidate Button -->
-			<button
-				type="button"
-				onclick={goToPrev}
-				disabled={!prevCandidate}
-				class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs shrink-0"
-				title={prevCandidate ? `Santri sebelumnya: ${prevCandidate.fullName}` : 'Santri pertama'}
-			>
-				<ChevronLeft class="w-4 h-4" />
-				<span class="hidden sm:inline">Sebelumnya</span>
-			</button>
-
-			<!-- Center Candidate Identity & Selector Trigger -->
+	<!-- CANDIDATE NAVIGATOR (OPSI 1: Interactive Identity Card • Grouped Stepper • Progress Indicator) -->
+	<div class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200">
+		<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 			{#if currentCandidate}
-				<div class="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left flex-1 justify-center min-w-0">
-					<div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm border border-emerald-200 shrink-0">
-						{currentCandidate.fullName.substring(0, 2).toUpperCase()}
-					</div>
-
-					<div class="min-w-0">
-						<div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-							<span class="font-bold text-sm text-slate-900 truncate">{currentCandidate.fullName}</span>
-							<span class="font-mono text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200">
-								{currentCandidate.testNumber}
-							</span>
-							{#if isLocked}
-								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
-									<Lock class="w-3 h-3 text-emerald-600" />
-									<span>Nilai Terkunci</span>
-								</span>
-							{:else if currentCandidate.pesantrenScore?.lockStatus === 'DRAFT'}
-								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
-									<Unlock class="w-3 h-3 text-amber-600" />
-									<span>Mode Draf</span>
-								</span>
-							{:else}
-								<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold">
-									<span>Belum Dinilai</span>
-								</span>
-							{/if}
-						</div>
-
-						<div class="text-[11px] text-slate-500 flex items-center justify-center sm:justify-start gap-2 mt-0.5 flex-wrap">
-							<span>{currentCandidate.schoolOrigin}</span>
-							<span>&bull;</span>
-							<span class="font-medium text-slate-700">{currentCandidate.majorChoice}</span>
-							<span>&bull;</span>
-							<span class="text-blue-700 font-medium">{currentCandidate.roomAssignment || 'Ruang 1'}</span>
-							<span>&bull;</span>
-							<span class="text-slate-400">Santri <strong class="text-slate-700 font-mono">{currentIndex + 1}</strong> dari {data.candidates.length}</span>
-						</div>
-					</div>
-
-					<!-- Popup Modal Trigger Button -->
+				<!-- Left: Interactive Candidate Identity (Click to open modal) -->
+				<div class="flex items-center gap-3 min-w-0">
+					<!-- Clickable Avatar + Details to Open Picker -->
 					<button
 						type="button"
 						onclick={() => (showCandidateModal = true)}
-						class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 transition shrink-0 active:scale-95 ml-0 sm:ml-2"
+						class="group flex items-center gap-3 p-1.5 -m-1.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200/80 transition text-left min-w-0"
+						title="Klik untuk memilih santri lain"
 					>
-						<Search class="w-3.5 h-3.5" />
-						<span>Pilih Santri</span>
-					</button>
+						<div class="relative w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm border border-emerald-200 shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+							{currentCandidate.fullName.substring(0, 2).toUpperCase()}
+							<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs">
+								<Search class="w-2.5 h-2.5" />
+							</div>
+						</div>
 
-					{#if isLocked}
-						<form method="POST" action="?/unlockScore" class="shrink-0">
-							<input type="hidden" name="candidateId" value={currentCandidate.id} />
-							<button
-								type="submit"
-								class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium transition shadow-2xs"
-							>
-								Buka Kunci
-							</button>
-						</form>
-					{/if}
+						<div class="min-w-0">
+							<div class="flex items-center gap-2 flex-wrap">
+								<span class="font-bold text-sm text-slate-900 group-hover:text-blue-700 transition-colors truncate">
+									{currentCandidate.fullName}
+								</span>
+								<ChevronDown class="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition shrink-0" />
+								<span class="font-mono text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200 shrink-0">
+									{currentCandidate.testNumber}
+								</span>
+								{#if isLocked}
+									<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0">
+										<Lock class="w-3 h-3 text-emerald-600" />
+										<span>Nilai Terkunci</span>
+									</span>
+								{:else if currentCandidate.pesantrenScore?.lockStatus === 'DRAFT'}
+									<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold shrink-0">
+										<Unlock class="w-3 h-3 text-amber-600" />
+										<span>Mode Draf</span>
+									</span>
+								{:else}
+									<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold shrink-0">
+										<span>Belum Dinilai</span>
+									</span>
+								{/if}
+							</div>
+
+							<div class="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
+								<span class="truncate max-w-[160px] sm:max-w-none">{currentCandidate.schoolOrigin}</span>
+								<span>&bull;</span>
+								<span class="font-medium text-slate-700">{currentCandidate.majorChoice}</span>
+								<span>&bull;</span>
+								<span class="text-blue-700 font-medium">{currentCandidate.roomAssignment || 'Ruang 1'}</span>
+							</div>
+						</div>
+					</button>
+				</div>
+
+				<!-- Right: Quick Actions + Grouped Stepper Nav & Progress -->
+				<div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-t-0">
+					<!-- Actions: Buka Kunci (if locked) & Pilih Santri button -->
+					<div class="flex items-center gap-2">
+						{#if isLocked}
+							<form method="POST" action="?/unlockScore" class="shrink-0">
+								<input type="hidden" name="candidateId" value={currentCandidate.id} />
+								<button
+									type="submit"
+									class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-xs font-semibold transition shadow-2xs"
+									title="Buka kunci nilai untuk mengedit kembali"
+								>
+									<Unlock class="w-3.5 h-3.5 text-amber-600" />
+									<span>Buka Kunci</span>
+								</button>
+							</form>
+						{/if}
+
+						<button
+							type="button"
+							onclick={() => (showCandidateModal = true)}
+							class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 transition active:scale-95 shadow-2xs"
+							title="Buka daftar lengkap calon santri"
+						>
+							<Search class="w-3.5 h-3.5" />
+							<span>Daftar Santri</span>
+						</button>
+					</div>
+
+					<div class="hidden sm:block h-6 w-px bg-slate-200"></div>
+
+					<!-- Grouped Stepper (< Prev, Indicator, Next >) -->
+					<div class="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
+						<!-- Prev Button -->
+						<button
+							type="button"
+							onclick={goToPrev}
+							disabled={!prevCandidate}
+							class="inline-flex items-center justify-center p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs"
+							title={prevCandidate ? `Santri sebelumnya: ${prevCandidate.fullName}` : 'Santri pertama'}
+							aria-label="Santri sebelumnya"
+						>
+							<ChevronLeft class="w-4 h-4" />
+						</button>
+
+						<!-- Progress Count & Bar -->
+						<div class="px-2.5 py-1 text-center min-w-[90px]">
+							<div class="text-[11px] font-bold text-slate-800">
+								{currentIndex + 1} <span class="text-slate-400 font-normal">/</span> {data.candidates.length}
+								<span class="text-[10px] text-blue-600 font-medium ml-1">
+									({Math.round(((currentIndex + 1) / Math.max(data.candidates.length, 1)) * 100)}%)
+								</span>
+							</div>
+							<div class="w-full bg-slate-200 h-1 rounded-full mt-1 overflow-hidden">
+								<div
+									class="bg-blue-600 h-full rounded-full transition-all duration-300"
+									style="width: {Math.round(((currentIndex + 1) / Math.max(data.candidates.length, 1)) * 100)}%"
+								></div>
+							</div>
+						</div>
+
+						<!-- Next Button -->
+						<button
+							type="button"
+							onclick={goToNext}
+							disabled={!nextCandidate}
+							class="inline-flex items-center justify-center p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition disabled:opacity-30 disabled:pointer-events-none shadow-2xs"
+							title={nextCandidate ? `Santri berikutnya: ${nextCandidate.fullName}` : 'Santri terakhir'}
+							aria-label="Santri berikutnya"
+						>
+							<ChevronRight class="w-4 h-4" />
+						</button>
+					</div>
 				</div>
 			{:else}
-				<div class="text-center text-xs text-slate-500">
+				<div class="text-center py-2 text-xs text-slate-500 w-full">
 					Belum ada santri dipilih.
 					<button
 						type="button"
@@ -440,18 +494,6 @@
 					</button>
 				</div>
 			{/if}
-
-			<!-- Next Candidate Button -->
-			<button
-				type="button"
-				onclick={goToNext}
-				disabled={!nextCandidate}
-				class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition disabled:opacity-30 disabled:pointer-events-none shadow-xs shadow-blue-700/20 shrink-0"
-				title={nextCandidate ? `Santri berikutnya: ${nextCandidate.fullName}` : 'Santri terakhir'}
-			>
-				<span class="hidden sm:inline">Berikutnya</span>
-				<ChevronRight class="w-4 h-4" />
-			</button>
 		</div>
 	</div>
 

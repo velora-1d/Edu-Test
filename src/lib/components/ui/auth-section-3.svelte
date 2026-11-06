@@ -107,7 +107,7 @@
 						</div>
 					</div>
 
-					<!-- Options: Remember Me & Forgot Password -->
+					<!-- Options: Remember Me -->
 					<div class="flex items-center justify-between pt-1">
 						<label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-600 dark:text-slate-400">
 							<input
@@ -117,13 +117,6 @@
 							/>
 							<span>Ingat sesi di perangkat ini</span>
 						</label>
-
-						<a
-							href="#bantuan"
-							class="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline"
-						>
-							Bantuan login?
-						</a>
 					</div>
 
 					<!-- Submit Button -->

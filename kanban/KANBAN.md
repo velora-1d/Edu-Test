@@ -6,6 +6,13 @@ Siklus Task Wajib: `To Do` -> `In Progress` (`in_progress`) -> `In Review / Test
 
 ## 🏃 In Progress
 
+*(Semua task saat ini selesai)*
+
+---
+
+## ✅ Done
+
+- [x] **EDU-TEST-32**: Redesign Candidate Header Selector Bar Opsi 1 (Interactive Identity, Grouped Stepper, & Progress Meter) pada `/tpa`, `/rubrik`, dan `/wawancara`
 - [x] **EDU-TEST-31**: Implementasi Tabel Users, Seeding Super Admin admin@skillage.com ke Neon DB, dan Eliminasi Akses Cepat Demo
 - [x] **EDU-TEST-30**: Enforce Wajib Login (Auth Hook & Session Guard) dan Eliminasi Profil Ust. Nurul Huda di Login UI
 - [x] **EDU-TEST-29**: Integrasi Komponen Login Auth-Section-3 (Svelte 5 / TSX) & Halaman `/login`
