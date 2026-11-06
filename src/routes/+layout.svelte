@@ -32,9 +32,10 @@
 		SlidersHorizontal,
 		Database,
 		ChevronRight,
+		LogOut,
 	} from "lucide-svelte";
 
-	let { children }: LayoutProps = $props();
+	let { children, data }: LayoutProps = $props();
 
 	const navSections = [
 		{
@@ -241,9 +242,20 @@
 						</div>
 						<span class="font-medium text-slate-700 truncate">Panitia PPDB</span>
 					</div>
-					<a href="/login" class="text-[10px] text-blue-600 hover:text-blue-700 font-semibold hover:underline flex items-center gap-1">
-						<span>Masuk</span>
-					</a>
+					{#if data?.user}
+						<a
+							href="/logout"
+							title="Keluar dari sesi"
+							class="text-[10px] text-rose-600 hover:text-rose-700 font-semibold hover:underline flex items-center gap-1"
+						>
+							<LogOut class="w-3 h-3" />
+							<span>Keluar</span>
+						</a>
+					{:else}
+						<a href="/login" class="text-[10px] text-blue-600 hover:text-blue-700 font-semibold hover:underline flex items-center gap-1">
+							<span>Masuk</span>
+						</a>
+					{/if}
 				</div>
 			</div>
 
@@ -294,6 +306,17 @@
 					<FileSpreadsheet class="w-3.5 h-3.5 text-blue-600" />
 					<span class="hidden sm:inline">Rekap Nilai</span>
 				</a>
+
+				{#if data?.user}
+					<a
+						href="/logout"
+						class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 text-slate-600 text-xs font-semibold transition shadow-2xs"
+						title="Keluar dari sistem"
+					>
+						<LogOut class="w-3.5 h-3.5 text-rose-500" />
+						<span class="hidden sm:inline">Keluar</span>
+					</a>
+				{/if}
 			</div>
 		</header>
 

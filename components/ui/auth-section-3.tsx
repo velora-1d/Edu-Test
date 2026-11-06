@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 import { Eye, EyeOff, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 export default function AuthSectionThree({ onLogin }: { onLogin?: (data: { email: string; role: string }) => void }) {
-  const [email, setEmail] = useState("admin@edutest.sch.id");
-  const [password, setPassword] = useState("••••••••••••");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -78,29 +78,6 @@ export default function AuthSectionThree({ onLogin }: { onLogin?: (data: { email
               >
                 Masuk ke Dashboard Seleksi
               </button>
-
-              {/* Demo Quick Selector */}
-              <div className="pt-4 border-t border-slate-100 dark:border-white/10">
-                <p className="text-[11px] font-medium text-slate-400 mb-2">Akun Demo Cepat Penguji:</p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setEmail("ustadz.tpa@edutest.sch.id")}
-                    className="p-2 text-left rounded border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition"
-                  >
-                    <div className="font-semibold text-slate-700 dark:text-slate-300">Penguji TPA</div>
-                    <div className="text-[10px] text-slate-400">Ust. Abdul Malik</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEmail("ustadz.pesantren@edutest.sch.id")}
-                    className="p-2 text-left rounded border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 transition"
-                  >
-                    <div className="font-semibold text-slate-700 dark:text-slate-300">Kepesantrenan</div>
-                    <div className="text-[10px] text-slate-400">Ust. Nurul Huda</div>
-                  </button>
-                </div>
-              </div>
             </form>
           </div>
         </div>
@@ -113,22 +90,9 @@ export default function AuthSectionThree({ onLogin }: { onLogin?: (data: { email
 
           <div className="relative z-10 h-full w-full flex flex-col justify-between">
             <div className="max-w-[480px] lg:pt-8">
-              {/* Reviewer / Asatidz info */}
-              <div className="flex items-center gap-4">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80"
-                  alt="Ustadz Penguji"
-                  className="size-11 shrink-0 rounded-full border border-white/20 object-cover shadow-sm"
-                />
-                <div>
-                  <div className="font-semibold leading-tight text-white flex items-center gap-1.5">
-                    Ust. H. Nurul Huda, Lc.
-                    <CheckCircle2 className="size-4 text-blue-400" />
-                  </div>
-                  <div className="mt-0.5 text-xs text-blue-200/70">
-                    Koordinator Dewan Penguji PPDB 2027/2028
-                  </div>
-                </div>
+              {/* System Portal Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold backdrop-blur-md shadow-sm">
+                <span>Edu-Test &bull; Sistem Seleksi Terpadu Santri Baru</span>
               </div>
 
               <blockquote className="mt-8 text-2xl font-light leading-snug tracking-tight text-slate-100 sm:text-3xl">

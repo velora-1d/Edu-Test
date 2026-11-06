@@ -170,6 +170,17 @@ export const examRooms = pgTable('exam_rooms', {
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
+// 10. Pengguna & Autentikasi Penguji / Admin (Users)
+export const users = pgTable('users', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	email: text('email').notNull().unique(),
+	passwordHash: text('password_hash').notNull(),
+	name: text('name').notNull(),
+	role: text('role').notNull().default('SUPER_ADMIN'), // SUPER_ADMIN, EXAMINER_TPA, EXAMINER_PESANTREN, INTERVIEWER
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
+
 // Relations
 export const wavesRelations = relations(waves, ({ many }) => ({
 	candidates: many(candidates),

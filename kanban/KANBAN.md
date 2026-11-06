@@ -6,6 +6,8 @@ Siklus Task Wajib: `To Do` -> `In Progress` (`in_progress`) -> `In Review / Test
 
 ## 🏃 In Progress
 
+- [x] **EDU-TEST-31**: Implementasi Tabel Users, Seeding Super Admin admin@skillage.com ke Neon DB, dan Eliminasi Akses Cepat Demo
+- [x] **EDU-TEST-30**: Enforce Wajib Login (Auth Hook & Session Guard) dan Eliminasi Profil Ust. Nurul Huda di Login UI
 - [x] **EDU-TEST-29**: Integrasi Komponen Login Auth-Section-3 (Svelte 5 / TSX) & Halaman `/login`
 - [x] **EDU-TEST-28**: Deploy Edu-Test ke Cloudflare Pages dengan Neon PostgreSQL & Adapter Cloudflare
 - [x] **EDU-TEST-27**: Pembaruan Modul Wawancara (Wawancara Umum murni, Form Tanya-Jawab Bebas Wawancara Ortu) & Integrasi Tes STIFIn

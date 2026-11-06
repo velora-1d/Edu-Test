@@ -27,3 +27,5 @@
 {"id":"EDU-TEST-27","title":"Pembaruan Modul Wawancara (Wawancara Umum, Form Bebas Wawancara Ortu) & Integrasi Tes STIFIn","status":"closed","created_at":"2026-11-05T09:00:00Z","priority":"high"}
 {"id":"EDU-TEST-28","title":"Deploy Edu-Test ke Cloudflare Pages dengan Neon PostgreSQL & Adapter Cloudflare","status":"closed","created_at":"2026-11-06T22:23:00Z","priority":"high"}
 {"id":"EDU-TEST-29","title":"Integrasi Komponen Login Auth-Section-3 (Svelte 5 / TSX) & Halaman /login","status":"closed","created_at":"2026-11-06T22:34:00Z","priority":"high"}
+{"id":"EDU-TEST-30","title":"Enforce Wajib Login (Auth Hook & Session Guard) dan Eliminasi Profil Ust. Nurul Huda di Login UI","status":"in_progress","created_at":"2026-11-06T22:58:00Z","priority":"high"}
+{"id":"EDU-TEST-31","title":"Implementasi Tabel Users, Seeding Super Admin admin@skillage.com ke Neon DB, dan Eliminasi Akses Cepat Demo","status":"closed","created_at":"2026-11-06T23:05:00Z","priority":"high"}

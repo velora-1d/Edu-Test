@@ -1,39 +1,22 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
+	import { enhance } from "$app/forms";
 	import {
 		Eye,
 		EyeOff,
 		ShieldCheck,
-		CheckCircle2,
+		GraduationCap,
 		ArrowRight,
 		Lock,
 		Mail,
-		KeyRound,
-		UserCheck,
 	} from "lucide-svelte";
 
-	let email = $state("admin@edutest.sch.id");
-	let password = $state("••••••••••••");
+	let { form }: { form?: { missing?: boolean; message?: string } | null } = $props();
+
+	let email = $state("");
+	let password = $state("");
 	let showPassword = $state(false);
 	let rememberMe = $state(true);
 	let isLoading = $state(false);
-	let errorMessage = $state("");
-
-	function handleLogin(e: SubmitEvent) {
-		e.preventDefault();
-		isLoading = true;
-		errorMessage = "";
-
-		setTimeout(() => {
-			isLoading = false;
-			goto("/");
-		}, 600);
-	}
-
-	function setQuickAccount(accountEmail: string) {
-		email = accountEmail;
-		password = "password123";
-	}
 </script>
 
 <section class="min-h-screen bg-slate-50 p-3 sm:p-4 text-slate-900 antialiased [font-synthesis:none] dark:bg-[#050505] dark:text-white">
@@ -54,13 +37,26 @@
 					Silakan masukkan akun Asatidz atau Panitia untuk mengakses lembar penilaian dan pleno santri baru.
 				</p>
 
-				{#if errorMessage}
-					<div class="mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
-						{errorMessage}
+				{#if form?.message}
+					<div class="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+						{form.message}
 					</div>
 				{/if}
 
-				<form onsubmit={handleLogin} class="mt-8 space-y-4">
+				<form
+					method="POST"
+					action="/login"
+					use:enhance={() => {
+						isLoading = true;
+						return async ({ update }) => {
+							isLoading = false;
+							await update();
+						};
+					}}
+					class="mt-8 space-y-4"
+				>
+					<input type="hidden" name="rememberMe" value={rememberMe ? "true" : "false"} />
+
 					<!-- Email / Username Input -->
 					<div class="space-y-1.5 text-left w-full">
 						<label for="login-email" class="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -70,6 +66,7 @@
 							<Mail class="w-4 h-4 text-slate-400 mr-2 shrink-0" />
 							<input
 								id="login-email"
+								name="email"
 								type="text"
 								bind:value={email}
 								placeholder="nama@pesantren.sch.id"
@@ -88,6 +85,7 @@
 							<Lock class="w-4 h-4 text-slate-400 mr-2 shrink-0" />
 							<input
 								id="login-password"
+								name="password"
 								type={showPassword ? "text" : "password"}
 								bind:value={password}
 								placeholder="Masukkan kata sandi"
@@ -142,57 +140,11 @@
 							<ArrowRight class="w-4 h-4" />
 						{/if}
 					</button>
-
-					<!-- Quick Selector Demo Asatidz -->
-					<div class="pt-5 mt-6 border-t border-slate-100 dark:border-white/10">
-						<div class="flex items-center justify-between mb-2.5">
-							<span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Akses Cepat Penguji (Demo)</span>
-							<UserCheck class="w-3.5 h-3.5 text-slate-400" />
-						</div>
-
-						<div class="grid grid-cols-2 gap-2 text-xs">
-							<button
-								type="button"
-								onclick={() => setQuickAccount("ust.malik@edutest.sch.id")}
-								class="p-2.5 text-left rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-blue-50/70 hover:border-blue-200 transition text-slate-700"
-							>
-								<div class="font-bold text-slate-800 text-[11px]">Penguji TPA</div>
-								<div class="text-[10px] text-slate-500 truncate">Ust. Abdul Malik, S.Pd.</div>
-							</button>
-
-							<button
-								type="button"
-								onclick={() => setQuickAccount("ust.huda@edutest.sch.id")}
-								class="p-2.5 text-left rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-blue-50/70 hover:border-blue-200 transition text-slate-700"
-							>
-								<div class="font-bold text-slate-800 text-[11px]">Kepesantrenan</div>
-								<div class="text-[10px] text-slate-500 truncate">Ust. Nurul Huda, Lc.</div>
-							</button>
-
-							<button
-								type="button"
-								onclick={() => setQuickAccount("dra.aminah@edutest.sch.id")}
-								class="p-2.5 text-left rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-blue-50/70 hover:border-blue-200 transition text-slate-700"
-							>
-								<div class="font-bold text-slate-800 text-[11px]">Pewawancara</div>
-								<div class="text-[10px] text-slate-500 truncate">Dra. Hj. Siti Aminah</div>
-							</button>
-
-							<button
-								type="button"
-								onclick={() => setQuickAccount("admin@edutest.sch.id")}
-								class="p-2.5 text-left rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-blue-50/70 hover:border-blue-200 transition text-slate-700"
-							>
-								<div class="font-bold text-blue-700 text-[11px]">Super Admin</div>
-								<div class="text-[10px] text-slate-500 truncate">Drs. H. M. Samsul</div>
-							</button>
-						</div>
-					</div>
 				</form>
 			</div>
 		</div>
 
-		<!-- Right Side: Marketing Showcase & Mockup Preview -->
+		<!-- Right Side: Marketing Showcase & Mockup Preview (UI profil individu telah dihapus) -->
 		<div class="relative flex min-h-[700px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-8 text-white sm:p-12 lg:min-h-0 lg:p-14 shadow-xl">
 			<!-- Ambient Lights -->
 			<div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
@@ -200,22 +152,10 @@
 
 			<!-- Main Top Showcase -->
 			<div class="relative z-10 max-w-[480px]">
-				<!-- Asatidz Identity -->
-				<div class="flex items-center gap-3.5">
-					<img
-						src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80"
-						alt="Koordinator Dewan Penguji"
-						class="size-11 shrink-0 rounded-full border-2 border-blue-400/30 object-cover shadow-sm"
-					/>
-					<div>
-						<div class="font-semibold text-white flex items-center gap-1.5 text-sm sm:text-base">
-							Ust. H. Nurul Huda, Lc.
-							<CheckCircle2 class="size-4 text-blue-400" />
-						</div>
-						<div class="text-xs text-blue-200/75">
-							Koordinator Dewan Penguji PPDB 2027/2028
-						</div>
-					</div>
+				<!-- System Portal Header Badge -->
+				<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold backdrop-blur-md shadow-sm">
+					<GraduationCap class="w-4 h-4 text-blue-300" />
+					<span>Edu-Test &bull; Sistem Seleksi Terpadu Santri Baru</span>
 				</div>
 
 				<blockquote class="mt-8 text-2xl sm:text-3xl font-light leading-snug tracking-tight text-slate-100">
