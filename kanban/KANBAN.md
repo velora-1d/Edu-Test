@@ -12,6 +12,7 @@ Siklus Task Wajib: `To Do` -> `In Progress` (`in_progress`) -> `In Review / Test
 
 ## ✅ Done
 
+- [x] **EDU-TEST-36**: Wajib Konfirmasi Sebelum Buka Kunci Nilai — `ConfirmDialog` generik (tone amber, focus ke Batal, Esc/backdrop, state loading) dipakai di `/tpa` dan `/rubrik` (2 titik unlock)
 - [x] **EDU-TEST-35**: Humanisasi Bahasa & Pembersihan Jargon (User-Friendly Wording) pada Halaman Pleno, Rekap Ledger, dan Sidebar Navigasi
 
 - [x] **EDU-TEST-34**: Redesign Modal Pemilih Santri ke Grid 4 Kolom (`max-w-6xl`, kartu vertikal kaya info, toolbar 4 kolom, empty state reset filter, Esc/backdrop) pada `/tpa`, `/rubrik`, dan `/wawancara`
