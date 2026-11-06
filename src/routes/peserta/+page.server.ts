@@ -13,7 +13,12 @@ import {
 	deleteMajor,
 	createExamRoom,
 	updateExamRoom,
-	deleteExamRoom
+	deleteExamRoom,
+	createWave,
+	updateWave,
+	activateWave,
+	closeWave,
+	deleteWave
 } from '$lib/server/db/queries';
 import { seedDatabase } from '$lib/server/seed';
 import { asc } from 'drizzle-orm';
@@ -28,6 +33,9 @@ export const load: PageServerLoad = async () => {
 
 	const activeWave = await getActiveWave();
 	const allWaves = await db.query.waves.findMany({
+		with: {
+			candidates: true
+		},
 		orderBy: (w, { desc }) => [desc(w.testDate)]
 	});
 
@@ -297,6 +305,147 @@ export const actions: Actions = {
 		} catch (e: any) {
 			console.error('Error deleteExamRoom:', e);
 			return fail(500, { error: e.message || 'Gagal menghapus ruang ujian' });
+		}
+	},
+
+	// =========================================================================
+	// CRUD & SWITCH: MASTER GELOMBANG & TAHUN AJARAN
+	// =========================================================================
+	createWave: async ({ request }) => {
+		const data = await request.formData();
+		const waveName = ((data.get('waveName') as string) || '').trim();
+		const academicYear = ((data.get('academicYear') as string) || '2027/2028').trim();
+		const dateStr = (data.get('testDate') as string) || '';
+		const quotaCapacity = parseInt((data.get('quotaCapacity') as string) || '20', 10);
+		const status = ((data.get('status') as string) || 'DRAFT').toUpperCase();
+
+		if (!waveName) {
+			return fail(400, { error: 'Nama gelombang seleksi wajib diisi' });
+		}
+		if (!academicYear) {
+			return fail(400, { error: 'Tahun ajaran wajib diisi (misal: 2027/2028)' });
+		}
+
+		const testDate = dateStr ? new Date(dateStr) : new Date();
+
+		try {
+			const created = await createWave({
+				waveName,
+				academicYear,
+				testDate,
+				quotaCapacity: isNaN(quotaCapacity) || quotaCapacity < 1 ? 20 : quotaCapacity,
+				status
+			});
+
+			return {
+				success: true,
+				action: 'createWave',
+				message: `Gelombang ${created.waveName} (${created.academicYear}) berhasil dibuat.`
+			};
+		} catch (e: any) {
+			console.error('Error createWave:', e);
+			return fail(500, { error: e.message || 'Gagal membuat gelombang baru' });
+		}
+	},
+
+	updateWave: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+		const waveName = ((data.get('waveName') as string) || '').trim();
+		const academicYear = ((data.get('academicYear') as string) || '').trim();
+		const dateStr = (data.get('testDate') as string) || '';
+		const quotaCapacity = parseInt((data.get('quotaCapacity') as string) || '20', 10);
+		const status = ((data.get('status') as string) || '').toUpperCase();
+
+		if (!id) {
+			return fail(400, { error: 'ID Gelombang tidak valid' });
+		}
+		if (!waveName) {
+			return fail(400, { error: 'Nama gelombang wajib diisi' });
+		}
+
+		try {
+			const updatePayload: Record<string, any> = {
+				waveName,
+				quotaCapacity: isNaN(quotaCapacity) || quotaCapacity < 1 ? 20 : quotaCapacity
+			};
+			if (academicYear) updatePayload.academicYear = academicYear;
+			if (dateStr) updatePayload.testDate = new Date(dateStr);
+			if (status) updatePayload.status = status;
+
+			const updated = await updateWave(id, updatePayload);
+
+			return {
+				success: true,
+				action: 'updateWave',
+				message: `Gelombang ${updated?.waveName} berhasil diperbarui.`
+			};
+		} catch (e: any) {
+			console.error('Error updateWave:', e);
+			return fail(500, { error: e.message || 'Gagal memperbarui gelombang' });
+		}
+	},
+
+	activateWave: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+
+		if (!id) {
+			return fail(400, { error: 'ID Gelombang tidak valid' });
+		}
+
+		try {
+			const activated = await activateWave(id);
+			return {
+				success: true,
+				action: 'activateWave',
+				message: `Gelombang ${activated?.waveName} (${activated?.academicYear}) kini telah diaktifkan.`
+			};
+		} catch (e: any) {
+			console.error('Error activateWave:', e);
+			return fail(500, { error: e.message || 'Gagal mengaktifkan gelombang' });
+		}
+	},
+
+	closeWave: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+
+		if (!id) {
+			return fail(400, { error: 'ID Gelombang tidak valid' });
+		}
+
+		try {
+			const closed = await closeWave(id);
+			return {
+				success: true,
+				action: 'closeWave',
+				message: `Gelombang ${closed?.waveName} telah ditutup.`
+			};
+		} catch (e: any) {
+			console.error('Error closeWave:', e);
+			return fail(500, { error: e.message || 'Gagal menutup gelombang' });
+		}
+	},
+
+	deleteWave: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get('id') as string;
+
+		if (!id) {
+			return fail(400, { error: 'ID Gelombang tidak valid' });
+		}
+
+		try {
+			const deleted = await deleteWave(id);
+			return {
+				success: true,
+				action: 'deleteWave',
+				message: `Gelombang ${deleted?.waveName} berhasil dihapus.`
+			};
+		} catch (e: any) {
+			console.error('Error deleteWave:', e);
+			return fail(400, { error: e.message || 'Gagal menghapus gelombang' });
 		}
 	}
 };

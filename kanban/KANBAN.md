@@ -12,6 +12,8 @@ Siklus Task Wajib: `To Do` -> `In Progress` (`in_progress`) -> `In Review / Test
 
 ## ✅ Done
 
+- [x] **EDU-TEST-38**: Implementasi Pengaturan Gelombang & Tahun Ajaran (CRUD, Switch Aktif/Nonaktif, Kuota & Integrasi di `/peserta`)
+
 - [x] **EDU-TEST-37**: Penyatuan Tab Wawancara Santri (Umum + Kepesantrenan), Poin Pertanyaan Dinamis (Bisa Diedit/Ditambah), dan Humanisasi Bahasa di `/wawancara`
 - [x] **EDU-TEST-36**: Wajib Konfirmasi Sebelum Buka Kunci Nilai — `ConfirmDialog` generik (tone amber, focus ke Batal, Esc/backdrop, state loading) dipakai di `/tpa` dan `/rubrik` (2 titik unlock)
 - [x] **EDU-TEST-35**: Humanisasi Bahasa & Pembersihan Jargon (User-Friendly Wording) pada Halaman Pleno, Rekap Ledger, dan Sidebar Navigasi

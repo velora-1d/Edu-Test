@@ -5,6 +5,7 @@ import { relations } from 'drizzle-orm';
 export const waves = pgTable('waves', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	waveName: text('wave_name').notNull(),
+	academicYear: text('academic_year').notNull().default('2027/2028'),
 	testDate: timestamp('test_date').notNull(),
 	quotaCapacity: integer('quota_capacity').notNull().default(20),
 	status: text('status').notNull().default('ACTIVE') // DRAFT, ACTIVE, CLOSED

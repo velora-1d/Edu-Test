@@ -777,3 +777,170 @@ export async function deleteExamRoom(id: string) {
 
 	return deleted;
 }
+
+// =========================================================================
+// CRUD: MASTER GELOMBANG & TAHUN AJARAN (WAVES & ACADEMIC YEAR)
+// =========================================================================
+
+/**
+ * Mendapatkan seluruh gelombang seleksi beserta hitungan peserta
+ */
+export async function getAllWaves() {
+	return await db.query.waves.findMany({
+		with: {
+			candidates: true
+		},
+		orderBy: [desc(waves.testDate)]
+	});
+}
+
+/**
+ * Membuat gelombang seleksi baru
+ */
+export async function createWave(data: {
+	waveName: string;
+	academicYear: string;
+	testDate: Date;
+	quotaCapacity: number;
+	status?: string;
+}) {
+	if (data.status === 'ACTIVE') {
+		await db.update(waves).set({ status: 'CLOSED' }).where(eq(waves.status, 'ACTIVE'));
+	}
+
+	const [newWave] = await db
+		.insert(waves)
+		.values({
+			waveName: data.waveName.trim(),
+			academicYear: data.academicYear.trim(),
+			testDate: data.testDate,
+			quotaCapacity: data.quotaCapacity,
+			status: data.status || 'DRAFT'
+		})
+		.returning();
+
+	if (newWave) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'CREATE_WAVE',
+			details: `Membuat gelombang baru: ${newWave.waveName} (TA ${newWave.academicYear}, Kuota ${newWave.quotaCapacity})`
+		});
+	}
+
+	return newWave;
+}
+
+/**
+ * Memperbarui gelombang seleksi
+ */
+export async function updateWave(
+	id: string,
+	data: {
+		waveName?: string;
+		academicYear?: string;
+		testDate?: Date;
+		quotaCapacity?: number;
+		status?: string;
+	}
+) {
+	if (data.status === 'ACTIVE') {
+		await db.update(waves).set({ status: 'CLOSED' }).where(eq(waves.status, 'ACTIVE'));
+	}
+
+	const updatePayload: Record<string, any> = {};
+	if (data.waveName !== undefined) updatePayload.waveName = data.waveName.trim();
+	if (data.academicYear !== undefined) updatePayload.academicYear = data.academicYear.trim();
+	if (data.testDate !== undefined) updatePayload.testDate = data.testDate;
+	if (data.quotaCapacity !== undefined) updatePayload.quotaCapacity = data.quotaCapacity;
+	if (data.status !== undefined) updatePayload.status = data.status;
+
+	const [updated] = await db
+		.update(waves)
+		.set(updatePayload)
+		.where(eq(waves.id, id))
+		.returning();
+
+	if (updated) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'UPDATE_WAVE',
+			details: `Memperbarui gelombang: ${updated.waveName} (Status ${updated.status})`
+		});
+	}
+
+	return updated;
+}
+
+/**
+ * Mengaktifkan gelombang seleksi (dan menutup gelombang yang sedang aktif sebelumnya)
+ */
+export async function activateWave(id: string) {
+	// Set gelombang yang aktif sebelumnya jadi CLOSED
+	await db.update(waves).set({ status: 'CLOSED' }).where(eq(waves.status, 'ACTIVE'));
+
+	// Set gelombang target jadi ACTIVE
+	const [active] = await db
+		.update(waves)
+		.set({ status: 'ACTIVE' })
+		.where(eq(waves.id, id))
+		.returning();
+
+	if (active) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'ACTIVATE_WAVE',
+			details: `Mengaktifkan gelombang seleksi: ${active.waveName} (${active.academicYear})`
+		});
+	}
+
+	return active;
+}
+
+/**
+ * Menutup gelombang seleksi
+ */
+export async function closeWave(id: string) {
+	const [closed] = await db
+		.update(waves)
+		.set({ status: 'CLOSED' })
+		.where(eq(waves.id, id))
+		.returning();
+
+	if (closed) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'CLOSE_WAVE',
+			details: `Menutup gelombang seleksi: ${closed.waveName}`
+		});
+	}
+
+	return closed;
+}
+
+/**
+ * Menghapus gelombang seleksi (dengan validasi relasi peserta)
+ */
+export async function deleteWave(id: string) {
+	const attachedCandidates = await db
+		.select()
+		.from(candidates)
+		.where(eq(candidates.waveId, id));
+
+	if (attachedCandidates.length > 0) {
+		throw new Error(
+			`Tidak dapat menghapus gelombang ini karena masih memiliki ${attachedCandidates.length} calon santri terdaftar. Pindahkan atau hapus data santri terlebih dahulu.`
+		);
+	}
+
+	const [deleted] = await db.delete(waves).where(eq(waves.id, id)).returning();
+
+	if (deleted) {
+		await db.insert(auditLogs).values({
+			userName: 'Panitia Admisi',
+			actionType: 'DELETE_WAVE',
+			details: `Menghapus gelombang seleksi: ${deleted.waveName}`
+		});
+	}
+
+	return deleted;
+}

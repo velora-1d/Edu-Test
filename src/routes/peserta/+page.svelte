@@ -20,7 +20,9 @@
 		GraduationCap,
 		IdCard,
 		AlertTriangle,
-		ShieldAlert
+		ShieldAlert,
+		Calendar,
+		Power
 	} from 'lucide-svelte';
 
 	let { data, form }: { data: PageData; form?: ActionData } = $props();
@@ -57,6 +59,25 @@
 	let newRoomLocation = $state('');
 	let editingRoom = $state<{ id: string; name: string; capacity: number; location: string | null } | null>(null);
 	let deletingRoom = $state<{ id: string; name: string } | null>(null);
+
+	// Wave CRUD Modal State
+	let showWaveModal = $state(false);
+	let showAddWaveForm = $state(false);
+	let newWaveName = $state('');
+	let newWaveAcademicYear = $state('2027/2028');
+	let newWaveDate = $state(new Date().toISOString().split('T')[0]);
+	let newWaveQuota = $state(80);
+	let newWaveStatus = $state<'DRAFT' | 'ACTIVE' | 'CLOSED'>('DRAFT');
+	let editingWave = $state<{
+		id: string;
+		waveName: string;
+		academicYear: string;
+		testDate: string;
+		quotaCapacity: number;
+		status: string;
+	} | null>(null);
+	let deletingWave = $state<{ id: string; waveName: string } | null>(null);
+	let isSubmittingWave = $state(false);
 
 	// Create Form State
 	let createFullName = $state('');
@@ -184,18 +205,27 @@
 	<!-- Professional Header (Clean, High Density, Zero Slop) -->
 	<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
 		<div>
-			<div class="flex items-center gap-2">
+			<div class="flex items-center gap-2 flex-wrap">
 				<h1 class="text-xl font-bold text-slate-900 tracking-tight">Data Calon Santri</h1>
-				<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/70">
-					Gelombang {data.activeWave?.waveName || '1'}
+				<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+					<Calendar class="w-3.5 h-3.5 text-blue-700" />
+					<span>TA {data.activeWave?.academicYear || '2027/2028'} • {data.activeWave?.waveName || 'Gelombang 1'}</span>
 				</span>
 			</div>
 			<p class="text-xs text-slate-500 mt-1">
-				Kelola registrasi peserta, jurusan pilihan, dan alokasi ruang ujian
+				Kelola registrasi peserta, jurusan pilihan, alokasi ruang, serta gelombang & tahun ajaran PPDB
 			</p>
 		</div>
 
 		<div class="flex items-center gap-2 shrink-0 flex-wrap">
+			<button
+				type="button"
+				onclick={() => (showWaveModal = true)}
+				class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold text-xs border border-blue-200 transition shadow-2xs active:scale-95"
+			>
+				<Calendar class="w-3.5 h-3.5 text-blue-700" />
+				<span>Kelola Gelombang & TA</span>
+			</button>
 			<button
 				type="button"
 				onclick={() => (showMasterModal = true)}
@@ -1600,6 +1630,522 @@
 					class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition"
 				>
 					{isSubmittingMaster ? 'Menghapus...' : 'Ya, Hapus'}
+				</button>
+			</form>
+		</div>
+	</div>
+{/if}
+
+<!-- MODAL KELOLA GELOMBANG & TAHUN AJARAN -->
+{#if showWaveModal}
+	<div
+		class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+		tabindex="-1"
+		role="dialog"
+		aria-modal="true"
+	>
+		<div class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 relative max-h-[90vh] flex flex-col">
+			<!-- Modal Header -->
+			<div class="flex items-start justify-between pb-3 border-b border-slate-100">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
+						<Calendar class="w-5 h-5 text-blue-700" />
+					</div>
+					<div>
+						<h2 class="text-lg font-bold text-slate-900">Kelola Gelombang & Tahun Ajaran</h2>
+						<p class="text-xs text-slate-500">Atur periode seleksi PPDB, tahun ajaran aktif, tanggal ujian, dan kuota daya tampung</p>
+					</div>
+				</div>
+				<button
+					type="button"
+					onclick={() => {
+						showWaveModal = false;
+						editingWave = null;
+						showAddWaveForm = false;
+					}}
+					class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+				>
+					<X class="w-5 h-5" />
+				</button>
+			</div>
+
+			<!-- Active Wave Summary Banner -->
+			<div class="p-4 rounded-2xl border bg-blue-50/60 border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+				<div>
+					<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+						<CheckCircle2 class="w-3.5 h-3.5 text-emerald-600" />
+						<span>GELOMBANG AKTIF SAAT INI</span>
+					</span>
+					<h3 class="text-base font-extrabold text-blue-950 mt-1">
+						{data.activeWave ? `${data.activeWave.waveName} (TA ${data.activeWave.academicYear || '2027/2028'})` : 'Belum Ada Gelombang Aktif'}
+					</h3>
+					{#if data.activeWave}
+						<p class="text-xs text-slate-600 mt-0.5">
+							Tanggal Ujian: <strong>{new Date(data.activeWave.testDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong> • Daya Tampung: <strong>{data.activeWave.quotaCapacity} Santri</strong>
+						</p>
+					{:else}
+						<p class="text-xs text-rose-600 mt-0.5">
+							Silakan klik tombol "Aktifkan" pada salah satu gelombang di bawah ini.
+						</p>
+					{/if}
+				</div>
+
+				{#if !showAddWaveForm && !editingWave}
+					<button
+						type="button"
+						onclick={() => {
+							showAddWaveForm = true;
+							newWaveName = `Gelombang ${(data.allWaves?.length || 0) + 1}`;
+							newWaveAcademicYear = data.activeWave?.academicYear || '2027/2028';
+							newWaveQuota = data.activeWave?.quotaCapacity || 80;
+						}}
+						class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-800 hover:bg-blue-900 text-white font-bold text-xs transition shadow-xs shadow-blue-950/20 shrink-0 self-start sm:self-auto"
+					>
+						<Plus class="w-4 h-4" />
+						<span>+ Tambah Gelombang Baru</span>
+					</button>
+				{/if}
+			</div>
+
+			<!-- Modal Body (Scrollable) -->
+			<div class="overflow-y-auto space-y-4 flex-1 pr-1">
+				<!-- FORM TAMBAH GELOMBANG BARU -->
+				{#if showAddWaveForm}
+					<form
+						method="POST"
+						action="?/createWave"
+						use:enhance={() => {
+							isSubmittingWave = true;
+							return async ({ update }) => {
+								isSubmittingWave = false;
+								await update();
+								showAddWaveForm = false;
+							};
+						}}
+						class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 animate-in fade-in"
+					>
+						<div class="flex items-center justify-between border-b border-slate-200 pb-2">
+							<span class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+								<Plus class="w-4 h-4 text-blue-700" />
+								Form Tambah Gelombang Seleksi Baru
+							</span>
+							<button
+								type="button"
+								onclick={() => (showAddWaveForm = false)}
+								class="text-xs text-slate-500 hover:text-slate-800"
+							>
+								Batal
+							</button>
+						</div>
+
+						<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+							<div class="space-y-1">
+								<label for="new-wave-name" class="block text-[11px] font-bold text-slate-700">Nama Gelombang:</label>
+								<input
+									id="new-wave-name"
+									name="waveName"
+									type="text"
+									required
+									bind:value={newWaveName}
+									placeholder="Contoh: Gelombang 2"
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-semibold"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="new-wave-year" class="block text-[11px] font-bold text-slate-700">Tahun Ajaran:</label>
+								<input
+									id="new-wave-year"
+									name="academicYear"
+									type="text"
+									required
+									bind:value={newWaveAcademicYear}
+									placeholder="Contoh: 2027/2028"
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-semibold"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="new-wave-date" class="block text-[11px] font-bold text-slate-700">Tanggal Tes Seleksi:</label>
+								<input
+									id="new-wave-date"
+									name="testDate"
+									type="date"
+									required
+									bind:value={newWaveDate}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="new-wave-quota" class="block text-[11px] font-bold text-slate-700">Kuota Daya Tampung (Santri):</label>
+								<input
+									id="new-wave-quota"
+									name="quotaCapacity"
+									type="number"
+									min="1"
+									max="1000"
+									required
+									bind:value={newWaveQuota}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-bold"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="new-wave-status" class="block text-[11px] font-bold text-slate-700">Status Awal:</label>
+								<select
+									id="new-wave-status"
+									name="status"
+									bind:value={newWaveStatus}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-semibold"
+								>
+									<option value="DRAFT">DRAFT (Belum Buka)</option>
+									<option value="ACTIVE">ACTIVE (Langsung Aktifkan)</option>
+								</select>
+							</div>
+
+							<div class="flex items-end">
+								<button
+									type="submit"
+									disabled={isSubmittingWave}
+									class="w-full px-4 py-2 rounded-xl text-xs font-bold bg-blue-800 text-white hover:bg-blue-900 transition shadow-xs flex items-center justify-center gap-1.5"
+								>
+									<Check class="w-3.5 h-3.5" />
+									<span>{isSubmittingWave ? 'Menyimpan...' : 'Simpan Gelombang'}</span>
+								</button>
+							</div>
+						</div>
+					</form>
+				{/if}
+
+				<!-- FORM EDIT GELOMBANG -->
+				{#if editingWave}
+					<form
+						method="POST"
+						action="?/updateWave"
+						use:enhance={() => {
+							isSubmittingWave = true;
+							return async ({ update }) => {
+								isSubmittingWave = false;
+								await update();
+								editingWave = null;
+							};
+						}}
+						class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-3 animate-in fade-in"
+					>
+						<input type="hidden" name="id" value={editingWave.id} />
+
+						<div class="flex items-center justify-between border-b border-blue-200 pb-2">
+							<span class="font-bold text-xs text-blue-950 flex items-center gap-1.5">
+								<Edit3 class="w-4 h-4 text-blue-700" />
+								Edit Gelombang: {editingWave.waveName}
+							</span>
+							<button
+								type="button"
+								onclick={() => (editingWave = null)}
+								class="text-xs text-slate-500 hover:text-slate-800"
+							>
+								Batal
+							</button>
+						</div>
+
+						<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+							<div class="space-y-1">
+								<label for="edit-wave-name" class="block text-[11px] font-bold text-slate-700">Nama Gelombang:</label>
+								<input
+									id="edit-wave-name"
+									name="waveName"
+									type="text"
+									required
+									bind:value={editingWave.waveName}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-semibold"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="edit-wave-year" class="block text-[11px] font-bold text-slate-700">Tahun Ajaran:</label>
+								<input
+									id="edit-wave-year"
+									name="academicYear"
+									type="text"
+									required
+									bind:value={editingWave.academicYear}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-semibold"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="edit-wave-date" class="block text-[11px] font-bold text-slate-700">Tanggal Tes Seleksi:</label>
+								<input
+									id="edit-wave-date"
+									name="testDate"
+									type="date"
+									required
+									bind:value={editingWave.testDate}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="edit-wave-quota" class="block text-[11px] font-bold text-slate-700">Kuota Daya Tampung (Santri):</label>
+								<input
+									id="edit-wave-quota"
+									name="quotaCapacity"
+									type="number"
+									min="1"
+									max="1000"
+									required
+									bind:value={editingWave.quotaCapacity}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-bold"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label for="edit-wave-status" class="block text-[11px] font-bold text-slate-700">Status Gelombang:</label>
+								<select
+									id="edit-wave-status"
+									name="status"
+									bind:value={editingWave.status}
+									class="w-full px-3 py-2 text-xs bg-white rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-semibold"
+								>
+									<option value="ACTIVE">ACTIVE (Sedang Berjalan)</option>
+									<option value="DRAFT">DRAFT (Belum Buka)</option>
+									<option value="CLOSED">CLOSED (Telah Ditutup)</option>
+								</select>
+							</div>
+
+							<div class="flex items-end gap-2">
+								<button
+									type="submit"
+									disabled={isSubmittingWave}
+									class="flex-1 px-4 py-2 rounded-xl text-xs font-bold bg-blue-800 text-white hover:bg-blue-900 transition shadow-xs flex items-center justify-center gap-1.5"
+								>
+									<Check class="w-3.5 h-3.5" />
+									<span>{isSubmittingWave ? 'Menyimpan...' : 'Simpan'}</span>
+								</button>
+								<button
+									type="button"
+									onclick={() => (editingWave = null)}
+									class="px-3 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+								>
+									Batal
+								</button>
+							</div>
+						</div>
+					</form>
+				{/if}
+
+				<!-- DAFTAR GELOMBANG TABLE -->
+				<div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+					<table class="w-full text-left text-xs">
+						<thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+							<tr>
+								<th class="py-3 px-3.5">Nama Gelombang</th>
+								<th class="py-3 px-3">Tahun Ajaran</th>
+								<th class="py-3 px-3">Tanggal Tes</th>
+								<th class="py-3 px-3 text-center">Kuota Tampung</th>
+								<th class="py-3 px-3 text-center">Peserta</th>
+								<th class="py-3 px-3 text-center">Status</th>
+								<th class="py-3 px-3 text-right">Aksi & Switch</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-slate-100 bg-white">
+							{#if !data.allWaves || data.allWaves.length === 0}
+								<tr>
+									<td colspan="7" class="py-8 text-center text-slate-400">
+										Belum ada data gelombang seleksi terdaftar.
+									</td>
+								</tr>
+							{:else}
+								{#each data.allWaves as w}
+									<tr class="hover:bg-slate-50/80 transition {w.status === 'ACTIVE' ? 'bg-blue-50/20' : ''}">
+										<td class="py-3 px-3.5 font-bold text-slate-900">
+											<div class="flex items-center gap-2">
+												<span>{w.waveName}</span>
+												{#if w.status === 'ACTIVE'}
+													<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Gelombang Aktif"></span>
+												{/if}
+											</div>
+										</td>
+										<td class="py-3 px-3 font-semibold text-slate-700">
+											{w.academicYear || '2027/2028'}
+										</td>
+										<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+											{new Date(w.testDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+										</td>
+										<td class="py-3 px-3 text-center font-bold text-slate-800">
+											{w.quotaCapacity}
+										</td>
+										<td class="py-3 px-3 text-center font-semibold text-blue-700">
+											{w.candidates?.length || 0}
+										</td>
+										<td class="py-3 px-3 text-center whitespace-nowrap">
+											{#if w.status === 'ACTIVE'}
+												<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+													<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+													AKTIF
+												</span>
+											{:else if w.status === 'CLOSED'}
+												<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+													DITUTUP
+												</span>
+											{:else}
+												<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+													DRAF
+												</span>
+											{/if}
+										</td>
+										<td class="py-3 px-3 text-right whitespace-nowrap">
+											<div class="inline-flex items-center gap-1.5">
+												<!-- Switch Aktifkan / Tutup Gelombang -->
+												{#if w.status !== 'ACTIVE'}
+													<form
+														method="POST"
+														action="?/activateWave"
+														use:enhance={() => {
+															isSubmittingWave = true;
+															return async ({ update }) => {
+																isSubmittingWave = false;
+																await update();
+															};
+														}}
+													>
+														<input type="hidden" name="id" value={w.id} />
+														<button
+															type="submit"
+															disabled={isSubmittingWave}
+															class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-700 hover:bg-blue-800 text-white transition flex items-center gap-1 shadow-2xs"
+															title="Jadikan Gelombang Aktif"
+														>
+															<Power class="w-3 h-3" />
+															<span>Aktifkan</span>
+														</button>
+													</form>
+												{:else}
+													<form
+														method="POST"
+														action="?/closeWave"
+														use:enhance={() => {
+															isSubmittingWave = true;
+															return async ({ update }) => {
+																isSubmittingWave = false;
+																await update();
+															};
+														}}
+													>
+														<input type="hidden" name="id" value={w.id} />
+														<button
+															type="submit"
+															disabled={isSubmittingWave}
+															class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
+															title="Tutup Gelombang Ini"
+														>
+															<span>Tutup</span>
+														</button>
+													</form>
+												{/if}
+
+												<!-- Edit Button -->
+												<button
+													type="button"
+													onclick={() => {
+														editingWave = {
+															id: w.id,
+															waveName: w.waveName,
+															academicYear: w.academicYear || '2027/2028',
+															testDate: w.testDate ? new Date(w.testDate).toISOString().split('T')[0] : '',
+															quotaCapacity: w.quotaCapacity,
+															status: w.status
+														};
+														showAddWaveForm = false;
+													}}
+													class="p-1 rounded-lg hover:bg-slate-200 text-slate-600 transition"
+													title="Edit Detail Gelombang"
+												>
+													<Edit3 class="w-3.5 h-3.5" />
+												</button>
+
+												<!-- Delete Button -->
+												<button
+													type="button"
+													onclick={() => { deletingWave = { id: w.id, waveName: w.waveName }; }}
+													disabled={(w.candidates?.length || 0) > 0}
+													class="p-1 rounded-lg hover:bg-rose-100 text-rose-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition"
+													title={(w.candidates?.length || 0) > 0 ? "Tidak dapat dihapus karena masih ada peserta terdaftar" : "Hapus Gelombang"}
+												>
+													<Trash2 class="w-3.5 h-3.5" />
+												</button>
+											</div>
+										</td>
+									</tr>
+								{/each}
+							{/if}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Modal Footer -->
+			<div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+				<span class="text-xs text-slate-500">
+					Gelombang yang aktif akan menjadi rujukan utama untuk registrasi calon santri dan sidang kelulusan.
+				</span>
+				<button
+					type="button"
+					onclick={() => {
+						showWaveModal = false;
+						editingWave = null;
+						showAddWaveForm = false;
+					}}
+					class="px-4 py-2 rounded-xl font-bold text-xs bg-slate-900 text-white hover:bg-slate-800 transition"
+				>
+					Tutup
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- MODAL KONFIRMASI HAPUS GELOMBANG -->
+{#if deletingWave}
+	<div class="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+		<div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-200 space-y-4">
+			<div class="text-center space-y-2">
+				<div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+					<Trash2 class="w-6 h-6" />
+				</div>
+				<h3 class="font-bold text-slate-900 text-base">Hapus Gelombang Seleksi?</h3>
+				<p class="text-xs text-slate-500">
+					Hapus <strong class="text-slate-800">{deletingWave.waveName}</strong>? Pastikan gelombang ini tidak sedang aktif dan tidak memiliki data peserta seleksi.
+				</p>
+			</div>
+			<form
+				method="POST"
+				action="?/deleteWave"
+				use:enhance={() => {
+					isSubmittingWave = true;
+					return async ({ update }) => {
+						isSubmittingWave = false;
+						await update();
+						deletingWave = null;
+					};
+				}}
+				class="flex items-center justify-end gap-2 pt-2"
+			>
+				<input type="hidden" name="id" value={deletingWave.id} />
+				<button
+					type="button"
+					onclick={() => (deletingWave = null)}
+					class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+				>
+					Batal
+				</button>
+				<button
+					type="submit"
+					disabled={isSubmittingWave}
+					class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition"
+				>
+					{isSubmittingWave ? 'Menghapus...' : 'Ya, Hapus'}
 				</button>
 			</form>
 		</div>
