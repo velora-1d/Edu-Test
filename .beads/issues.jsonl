@@ -25,3 +25,4 @@
 {"id":"EDU-TEST-25","title":"Sprint 4: Redesign Master Ledger & Pleno (/ledger, /pleno, verifikasi empiris build)","status":"closed","created_at":"2026-11-05T08:00:00Z","priority":"high"}
 {"id":"EDU-TEST-26","title":"Implementasi Modal Popup Pemilih Santri Berfilter (Status, Ruang, Jurusan) & Stepper Prev/Next (/tpa, /rubrik, /wawancara)","status":"closed","created_at":"2026-11-05T08:30:00Z","priority":"high"}
 {"id":"EDU-TEST-27","title":"Pembaruan Modul Wawancara (Wawancara Umum, Form Bebas Wawancara Ortu) & Integrasi Tes STIFIn","status":"closed","created_at":"2026-11-05T09:00:00Z","priority":"high"}
+{"id":"EDU-TEST-28","title":"Deploy Edu-Test ke Cloudflare Pages dengan Neon PostgreSQL & Adapter Cloudflare","status":"closed","created_at":"2026-11-06T22:23:00Z","priority":"high"}

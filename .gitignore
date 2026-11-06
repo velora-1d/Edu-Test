@@ -15,6 +15,7 @@ yarn.lock
 build/
 dist/
 .output/
+.wrangler/
 
 # OS & Logs
 .DS_Store
