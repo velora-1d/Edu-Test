@@ -25,21 +25,14 @@ import { asc } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-	// Auto seed if empty
-	const existing = await db.select().from(candidates);
-	if (existing.length === 0) {
-		await seedDatabase();
-	}
-
-	const activeWave = await getActiveWave();
-	const allWaves = await db.query.waves.findMany({
-		with: {
-			candidates: true
-		},
-		orderBy: (w, { desc }) => [desc(w.testDate)]
-	});
-
-	const [candidateList, majorList, roomList] = await Promise.all([
+	// Concurrent fetch: waves, candidates, majors, exam rooms
+	let [allWaves, candidateList, majorList, roomList] = await Promise.all([
+		db.query.waves.findMany({
+			with: {
+				candidates: true
+			},
+			orderBy: (w, { desc }) => [desc(w.testDate)]
+		}),
 		db.query.candidates.findMany({
 			with: {
 				wave: true,
@@ -53,6 +46,33 @@ export const load: PageServerLoad = async () => {
 		getMajors(),
 		getExamRooms()
 	]);
+
+	// Auto-seed only if candidates database is completely empty
+	if (candidateList.length === 0) {
+		await seedDatabase();
+		[allWaves, candidateList, majorList, roomList] = await Promise.all([
+			db.query.waves.findMany({
+				with: {
+					candidates: true
+				},
+				orderBy: (w, { desc }) => [desc(w.testDate)]
+			}),
+			db.query.candidates.findMany({
+				with: {
+					wave: true,
+					tpaScore: true,
+					pesantrenScore: true,
+					interview: true,
+					ranking: true
+				},
+				orderBy: [asc(candidates.testNumber)]
+			}),
+			getMajors(),
+			getExamRooms()
+		]);
+	}
+
+	const activeWave = allWaves.find((w) => w.status === 'ACTIVE') || null;
 
 	return {
 		activeWave,

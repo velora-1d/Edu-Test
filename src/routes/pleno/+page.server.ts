@@ -6,22 +6,23 @@ import { eq, asc } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-	// Auto seed if empty
-	const existing = await db.select().from(candidates);
-	if (existing.length === 0) {
+	const activeWave = await getActiveWave();
+	let candidateList = await getCandidatesWithScores(activeWave?.id);
+
+	// Auto seed only if empty
+	if (candidateList.length === 0) {
 		await seedDatabase();
+		candidateList = await getCandidatesWithScores(activeWave?.id);
 	}
 
-	const activeWave = await getActiveWave();
-	if (activeWave) {
-		const candidateList = await getCandidatesWithScores(activeWave.id);
+	// Calculate rankings only if any candidate does not have a ranking yet
+	if (activeWave && candidateList.length > 0) {
 		const needsRanking = candidateList.some((c) => !c.ranking);
-		if (needsRanking && candidateList.length > 0) {
+		if (needsRanking) {
 			await calculateAndSaveParallelRankings(activeWave.id);
+			candidateList = await getCandidatesWithScores(activeWave.id);
 		}
 	}
-
-	const candidateList = await getCandidatesWithScores(activeWave?.id);
 
 	// Sorted by parallel ranking
 	const sortedByRank = [...candidateList].sort(

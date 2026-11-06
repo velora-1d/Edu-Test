@@ -12,6 +12,7 @@ Siklus Task Wajib: `To Do` -> `In Progress` (`in_progress`) -> `In Review / Test
 
 ## ✅ Done
 
+- [x] **EDU-TEST-39**: Optimasi Efisiensi Request & Database Query (Preload-data tap, eliminasi query redundan server, seleksi santri reaktif di klien tanpa reload, form use:enhance, dan dirty checking autosave)
 - [x] **EDU-TEST-38**: Implementasi Pengaturan Gelombang & Tahun Ajaran (CRUD, Switch Aktif/Nonaktif, Kuota & Integrasi di `/peserta`)
 
 - [x] **EDU-TEST-37**: Penyatuan Tab Wawancara Santri (Umum + Kepesantrenan), Poin Pertanyaan Dinamis (Bisa Diedit/Ditambah), dan Humanisasi Bahasa di `/wawancara`

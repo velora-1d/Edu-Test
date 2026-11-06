@@ -6,30 +6,31 @@ import { eq } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-	// Auto seed if empty
-	const existing = await db.select().from(candidates);
-	if (existing.length === 0) {
-		await seedDatabase();
-	}
-
-	const activeWave = await getActiveWave();
-	if (activeWave) {
-		// Ensure rankings are calculated and saved
-		const candidatesList = await getCandidatesWithScores(activeWave.id);
-		const needsRanking = candidatesList.some((c) => !c.ranking);
-		if (needsRanking && candidatesList.length > 0) {
-			await calculateAndSaveParallelRankings(activeWave.id);
-		}
-	}
-
-	const allWaves = await db.query.waves.findMany({
-		orderBy: (w, { desc }) => [desc(w.testDate)]
-	});
-
-	const [candidateList, majorList] = await Promise.all([
-		getCandidatesWithScores(activeWave?.id),
+	// Concurrent fetch: waves and majors
+	const [allWaves, majorList] = await Promise.all([
+		db.query.waves.findMany({
+			orderBy: (w, { desc }) => [desc(w.testDate)]
+		}),
 		getMajors()
 	]);
+
+	const activeWave = allWaves.find((w) => w.status === 'ACTIVE') || null;
+	let candidateList = await getCandidatesWithScores(activeWave?.id);
+
+	// Auto seed only if candidates are empty
+	if (candidateList.length === 0) {
+		await seedDatabase();
+		candidateList = await getCandidatesWithScores(activeWave?.id);
+	}
+
+	// Calculate rankings only if any candidate does not have a ranking yet
+	if (activeWave && candidateList.length > 0) {
+		const needsRanking = candidateList.some((c) => !c.ranking);
+		if (needsRanking) {
+			await calculateAndSaveParallelRankings(activeWave.id);
+			candidateList = await getCandidatesWithScores(activeWave.id);
+		}
+	}
 
 	return {
 		activeWave,

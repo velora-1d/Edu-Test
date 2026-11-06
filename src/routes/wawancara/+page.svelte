@@ -51,8 +51,15 @@
 	let autosaveStatus = $state<'saved' | 'saving' | 'idle'>('idle');
 	let lastSavedTime = $state<string>('');
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let lastSavedSnapshot = $state('');
 
-	let currentCandidate = $derived(data.selectedCandidate);
+	let customSelectedId = $state<string | null>(null);
+	let selectedCandidateId = $derived(
+		customSelectedId ?? data.selectedCandidate?.id ?? data.candidates[0]?.id ?? ''
+	);
+	let currentCandidate = $derived(
+		data.candidates.find((c) => c.id === selectedCandidateId) || data.selectedCandidate
+	);
 	let interviewData = $derived(currentCandidate?.interview);
 	let isCompleted = $derived(interviewData?.completionStatus === 'COMPLETED');
 
@@ -221,6 +228,17 @@
 					specialRecommendation = 'Sangat direkomendasikan masuk kuota utama';
 					fd = { ...DEFAULT_FORM_DATA };
 				}
+
+				lastSavedSnapshot = JSON.stringify({
+					candidateId: candidate.id,
+					formData: fd,
+					studentGeneralSummary,
+					studentPesantrenSummary,
+					parentCommitmentSummary,
+					specialRecommendation,
+					interviewerName,
+					isCompleted: false
+				});
 			}
 		});
 	});
@@ -237,7 +255,12 @@
 
 	function selectCandidate(id: string) {
 		showCandidateModal = false;
-		goto(`/wawancara?candidateId=${id}`, { reset: false });
+		customSelectedId = id;
+		if (typeof window !== 'undefined') {
+			const url = new URL(window.location.href);
+			url.searchParams.set('candidateId', id);
+			window.history.replaceState({}, '', url.toString());
+		}
 	}
 
 	let currentIndex = $derived(
@@ -289,31 +312,41 @@
 		if (nextCandidate) selectCandidate(nextCandidate.id);
 	}
 
-	// Trigger autosave on field change
+	// Trigger autosave on field change with dirty checking
 	function triggerAutosave() {
 		if (isCompleted || !currentCandidate) return;
 
-		autosaveStatus = 'saving';
 		if (debounceTimer) clearTimeout(debounceTimer);
 
 		debounceTimer = setTimeout(async () => {
 			try {
+				const payload = {
+					candidateId: currentCandidate.id,
+					formData: fd,
+					studentGeneralSummary,
+					studentPesantrenSummary,
+					parentCommitmentSummary,
+					specialRecommendation,
+					interviewerName,
+					isCompleted: false
+				};
+				const payloadStr = JSON.stringify(payload);
+
+				// Dirty check: lewati request jika payload tidak berubah sama sekali
+				if (payloadStr === lastSavedSnapshot) {
+					autosaveStatus = 'saved';
+					return;
+				}
+
+				autosaveStatus = 'saving';
 				const res = await fetch('/api/wawancara', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						candidateId: currentCandidate.id,
-						formData: fd,
-						studentGeneralSummary,
-						studentPesantrenSummary,
-						parentCommitmentSummary,
-						specialRecommendation,
-						interviewerName,
-						isCompleted: false
-					})
+					body: payloadStr
 				});
 
 				if (res.ok) {
+					lastSavedSnapshot = payloadStr;
 					autosaveStatus = 'saved';
 					const now = new Date();
 					lastSavedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
@@ -336,7 +369,18 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleCandidateModalKeydown} />
+<svelte:window
+	onkeydown={handleCandidateModalKeydown}
+	onpopstate={() => {
+		if (typeof window !== 'undefined') {
+			const params = new URLSearchParams(window.location.search);
+			const cid = params.get('candidateId');
+			if (cid && cid !== selectedCandidateId) {
+				customSelectedId = cid;
+			}
+		}
+	}}
+/>
 
 <div class="w-full space-y-6">
 	<!-- Top Navigation Workflow Bar (Clean & Compact) -->

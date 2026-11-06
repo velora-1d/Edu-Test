@@ -5,35 +5,52 @@ import { desc } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	// Auto-seed if database is empty
-	const existingCount = await db.select().from(candidates);
-	if (existingCount.length === 0) {
+	// Fetch active wave, candidates, and audit logs concurrently
+	let [activeWaves, candidateList, recentLogs] = await Promise.all([
+		db.query.waves.findMany({
+			where: (waves, { eq }) => eq(waves.status, 'ACTIVE')
+		}),
+		db.query.candidates.findMany({
+			with: {
+				wave: true,
+				tpaScore: true,
+				pesantrenScore: true,
+				interview: true,
+				ranking: true
+			},
+			orderBy: [desc(candidates.createdAt)]
+		}),
+		db.query.auditLogs.findMany({
+			orderBy: [desc(auditLogs.createdAt)],
+			limit: 6
+		})
+	]);
+
+	// Auto-seed only if database is completely empty
+	if (candidateList.length === 0) {
 		await seedDatabase();
+		[activeWaves, candidateList, recentLogs] = await Promise.all([
+			db.query.waves.findMany({
+				where: (waves, { eq }) => eq(waves.status, 'ACTIVE')
+			}),
+			db.query.candidates.findMany({
+				with: {
+					wave: true,
+					tpaScore: true,
+					pesantrenScore: true,
+					interview: true,
+					ranking: true
+				},
+				orderBy: [desc(candidates.createdAt)]
+			}),
+			db.query.auditLogs.findMany({
+				orderBy: [desc(auditLogs.createdAt)],
+				limit: 6
+			})
+		]);
 	}
 
-	// Fetch active wave
-	const activeWaves = await db.query.waves.findMany({
-		where: (waves, { eq }) => eq(waves.status, 'ACTIVE')
-	});
 	const activeWave = activeWaves[0] || null;
-
-	// Fetch all candidates with relational data
-	const candidateList = await db.query.candidates.findMany({
-		with: {
-			wave: true,
-			tpaScore: true,
-			pesantrenScore: true,
-			interview: true,
-			ranking: true
-		},
-		orderBy: [desc(candidates.createdAt)]
-	});
-
-	// Fetch recent audit logs
-	const recentLogs = await db.query.auditLogs.findMany({
-		orderBy: [desc(auditLogs.createdAt)],
-		limit: 6
-	});
 
 	// Calculations
 	const totalCandidates = candidateList.length;

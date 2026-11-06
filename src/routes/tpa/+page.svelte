@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import {
 		BookOpen,
@@ -45,9 +46,16 @@
 	let modalFilterRoom = $state('ALL');
 	let modalFilterMajor = $state('ALL');
 
-	// Currently selected candidate
-	let currentCandidate = $derived(data.selectedCandidate);
+	// Currently selected candidate (reactive client-state)
+	let customSelectedId = $state<string | null>(null);
+	let selectedCandidateId = $derived(
+		customSelectedId ?? data.selectedCandidate?.id ?? data.candidates[0]?.id ?? ''
+	);
+	let currentCandidate = $derived(
+		data.candidates.find((c) => c.id === selectedCandidateId) || data.selectedCandidate
+	);
 	let isLocked = $derived(currentCandidate?.tpaScore?.lockStatus === 'LOCKED');
+	let isSubmitting = $state(false);
 
 	// Examiner Name
 	let examinerName = $state('Ust. Abdul Malik, S.Pd.');
@@ -155,7 +163,12 @@
 
 	function selectCandidate(id: string) {
 		showCandidateModal = false;
-		goto(`/tpa?candidateId=${id}`, { reset: false });
+		customSelectedId = id;
+		if (typeof window !== 'undefined') {
+			const url = new URL(window.location.href);
+			url.searchParams.set('candidateId', id);
+			window.history.replaceState({}, '', url.toString());
+		}
 	}
 
 	function goToPrev() {
@@ -175,7 +188,18 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleCandidateModalKeydown} />
+<svelte:window
+	onkeydown={handleCandidateModalKeydown}
+	onpopstate={() => {
+		if (typeof window !== 'undefined') {
+			const params = new URLSearchParams(window.location.search);
+			const cid = params.get('candidateId');
+			if (cid && cid !== selectedCandidateId) {
+				customSelectedId = cid;
+			}
+		}
+	}}
+/>
 
 <div class="w-full space-y-5">
 	<!-- Top Navigation Workflow Bar (Clean & Compact) -->
@@ -834,7 +858,17 @@
 					<!-- Form Submission Actions -->
 					{#if !isLocked}
 						<div class="pt-1 space-y-2">
-							<form method="POST" action="?/saveDraft">
+							<form
+								method="POST"
+								action="?/saveDraft"
+								use:enhance={() => {
+									isSubmitting = true;
+									return async ({ update }) => {
+										isSubmitting = false;
+										await update();
+									};
+								}}
+							>
 								<input type="hidden" name="candidateId" value={currentCandidate.id} />
 								<input type="hidden" name="examinerName" value={examinerName} />
 								<input type="hidden" name="eydCorrect" value={eyd} />
@@ -852,10 +886,11 @@
 
 								<button
 									type="submit"
-									class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition active:scale-98 shadow-2xs"
+									disabled={isSubmitting}
+									class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs flex items-center justify-center gap-1.5 transition active:scale-98 shadow-2xs disabled:opacity-50"
 								>
 									<Save class="w-3.5 h-3.5" />
-									<span>Simpan Draf</span>
+									<span>{isSubmitting ? 'Menyimpan...' : 'Simpan Draf'}</span>
 								</button>
 							</form>
 
@@ -891,7 +926,19 @@
 						</p>
 					</div>
 
-					<form method="POST" action="?/lockScore" class="space-y-4">
+					<form
+						method="POST"
+						action="?/lockScore"
+						use:enhance={() => {
+							isSubmitting = true;
+							return async ({ update }) => {
+								isSubmitting = false;
+								showLockModal = false;
+								await update();
+							};
+						}}
+						class="space-y-4"
+					>
 						<input type="hidden" name="candidateId" value={currentCandidate.id} />
 						<input type="hidden" name="examinerName" value={examinerName} />
 						<input type="hidden" name="eydCorrect" value={eyd} />
@@ -917,9 +964,10 @@
 							</button>
 							<button
 								type="submit"
-								class="px-4 py-2 rounded-xl bg-blue-700 text-white font-bold text-xs hover:bg-blue-800 shadow-xs"
+								disabled={isSubmitting}
+								class="px-4 py-2 rounded-xl bg-blue-700 text-white font-bold text-xs hover:bg-blue-800 shadow-xs disabled:opacity-50"
 							>
-								Ya, Kunci Nilai
+								{isSubmitting ? 'Mengunci...' : 'Ya, Kunci Nilai'}
 							</button>
 						</div>
 					</form>
@@ -1146,7 +1194,20 @@
 	{/if}
 
 	<!-- KONFIRMASI BUKA KUNCI NILAI -->
-	<form bind:this={unlockForm} method="POST" action="?/unlockScore" class="hidden">
+	<form
+		bind:this={unlockForm}
+		method="POST"
+		action="?/unlockScore"
+		use:enhance={() => {
+			unlockSubmitting = true;
+			return async ({ update }) => {
+				unlockSubmitting = false;
+				showUnlockModal = false;
+				await update();
+			};
+		}}
+		class="hidden"
+	>
 		<input type="hidden" name="candidateId" value={unlockCandidateId ?? ''} />
 	</form>
 
