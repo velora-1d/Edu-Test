@@ -855,7 +855,7 @@
 					<div class="space-y-4">
 						<h4 class="font-bold text-slate-900 text-sm border-b pb-2 flex items-center gap-2">
 							<FileText class="w-4 h-4 text-blue-600" />
-							<span>Dossier Kualitatif Wawancara Santri & Orang Tua</span>
+							<span>Catatan Hasil Wawancara Santri & Orang Tua</span>
 						</h4>
 
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">

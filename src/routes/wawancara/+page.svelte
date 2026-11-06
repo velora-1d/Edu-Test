@@ -47,7 +47,7 @@
 	let modalFilterRoom = $state('ALL');
 	let modalFilterMajor = $state('ALL');
 
-	let activeTab = $state<'umum' | 'ortu' | 'pesantren' | 'dossier'>('umum');
+	let activeTab = $state<'santri' | 'ortu' | 'rekomendasi'>('santri');
 	let autosaveStatus = $state<'saved' | 'saving' | 'idle'>('idle');
 	let lastSavedTime = $state<string>('');
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -59,18 +59,19 @@
 	// Interviewer
 	let interviewerName = $state('Dra. Hj. Siti Aminah');
 
-	// Form Data Default Constant (Umum, STIFIn, Kepesantrenan, dan Ortu)
+	// Form Data Default Constant (Umum & Karakter, Kepesantrenan, dan Orang Tua)
 	const DEFAULT_FORM_DATA = {
-		// A. Umum & Screening
+		// Data Dasar & Screening
 		prestasi: '',
 		anak_ke: 1,
 		dari_bersaudara: 3,
 
 		// STIFIn (Mesin Kecerdasan & Karakter)
-		stifin_category: '', // Sensing, Thinking, Intuiting, Feeling, Instinct
-		stifin_type: '', // Si, Se, Ti, Te, Ii, Ie, Fi, Fe, In, Belum Tes
+		stifin_category: '',
+		stifin_type: '',
 		stifin_notes: '',
 
+		// Screening Perilaku & Keterampilan
 		pernah_pacaran: false,
 		catatan_pacaran: '',
 		pernah_merokok: false,
@@ -80,32 +81,31 @@
 		bisa_editing: false,
 		aplikasi_editing: '',
 		penyakit_alergi: '',
-		respons_ejekan: '',
-		sikap_malas: '',
-		sikap_terhadap_teman_khusus: '',
-		pengalaman_pergaulan: '',
-		kebiasaan_berbicara: '',
-		inisiatif_mondok: 'Keinginan Sendiri & Didukung Ortu',
-		catatan_inisiatif: '',
-		manajemen_waktu: '',
-		tantangan_kemandirian: '',
-		kebiasaan_diperbaiki: '',
-		kebersihan_kamar: '',
 		durasi_gadget: '2-3 Jam',
 		rincian_gadget: '',
 
-		// B. Kepesantrenan
-		hafalan_juz: '',
-		kitab_dipelajari: '',
-		motivasi_masuk: '',
-		salat_lima_waktu: '',
-		membaca_quran: '',
-		menerima_teguran: '',
-		beda_pendapat: '',
-		ibadah_malam: '',
-		bukti_kesiapan: '',
+		// A. Poin Pertanyaan Wawancara Umum Santri (Dinamis)
+		student_general_qa: [
+			{ question: 'Inisiatif mondok & motivasi pribadi santri', answer: 'Keinginan Sendiri & Didukung Ortu' },
+			{ question: 'Prestasi yang pernah diraih santri (akademik / non-akademik)', answer: '' },
+			{ question: 'Kebiasaan berbicara, interaksi, dan pergaulan sehari-hari', answer: '' },
+			{ question: 'Tantangan kemandirian, kedisiplinan, dan kebersihan diri', answer: '' },
+			{ question: 'Sikap santri saat menghadapi rasa malas atau bosan', answer: '' },
+			{ question: 'Respons santri terhadap ejekan atau perselisihan dengan teman', answer: '' }
+		],
 
-		// C. Wawancara Orang Tua (Tanya Jawab Bebas)
+		// B. Poin Pertanyaan Wawancara Kepesantrenan (Dinamis)
+		student_pesantren_qa: [
+			{ question: 'Capaian hafalan Al-Qur\'an riil santri (juz/surat)', answer: '' },
+			{ question: 'Judul kitab / materi dasar keislaman yang pernah dipelajari', answer: '' },
+			{ question: 'Alasan dan motivasi utama memilih masuk pondok pesantren', answer: '' },
+			{ question: 'Konsistensi salat fardu 5 waktu & kebiasaan tilawah Al-Qur\'an', answer: '' },
+			{ question: 'Kesiapan mengikuti rutinitas ibadah malam (tahajud) & halaqah rutin', answer: '' },
+			{ question: 'Sikap santri saat menerima teguran/nasihat dari ustadz dan musrif', answer: '' },
+			{ question: 'Pernyataan komitmen & bukti kesiapan nyata siap beradaptasi di asrama', answer: '' }
+		],
+
+		// C. Poin Pertanyaan Wawancara Orang Tua / Wali (Dinamis)
 		parent_qa: [
 			{ question: 'Bagaimana komitmen pembiayaan pendidikan santri selama di pesantren?', answer: '' },
 			{ question: 'Apakah ananda memiliki riwayat kesehatan khusus, alergi berat, atau kebutuhan pemantauan khusus?', answer: '' },
@@ -120,6 +120,36 @@
 	let studentPesantrenSummary = $state('');
 	let parentCommitmentSummary = $state('');
 	let specialRecommendation = $state('Sangat direkomendasikan masuk kuota utama');
+
+	function addStudentGeneralQuestion(defaultQuestion = '') {
+		if (!fd.student_general_qa) fd.student_general_qa = [];
+		fd.student_general_qa = [
+			...fd.student_general_qa,
+			{ question: defaultQuestion || '', answer: '' }
+		];
+		triggerAutosave();
+	}
+
+	function removeStudentGeneralQuestion(index: number) {
+		if (!fd.student_general_qa) return;
+		fd.student_general_qa = fd.student_general_qa.filter((_: any, i: number) => i !== index);
+		triggerAutosave();
+	}
+
+	function addStudentPesantrenQuestion(defaultQuestion = '') {
+		if (!fd.student_pesantren_qa) fd.student_pesantren_qa = [];
+		fd.student_pesantren_qa = [
+			...fd.student_pesantren_qa,
+			{ question: defaultQuestion || '', answer: '' }
+		];
+		triggerAutosave();
+	}
+
+	function removeStudentPesantrenQuestion(index: number) {
+		if (!fd.student_pesantren_qa) return;
+		fd.student_pesantren_qa = fd.student_pesantren_qa.filter((_: any, i: number) => i !== index);
+		triggerAutosave();
+	}
 
 	function addParentQuestion(defaultQuestion = '') {
 		if (!fd.parent_qa) fd.parent_qa = [];
@@ -154,6 +184,27 @@
 						fd = {
 							...DEFAULT_FORM_DATA,
 							...raw,
+							student_general_qa: Array.isArray(raw.student_general_qa) && raw.student_general_qa.length > 0
+								? raw.student_general_qa
+								: [
+									{ question: 'Inisiatif mondok & motivasi pribadi santri', answer: raw.inisiatif_mondok || 'Keinginan Sendiri & Didukung Ortu' },
+									{ question: 'Prestasi yang pernah diraih santri (akademik / non-akademik)', answer: raw.prestasi || '' },
+									{ question: 'Kebiasaan berbicara, interaksi, dan pergaulan sehari-hari', answer: raw.kebiasaan_berbicara || '' },
+									{ question: 'Tantangan kemandirian, kedisiplinan, dan kebersihan diri', answer: raw.tantangan_kemandirian || '' },
+									{ question: 'Sikap santri saat menghadapi rasa malas atau bosan', answer: raw.sikap_malas || '' },
+									{ question: 'Respons santri terhadap ejekan atau perselisihan dengan teman', answer: raw.respons_ejekan || '' }
+								],
+							student_pesantren_qa: Array.isArray(raw.student_pesantren_qa) && raw.student_pesantren_qa.length > 0
+								? raw.student_pesantren_qa
+								: [
+									{ question: 'Capaian hafalan Al-Qur\'an riil santri (juz/surat)', answer: raw.hafalan_juz || '' },
+									{ question: 'Judul kitab / materi dasar keislaman yang pernah dipelajari', answer: raw.kitab_dipelajari || '' },
+									{ question: 'Alasan dan motivasi utama memilih masuk pondok pesantren', answer: raw.motivasi_masuk || '' },
+									{ question: 'Konsistensi salat fardu 5 waktu & kebiasaan tilawah Al-Qur\'an', answer: raw.salat_lima_waktu || '' },
+									{ question: 'Kesiapan mengikuti rutinitas ibadah malam (tahajud) & halaqah rutin', answer: raw.ibadah_malam || '' },
+									{ question: 'Sikap santri saat menerima teguran/nasihat dari ustadz dan musrif', answer: raw.menerima_teguran || '' },
+									{ question: 'Pernyataan komitmen & bukti kesiapan nyata siap beradaptasi di asrama', answer: raw.bukti_kesiapan || '' }
+								],
 							parent_qa: Array.isArray(raw.parent_qa) && raw.parent_qa.length > 0
 								? raw.parent_qa
 								: [...DEFAULT_FORM_DATA.parent_qa]
@@ -543,18 +594,18 @@
 
 		<!-- Section Tabs (Tablet Touch Friendly - min 48px) -->
 		<div class="bg-white rounded-2xl p-2 shadow-xs border border-slate-200">
-			<div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
 				<button
 					type="button"
-					onclick={() => (activeTab = 'umum')}
+					onclick={() => (activeTab = 'santri')}
 					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
-						activeTab === 'umum'
+						activeTab === 'santri'
 							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
 							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
 					}`}
 				>
 					<User class="w-4 h-4" />
-					<span>1. Wawancara Umum</span>
+					<span>1. Wawancara Santri (Umum & Pesantren)</span>
 				</button>
 
 				<button
@@ -572,28 +623,15 @@
 
 				<button
 					type="button"
-					onclick={() => (activeTab = 'pesantren')}
+					onclick={() => (activeTab = 'rekomendasi')}
 					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
-						activeTab === 'pesantren'
-							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
-							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-					}`}
-				>
-					<BookOpen class="w-4 h-4" />
-					<span>3. Kepesantrenan</span>
-				</button>
-
-				<button
-					type="button"
-					onclick={() => (activeTab = 'dossier')}
-					class={`py-3 px-3 rounded-xl font-bold text-xs md:text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all select-none ${
-						activeTab === 'dossier'
+						activeTab === 'rekomendasi'
 							? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
 							: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
 					}`}
 				>
 					<FileText class="w-4 h-4" />
-					<span>4. Dossier & Rekomendasi</span>
+					<span>3. Ringkasan & Rekomendasi</span>
 				</button>
 			</div>
 		</div>
@@ -608,8 +646,8 @@
 			<input type="hidden" name="parentCommitmentSummary" value={parentCommitmentSummary} />
 			<input type="hidden" name="specialRecommendation" value={specialRecommendation} />
 
-			<!-- TAB 1: WAWANCARA UMUM -->
-			{#if activeTab === 'umum'}
+			<!-- TAB 1: WAWANCARA SANTRI (UMUM & KEPESANTRENAN) -->
+			{#if activeTab === 'santri'}
 				<div class="space-y-6">
 					<!-- A.1 Identitas & Profil -->
 					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
@@ -913,217 +951,351 @@
 						</div>
 					</div>
 
-					<!-- A.3 Sikap Sosial, Emosional & Anti-Bullying -->
+					<!-- A.4 Poin Pertanyaan Wawancara Umum & Karakter Santri (Dinamis) -->
+					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-5">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+							<div>
+								<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2">
+									<User class="w-5 h-5 text-blue-700" />
+									A.4 Poin Pertanyaan Wawancara Umum & Karakter Santri
+								</h3>
+								<p class="text-xs text-slate-500 mt-0.5">
+									Pertanyaan dan respons santri dapat diedit bebas atau ditambah butir baru oleh penguji.
+								</p>
+							</div>
+
+							{#if !isCompleted}
+								<button
+									type="button"
+									onclick={() => addStudentGeneralQuestion()}
+									class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition shadow-xs shadow-blue-700/20 shrink-0 self-start sm:self-auto"
+								>
+									<Plus class="w-4 h-4" />
+									<span>Tambah Pertanyaan</span>
+								</button>
+							{/if}
+						</div>
+
+						<!-- Quick Template Chips (Umum) -->
+						{#if !isCompleted}
+							<div class="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 space-y-2">
+								<span class="text-[11px] font-bold text-blue-900 block">Templat Pertanyaan Cepat (Klik untuk menambah):</span>
+								<div class="flex flex-wrap gap-2">
+									<button
+										type="button"
+										onclick={() => addStudentGeneralQuestion('Inisiatif mondok & motivasi pribadi santri')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Inisiatif Mondok
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentGeneralQuestion('Bagaimana cara santri mengatasi rasa malas, bosan, atau jenuh saat belajar?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Mengatasi Kemalasan
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentGeneralQuestion('Apa yang kamu lakukan jika ada teman yang mengejek, mengganggu, atau berbeda watak?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Respons Bullying & Konflik
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentGeneralQuestion('Bagaimana sikap santri terhadap teman yang memiliki kekurangan fisik atau berkebutuhan khusus?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Empati & Anti-Bullying
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentGeneralQuestion('Bagaimana kebiasaan berbicara santri (apakah pernah berkata kasar/kotor)?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Kebiasaan Berbicara
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentGeneralQuestion('Apa tantangan kemandirian terbesar santri ketika jauh dari orang tua (mandi, cuci, bangun pagi)?')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 transition shadow-2xs"
+									>
+										+ Kemandirian Pribadi
+									</button>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Daftar Pertanyaan Dinamis Santri Umum -->
+						<div class="space-y-4 pt-1">
+							{#if !fd.student_general_qa || fd.student_general_qa.length === 0}
+								<div class="py-8 text-center text-slate-400 bg-slate-50/60 rounded-xl border border-dashed border-slate-200">
+									<User class="w-8 h-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
+									<p class="text-xs font-semibold text-slate-600">Belum ada butir pertanyaan wawancara umum santri</p>
+									<p class="text-[11px] text-slate-400 mt-1">Klik "+ Tambah Pertanyaan" atau pilih templat cepat di atas.</p>
+								</div>
+							{:else}
+								{#each fd.student_general_qa as qa, idx}
+									<div class="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-3">
+										<div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+											<div class="flex items-center gap-2">
+												<span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 text-xs font-bold flex items-center justify-center font-mono">
+													{idx + 1}
+												</span>
+												<span class="text-xs font-bold text-slate-700">Pertanyaan Umum #{idx + 1}</span>
+											</div>
+
+											{#if !isCompleted}
+												<button
+													type="button"
+													onclick={() => removeStudentGeneralQuestion(idx)}
+													class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+													title="Hapus pertanyaan ini"
+												>
+													<Trash2 class="w-4 h-4" />
+												</button>
+											{/if}
+										</div>
+
+										<div class="space-y-2.5">
+											<div>
+												<label for={`gen-q-${idx}`} class="block text-[11px] font-semibold text-slate-600 mb-1">
+													Teks Pertanyaan / Topik:
+												</label>
+												<input
+													id={`gen-q-${idx}`}
+													type="text"
+													disabled={isCompleted}
+													bind:value={qa.question}
+													placeholder="Ketik topik pertanyaan umum santri..."
+													class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium"
+												/>
+											</div>
+
+											<div>
+												<label for={`gen-a-${idx}`} class="block text-[11px] font-semibold text-slate-600 mb-1">
+													Jawaban / Respons Santri:
+												</label>
+												<textarea
+													id={`gen-a-${idx}`}
+													disabled={isCompleted}
+													bind:value={qa.answer}
+													rows="2"
+													placeholder="Ketik catatan respons santri..."
+													class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
+												></textarea>
+											</div>
+										</div>
+									</div>
+								{/each}
+							{/if}
+						</div>
+					</div>
+
+					<!-- PEMBATAS VISUAL KEPESANTRENAN -->
+					<div class="relative py-6 my-2">
+						<div class="absolute inset-0 flex items-center" aria-hidden="true">
+							<div class="w-full border-t-2 border-emerald-300"></div>
+						</div>
+						<div class="relative flex justify-center">
+							<span class="bg-emerald-50 text-emerald-900 px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider border-2 border-emerald-300 flex items-center gap-2.5 shadow-sm">
+								<BookOpen class="w-4 h-4 text-emerald-700" />
+								<span>Bagian B: Kesiapan & Wawancara Kepesantrenan</span>
+							</span>
+						</div>
+					</div>
+
+					<!-- B.1 Capaian Riil Al-Qur'an & Kitab -->
 					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
 						<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-							<span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span>
-							A.3 Sikap Sosial, Emosional & Anti-Bullying
+							<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+							B.1 Portofolio Riil Al-Qur'an & Kitab
 						</h3>
 
-						<div class="space-y-4">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div class="space-y-1.5">
-								<label for="respons-ejekan" class="block text-xs font-bold text-slate-800">
-									8. Respons terhadap Ejekan/Gangguan Teman:
-									<span class="font-normal text-slate-500 italic">("Apa yang akan kamu lakukan jika ada teman yang mengejek atau mengganggumu?")</span>
+								<label for="hafalan-juz" class="block text-xs font-bold text-slate-800">
+									Capaian Hafalan Al-Qur'an Riil:
 								</label>
-								<textarea
-									id="respons-ejekan"
+								<input
+									id="hafalan-juz"
+									type="text"
 									disabled={isCompleted}
-									bind:value={fd.respons_ejekan}
-									rows="2"
+									bind:value={fd.hafalan_juz}
 									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Jawaban santri..."
-								></textarea>
+									placeholder="Contoh: 3 Juz (Juz 30, Juz 29, Surat Al-Baqarah 1-50)..."
+								/>
 							</div>
 
 							<div class="space-y-1.5">
-								<label for="sikap-malas" class="block text-xs font-bold text-slate-800">
-									9. Motivasi Mengatasi Kemalasan:
-									<span class="font-normal text-slate-500 italic">("Apa yang akan kamu lakukan jika merasa malas mengikuti kegiatan pesantren?")</span>
+								<label for="kitab-dipelajari" class="block text-xs font-bold text-slate-800">
+									Judul Kitab yang Pernah Dipelajari:
 								</label>
-								<textarea
-									id="sikap-malas"
+								<input
+									id="kitab-dipelajari"
+									type="text"
 									disabled={isCompleted}
-									bind:value={fd.sikap_malas}
-									rows="2"
+									bind:value={fd.kitab_dipelajari}
 									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Jawaban santri..."
-								></textarea>
-							</div>
-
-							<div class="space-y-1.5">
-								<label for="sikap-teman-khusus" class="block text-xs font-bold text-slate-800">
-									10. Empati & Sikap Inklusif (Anti-Bullying & ABK):
-									<span class="font-normal text-slate-500 italic">("Jika teman kamu ada yang culun, bibir sumbing, anak mami, ABK, bodoh, gagap, cadel, apa yang kamu katakan dan bagaimana sikap kamu terhadap dia?")</span>
-								</label>
-								<textarea
-									id="sikap-teman-khusus"
-									disabled={isCompleted}
-									bind:value={fd.sikap_terhadap_teman_khusus}
-									rows="2"
-									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Jawaban santri..."
-								></textarea>
-							</div>
-
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div class="space-y-1.5">
-									<label for="pengalaman-pergaulan" class="block text-xs font-bold text-slate-800">
-										11. Pengalaman Pergaulan Sebelumnya:
-										<span class="font-normal text-slate-500 italic">("Pernah mengalami kejadian kurang menyenangkan?")</span>
-									</label>
-									<textarea
-										id="pengalaman-pergaulan"
-										disabled={isCompleted}
-										bind:value={fd.pengalaman_pergaulan}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Jawaban santri..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="kebiasaan-berbicara" class="block text-xs font-bold text-slate-800">
-										12. Kebiasaan Berbicara & Interaksi:
-										<span class="font-normal text-slate-500 italic">("Apakah pernah berkata kasar/kotor atau menyakiti orang lain?")</span>
-									</label>
-									<textarea
-										id="kebiasaan-berbicara"
-										disabled={isCompleted}
-										bind:value={fd.kebiasaan_berbicara}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Jawaban santri..."
-									></textarea>
-								</div>
+									placeholder="Contoh: Safinatun Najah, Jurumiyah, Mabadi Fiqhiyah, Al-Ajrumiyah..."
+								/>
 							</div>
 						</div>
 					</div>
 
-					<!-- A.4 Kemandirian & Kesiapan Mental Mondok -->
-					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
-						<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-							<span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span>
-							A.4 Kemandirian & Kesiapan Mental Mondok
-						</h3>
-
-						<div class="space-y-4">
-							<!-- 13. Inisiatif Mondok -->
-							<div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-								<span class="block text-xs font-bold text-slate-800">13. Inisiatif Keputusan Masuk Pesantren:</span>
-								<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-									{#each ['Keinginan Sendiri', 'Keinginan Orang Tua', 'Keinginan Sendiri & Didukung Ortu'] as opt}
-										<button
-											type="button"
-											disabled={isCompleted}
-											onclick={() => { fd.inisiatif_mondok = opt; triggerAutosave(); }}
-											class={`p-3 rounded-xl font-bold text-xs min-h-[48px] transition-all text-center ${
-												fd.inisiatif_mondok === opt
-													? 'bg-blue-800 text-white shadow-md ring-2 ring-blue-500/40'
-													: 'bg-white border border-slate-300 text-slate-700 hover:border-blue-400'
-											}`}
-										>
-											{opt}
-										</button>
-									{/each}
-								</div>
-								<input
-									type="text"
-									disabled={isCompleted}
-									bind:value={fd.catatan_inisiatif}
-									class="w-full p-2.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
-									placeholder="Alasan santri ingin mondok / respon orang tua..."
-								/>
+					<!-- B.2 Poin Pertanyaan Wawancara Kepesantrenan (Dinamis) -->
+					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-5">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+							<div>
+								<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2">
+									<BookOpen class="w-5 h-5 text-emerald-700" />
+									B.2 Poin Pertanyaan Wawancara Kepesantrenan
+								</h3>
+								<p class="text-xs text-slate-500 mt-0.5">
+									Pertanyaan komitmen ibadah, adab, dan adaptasi kepesantrenan dapat diedit atau ditambah bebas.
+								</p>
 							</div>
 
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div class="space-y-1.5">
-									<label for="manajemen-waktu" class="block text-xs font-bold text-slate-800">
-										14. Manajemen Waktu Pribadi:
-										<span class="font-normal text-slate-500 italic">("Cara mengatur belajar, ibadah, istirahat...")</span>
-									</label>
-									<textarea
-										id="manajemen-waktu"
-										disabled={isCompleted}
-										bind:value={fd.manajemen_waktu}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Jawaban santri..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="tantangan-kemandirian" class="block text-xs font-bold text-slate-800">
-										15. Tantangan Kemandirian Terbesar:
-										<span class="font-normal text-slate-500 italic">("Hal paling sulit saat jauh dari orang tua?")</span>
-									</label>
-									<textarea
-										id="tantangan-kemandirian"
-										disabled={isCompleted}
-										bind:value={fd.tantangan_kemandirian}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Jawaban santri..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="kebiasaan-diperbaiki" class="block text-xs font-bold text-slate-800">
-										16. Refleksi Kebiasaan yang Ingin Diperbaiki:
-									</label>
-									<textarea
-										id="kebiasaan-diperbaiki"
-										disabled={isCompleted}
-										bind:value={fd.kebiasaan_diperbaiki}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Sikap atau kebiasaan buruk yang ingin diubah setelah di pondok..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="kebersihan-kamar" class="block text-xs font-bold text-slate-800">
-										17. Kebersihan Kamar & Barang Pribadi:
-									</label>
-									<textarea
-										id="kebersihan-kamar"
-										disabled={isCompleted}
-										bind:value={fd.kebersihan_kamar}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Kebiasaan merapikan kasur, mencuci pakaian, menjaga kebersihan..."
-									></textarea>
-								</div>
-							</div>
-
-							<!-- 18. Penggunaan Gadget / HP -->
-							<div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-								<span class="block text-xs font-bold text-slate-800">18. Intensitas Penggunaan Gadget / HP dalam Sehari:</span>
-								<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-									{#each ['< 1 Jam', '1-2 Jam', '2-4 Jam', '> 5 Jam'] as dur}
-										<button
-											type="button"
-											disabled={isCompleted}
-											onclick={() => { fd.durasi_gadget = dur; triggerAutosave(); }}
-											class={`p-2.5 rounded-xl font-bold text-xs min-h-[44px] transition-all text-center ${
-												fd.durasi_gadget === dur
-													? 'bg-blue-800 text-white shadow-xs'
-													: 'bg-white border border-slate-300 text-slate-700'
-											}`}
-										>
-											{dur}
-										</button>
-									{/each}
-								</div>
-								<input
-									type="text"
-									disabled={isCompleted}
-									bind:value={fd.rincian_gadget}
-									class="w-full p-2.5 text-xs bg-white rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
-									placeholder="Biasanya digunakan untuk apa saja (game apa, medsos apa, belajar apa)..."
-								/>
-							</div>
+							{#if !isCompleted}
+								<button
+									type="button"
+									onclick={() => addStudentPesantrenQuestion()}
+									class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition shadow-xs shadow-emerald-700/20 shrink-0 self-start sm:self-auto"
+								>
+									<Plus class="w-4 h-4" />
+									<span>Tambah Pertanyaan</span>
+								</button>
+							{/if}
 						</div>
+
+						<!-- Quick Template Chips (Pesantren) -->
+						{#if !isCompleted}
+							<div class="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100 space-y-2">
+								<span class="text-[11px] font-bold text-emerald-900 block">Templat Pertanyaan Cepat (Klik untuk menambah):</span>
+								<div class="flex flex-wrap gap-2">
+									<button
+										type="button"
+										onclick={() => addStudentPesantrenQuestion('Alasan dan motivasi utama memilih masuk pondok pesantren')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs"
+									>
+										+ Motivasi Masuk Pondok
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentPesantrenQuestion('Konsistensi salat fardu 5 waktu & kebiasaan tilawah Al-Qur\'an')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs"
+									>
+										+ Konsistensi Salat & Tilawah
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentPesantrenQuestion('Kesiapan mengikuti rutinitas ibadah malam (tahajud) & halaqah rutin')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs"
+									>
+										+ Ibadah Malam & Halaqah
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentPesantrenQuestion('Sikap santri saat menerima teguran atau nasihat dari ustadz dan musrif')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs"
+									>
+										+ Sikap Menerima Nasihat
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentPesantrenQuestion('Cara menyelesaikan jika ada perbedaan pendapat dengan teman asrama')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs"
+									>
+										+ Toleransi & Beda Pendapat
+									</button>
+									<button
+										type="button"
+										onclick={() => addStudentPesantrenQuestion('Pernyataan komitmen & bukti kesiapan nyata siap beradaptasi di asrama')}
+										class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition shadow-2xs"
+									>
+										+ Bukti Kesiapan Nyata
+									</button>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Daftar Pertanyaan Dinamis Pesantren -->
+						<div class="space-y-4 pt-1">
+							{#if !fd.student_pesantren_qa || fd.student_pesantren_qa.length === 0}
+								<div class="py-8 text-center text-slate-400 bg-slate-50/60 rounded-xl border border-dashed border-slate-200">
+									<BookOpen class="w-8 h-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
+									<p class="text-xs font-semibold text-slate-600">Belum ada butir pertanyaan kepesantrenan</p>
+									<p class="text-[11px] text-slate-400 mt-1">Klik "+ Tambah Pertanyaan" atau pilih templat cepat di atas.</p>
+								</div>
+							{:else}
+								{#each fd.student_pesantren_qa as qa, idx}
+									<div class="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-3">
+										<div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+											<div class="flex items-center gap-2">
+												<span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center font-mono">
+													{idx + 1}
+												</span>
+												<span class="text-xs font-bold text-slate-700">Pertanyaan Kepesantrenan #{idx + 1}</span>
+											</div>
+
+											{#if !isCompleted}
+												<button
+													type="button"
+													onclick={() => removeStudentPesantrenQuestion(idx)}
+													class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+													title="Hapus pertanyaan ini"
+												>
+													<Trash2 class="w-4 h-4" />
+												</button>
+											{/if}
+										</div>
+
+										<div class="space-y-2.5">
+											<div>
+												<label for={`pes-q-${idx}`} class="block text-[11px] font-semibold text-slate-600 mb-1">
+													Teks Pertanyaan / Topik:
+												</label>
+												<input
+													id={`pes-q-${idx}`}
+													type="text"
+													disabled={isCompleted}
+													bind:value={qa.question}
+													placeholder="Ketik topik pertanyaan kepesantrenan..."
+													class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 focus:bg-white font-medium"
+												/>
+											</div>
+
+											<div>
+												<label for={`pes-a-${idx}`} class="block text-[11px] font-semibold text-slate-600 mb-1">
+													Jawaban / Respons Santri:
+												</label>
+												<textarea
+													id={`pes-a-${idx}`}
+													disabled={isCompleted}
+													bind:value={qa.answer}
+													rows="2"
+													placeholder="Ketik catatan respons santri..."
+													class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-emerald-600 focus:bg-white"
+												></textarea>
+											</div>
+										</div>
+									</div>
+								{/each}
+							{/if}
+						</div>
+					</div>
+
+					<!-- Navigasi Stepper Lanjut ke Wawancara Ortu -->
+					<div class="pt-4 flex justify-end">
+						<button
+							type="button"
+							onclick={() => { activeTab = 'ortu'; window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+							class="px-5 py-3 rounded-xl bg-blue-800 hover:bg-blue-900 text-white font-bold text-xs md:text-sm flex items-center gap-2 shadow-md shadow-blue-950/20 transition min-h-[44px]"
+						>
+							<span>Lanjut ke Wawancara Orang Tua</span>
+							<ArrowRight class="w-4 h-4" />
+						</button>
 					</div>
 				</div>
 			{/if}
@@ -1278,186 +1450,51 @@
 								placeholder="Catatan ringkas pewawancara mengenai kesiapan wali santri (finansial, mental mendukung pesantren, dll)..."
 							></textarea>
 						</div>
-					</div>
-				</div>
-			{/if}
 
-			<!-- TAB 3: WAWANCARA KEPESANTRENAN -->
-			{#if activeTab === 'pesantren'}
-				<div class="space-y-6">
-					<!-- B.1 Capaian Riil -->
-					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
-						<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-							<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-							B.1 Portofolio Riil Al-Qur'an & Kitab
-						</h3>
+						<!-- Navigasi Stepper Ortu -->
+						<div class="pt-4 flex items-center justify-between border-t border-slate-100 flex-wrap gap-3">
+							<button
+								type="button"
+								onclick={() => { activeTab = 'santri'; window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+								class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs md:text-sm flex items-center gap-2 transition min-h-[44px]"
+							>
+								<ArrowLeft class="w-4 h-4" />
+								<span>Kembali ke Wawancara Santri</span>
+							</button>
 
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div class="space-y-1.5">
-								<label for="hafalan-juz" class="block text-xs font-bold text-slate-800">
-									19. Capaian Hafalan Al-Qur'an Riil:
-								</label>
-								<input
-									id="hafalan-juz"
-									type="text"
-									disabled={isCompleted}
-									bind:value={fd.hafalan_juz}
-									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Contoh: 3 Juz (Juz 30, Juz 29, Surat Al-Baqarah 1-50)..."
-								/>
-							</div>
-
-							<div class="space-y-1.5">
-								<label for="kitab-dipelajari" class="block text-xs font-bold text-slate-800">
-									20. Judul Kitab yang Pernah Dipelajari:
-								</label>
-								<input
-									id="kitab-dipelajari"
-									type="text"
-									disabled={isCompleted}
-									bind:value={fd.kitab_dipelajari}
-									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Contoh: Safinatun Najah, Jurumiyah, Mabadi Fiqhiyah, Al-Ajrumiyah..."
-								/>
-							</div>
-						</div>
-					</div>
-
-					<!-- B.2 Komitmen Spiritual & Kedisiplinan -->
-					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-4">
-						<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-							<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-							B.2 Wawancara Komitmen Spiritual & Kedisiplinan
-						</h3>
-
-						<div class="space-y-4">
-							<div class="space-y-1.5">
-								<label for="motivasi-masuk" class="block text-xs font-bold text-slate-800">
-									21. Motivasi Utama:
-									<span class="font-normal text-slate-500 italic">("Alasan sebenarnya kamu ingin masuk pesantren?")</span>
-								</label>
-								<textarea
-									id="motivasi-masuk"
-									disabled={isCompleted}
-									bind:value={fd.motivasi_masuk}
-									rows="2"
-									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Jawaban santri..."
-								></textarea>
-							</div>
-
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div class="space-y-1.5">
-									<label for="salat-lima-waktu" class="block text-xs font-bold text-slate-800">
-										22. Konsistensi Salat 5 Waktu:
-									</label>
-									<textarea
-										id="salat-lima-waktu"
-										disabled={isCompleted}
-										bind:value={fd.salat_lima_waktu}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Apakah rutin berjamaah, bolong-bolong, atau harus diingatkan..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="membaca-quran" class="block text-xs font-bold text-slate-800">
-										23. Kebiasaan Membaca Al-Qur'an:
-									</label>
-									<textarea
-										id="membaca-quran"
-										disabled={isCompleted}
-										bind:value={fd.membaca_quran}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Seberapa sering membaca (harian, mingguan, ba'da maghrib)..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="menerima-teguran" class="block text-xs font-bold text-slate-800">
-										24. Sikap Menerima Teguran/Nasihat:
-									</label>
-									<textarea
-										id="menerima-teguran"
-										disabled={isCompleted}
-										bind:value={fd.menerima_teguran}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Respons ketika mendapatkan teguran dari guru atau ustadz..."
-									></textarea>
-								</div>
-
-								<div class="space-y-1.5">
-									<label for="beda-pendapat" class="block text-xs font-bold text-slate-800">
-										25. Penyelesaian Perbedaan Pendapat:
-									</label>
-									<textarea
-										id="beda-pendapat"
-										disabled={isCompleted}
-										bind:value={fd.beda_pendapat}
-										rows="2"
-										class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-										placeholder="Cara menyikapi jika tidak setuju dengan pendapat teman asrama..."
-									></textarea>
-								</div>
-							</div>
-
-							<div class="space-y-1.5">
-								<label for="ibadah-malam" class="block text-xs font-bold text-slate-800">
-									26. Kesiapan Rutinitas Ibadah Malam & Halaqah:
-									<span class="font-normal text-slate-500 italic">("Bagaimana perasaan kamu jika harus mengikuti tahajud, zikir, kajian rutin?")</span>
-								</label>
-								<textarea
-									id="ibadah-malam"
-									disabled={isCompleted}
-									bind:value={fd.ibadah_malam}
-									rows="2"
-									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Kesiapan fisik dan mental bangun pagi dan disiplin halaqah..."
-								></textarea>
-							</div>
-
-							<div class="space-y-1.5">
-								<label for="bukti-kesiapan" class="block text-xs font-bold text-slate-800">
-									27. Bukti Kesiapan Nyata Santri (Pernyataan Komitmen):
-									<span class="font-normal text-slate-500 italic">("Bukti konkret bahwa kamu siap menjadi santri, bukan hanya ingin diterima?")</span>
-								</label>
-								<textarea
-									id="bukti-kesiapan"
-									disabled={isCompleted}
-									bind:value={fd.bukti_kesiapan}
-									rows="2"
-									class="w-full p-3 text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-									placeholder="Pernyataan komitmen santri..."
-								></textarea>
-							</div>
+							<button
+								type="button"
+								onclick={() => { activeTab = 'rekomendasi'; window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+								class="px-5 py-3 rounded-xl bg-blue-800 hover:bg-blue-900 text-white font-bold text-xs md:text-sm flex items-center gap-2 shadow-md shadow-blue-950/20 transition min-h-[44px]"
+							>
+								<span>Lanjut ke Ringkasan & Rekomendasi</span>
+								<ArrowRight class="w-4 h-4" />
+							</button>
 						</div>
 					</div>
 				</div>
 			{/if}
 
-			<!-- TAB 4: DOSSIER & REKOMENDASI -->
-			{#if activeTab === 'dossier'}
+			<!-- TAB 3: RINGKASAN & REKOMENDASI -->
+			{#if activeTab === 'rekomendasi'}
 				<div class="space-y-6">
 					<div class="bg-white rounded-2xl p-5 md:p-6 shadow-xs border border-slate-200 space-y-5">
 						<div class="flex items-center justify-between pb-3 border-b border-slate-100">
 							<div>
 								<h3 class="font-extrabold text-base text-blue-900 flex items-center gap-2">
 									<FileText class="w-5 h-5 text-blue-700" />
-									Dossier Wawancara & Rekomendasi Pleno
+									Ringkasan Wawancara & Rekomendasi Kelulusan
 								</h3>
 								<p class="text-xs text-slate-500">
-									Catatan kualitatif penguji untuk pertimbangan Dewan Penguji pada Sidang Pleno Kelulusan
+									Catatan penguji untuk pertimbangan pimpinan pada Sidang Kelulusan
 								</p>
 							</div>
 						</div>
 
-						<!-- Glanceable STIFIn & Ortu Status Summary -->
+						<!-- Ringkasan Cepat Santri & Ortu -->
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
 							<div class="space-y-1">
-								<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Hasil Tes STIFIn</span>
+								<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Hasil Tes STIFIn Santri</span>
 								<div class="flex items-center gap-2">
 									{#if fd.stifin_category || fd.stifin_type}
 										<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 text-xs font-bold font-mono">
@@ -1467,7 +1504,7 @@
 											{/if}
 										</span>
 									{:else}
-										<span class="text-xs text-slate-400 italic">Belum diisi di Wawancara Umum</span>
+										<span class="text-xs text-slate-400 italic">Belum diisi di tab Wawancara Santri</span>
 									{/if}
 								</div>
 								{#if fd.stifin_notes}
@@ -1480,7 +1517,7 @@
 								<div>
 									{#if fd.parent_qa && fd.parent_qa.length > 0}
 										<span class="text-xs font-semibold text-slate-700">
-											{fd.parent_qa.filter((q: any) => q.answer && q.answer.trim()).length} dari {fd.parent_qa.length} butir terisi
+											{fd.parent_qa.filter((q: any) => q.answer && q.answer.trim()).length} dari {fd.parent_qa.length} butir pertanyaan terisi
 										</span>
 									{:else}
 										<span class="text-xs text-slate-400 italic">Belum ada butir pertanyaan</span>
@@ -1495,7 +1532,7 @@
 						<div class="space-y-4">
 							<div class="space-y-1.5">
 								<label for="summary-umum" class="block text-xs font-bold text-slate-800">
-									Catatan Profil Umum, Karakter & Kemandirian Santri:
+									Catatan Profil & Karakter Santri:
 								</label>
 								<textarea
 									id="summary-umum"
@@ -1509,7 +1546,7 @@
 
 							<div class="space-y-1.5">
 								<label for="summary-pesantren" class="block text-xs font-bold text-slate-800">
-									Catatan Kesiapan Asrama & Komitmen Spiritual:
+									Catatan Kesiapan Asrama & Kepesantrenan:
 								</label>
 								<textarea
 									id="summary-pesantren"
@@ -1523,7 +1560,7 @@
 
 							<div class="space-y-1.5">
 								<label for="summary-ortu" class="block text-xs font-bold text-slate-800">
-									Catatan Komitmen & Kesediaan Orang Tua / Wali:
+									Catatan Komitmen Orang Tua / Wali:
 								</label>
 								<textarea
 									id="summary-ortu"
@@ -1539,7 +1576,7 @@
 							<div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200 space-y-3">
 								<label for="rekomendasi-khusus" class="block text-xs font-extrabold text-blue-900 flex items-center gap-1.5">
 									<Sparkles class="w-4 h-4 text-blue-700" />
-									Rekomendasi Khusus Penguji untuk Sidang Pleno:
+									Rekomendasi Kelulusan untuk Sidang Kelulusan:
 								</label>
 
 								<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1587,6 +1624,18 @@
 									placeholder="Nama pewawancara..."
 								/>
 							</div>
+
+							<!-- Stepper Balik ke Ortu -->
+							<div class="pt-4 flex justify-start border-t border-slate-100">
+								<button
+									type="button"
+									onclick={() => { activeTab = 'ortu'; window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+									class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs md:text-sm flex items-center gap-2 transition min-h-[44px]"
+								>
+									<ArrowLeft class="w-4 h-4" />
+									<span>Kembali ke Wawancara Orang Tua</span>
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -1616,17 +1665,17 @@
 							class="flex-1 sm:flex-initial px-6 py-3 rounded-xl bg-blue-800 text-white hover:bg-blue-900 font-bold text-sm min-h-[48px] flex items-center justify-center gap-2 transition-all active:scale-98 shadow-md shadow-blue-950/20"
 						>
 							<Check class="w-4 h-4" />
-							<span>Tandai Selesai & Kunci Dossier</span>
+							<span>Tandai Selesai & Simpan Wawancara</span>
 						</button>
 					</div>
 				{:else}
 					<div class="text-xs font-semibold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
-						Dossier wawancara peserta ini telah lengkap & terkunci.
+						Hasil wawancara santri ini telah selesai & tersimpan resmi.
 					</div>
 				{/if}
 			</div>
 
-			<!-- Custom Modal Konfirmasi Kunci Dossier Wawancara -->
+			<!-- Custom Modal Konfirmasi Selesai Wawancara -->
 			{#if showCompleteModal}
 				<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
 					<div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
@@ -1634,9 +1683,9 @@
 							<Lock class="w-6 h-6 text-blue-700" />
 						</div>
 						<div>
-							<h3 class="text-lg font-bold text-slate-900">Kunci Dossier Wawancara?</h3>
+							<h3 class="text-lg font-bold text-slate-900">Selesaikan & Simpan Hasil Wawancara?</h3>
 							<p class="text-xs text-slate-500 mt-1 leading-relaxed">
-								Anda akan menandai sesi wawancara untuk <strong>{currentCandidate.fullName}</strong> ({currentCandidate.testNumber}) telah selesai. Catatan wawancara yang terkunci akan menjadi rujukan resmi pimpinan pada Sidang Pleno.
+								Anda akan menandai sesi wawancara untuk <strong>{currentCandidate.fullName}</strong> ({currentCandidate.testNumber}) telah selesai. Catatan wawancara yang tersimpan akan menjadi rujukan resmi pimpinan pada Sidang Kelulusan.
 							</p>
 						</div>
 
@@ -1666,7 +1715,7 @@
 								class="px-5 py-2.5 rounded-xl bg-blue-800 text-white font-bold text-sm hover:bg-blue-900 transition shadow-md shadow-blue-950/20 min-h-[44px] flex items-center gap-2"
 							>
 								<Check class="w-4 h-4" />
-								<span>Ya, Kunci Dossier</span>
+								<span>Ya, Selesaikan Wawancara</span>
 							</button>
 						</div>
 					</div>
