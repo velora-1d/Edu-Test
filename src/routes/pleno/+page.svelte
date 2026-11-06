@@ -142,7 +142,7 @@
 </script>
 
 <svelte:head>
-	<title>Sidang Pleno Kelulusan Santri | Edu-Test</title>
+	<title>Penetapan Hasil Kelulusan Santri | Edu-Test</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -166,7 +166,7 @@
 			</a>
 			<span class="text-slate-300">&rarr;</span>
 			<span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-700 text-white font-bold shadow-2xs">
-				Sidang Pleno
+				Penetapan Kelulusan
 			</span>
 		</div>
 
@@ -182,13 +182,13 @@
 	<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
 		<div>
 			<div class="flex items-center gap-2">
-				<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Sidang Pleno Penetapan Kelulusan</h1>
+				<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Penetapan Hasil Kelulusan Santri</h1>
 				<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
-					Majelis Pimpinan
+					Pimpinan Pondok
 				</span>
 			</div>
 			<p class="text-sm text-slate-500 mt-1">
-				Penetapan cut-off kuota daya tampung, penelaahan dossier kualitatif, dan pengesahan Surat Keputusan (SK)
+				Penetapan batas kuota penerimaan, tinjauan catatan wawancara santri, dan pengesahan hasil seleksi santri baru.
 			</p>
 		</div>
 
@@ -198,7 +198,7 @@
 				class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition border border-slate-300 shadow-sm"
 			>
 				<FileSpreadsheet class="w-4 h-4" />
-				<span>Lihat Master Ledger</span>
+				<span>Buka Rekap Nilai Lengkap</span>
 			</a>
 		</div>
 	</div>
@@ -209,7 +209,7 @@
 			<div class="flex items-center gap-3">
 				<ShieldCheck class="w-6 h-6 text-emerald-600" />
 				<div>
-					<p class="font-bold">Pengesahan Pleno Berhasil!</p>
+					<p class="font-bold">Pengesahan Kelulusan Berhasil!</p>
 					<p class="text-xs text-emerald-700">{form.message}</p>
 				</div>
 			</div>
@@ -219,7 +219,7 @@
 			<div class="flex items-center gap-3">
 				<AlertCircle class="w-6 h-6 text-rose-600" />
 				<div>
-					<p class="font-bold">Gagal Mengesahkan Pleno</p>
+					<p class="font-bold">Gagal Menyimpan Kelulusan</p>
 					<p class="text-xs text-rose-700">{form.error}</p>
 				</div>
 			</div>
@@ -234,7 +234,7 @@
 				<div class="flex items-center justify-between">
 					<label for="quota-slider" class="text-sm font-bold text-sky-200 flex items-center gap-2">
 						<Sliders class="w-4 h-4 text-sky-300" />
-						Simulasi Cut-Off Kuota Daya Tampung:
+						Simulasi Batas Kuota Penerimaan:
 					</label>
 					<div class="flex items-center gap-2">
 						<input
@@ -245,7 +245,7 @@
 							bind:value={quotaInput}
 							class="w-16 px-2.5 py-1 text-center font-extrabold text-blue-900 bg-white rounded-lg text-base border-none focus:ring-2 focus:ring-sky-400"
 						/>
-						<span class="text-xs text-sky-200">Kursi Santri</span>
+						<span class="text-xs text-sky-200">Santri</span>
 					</div>
 				</div>
 
@@ -261,23 +261,23 @@
 
 				<div class="flex justify-between text-[11px] text-sky-300">
 					<span>Min: 1</span>
-					<span>Default: {data.quotaCapacity}</span>
-					<span>Maks: {data.candidates.length} (Kapasitas Total)</span>
+					<span>Kapasitas Default: {data.quotaCapacity}</span>
+					<span>Maks: {data.candidates.length} (Total Pendaftar)</span>
 				</div>
 			</div>
 
 			<!-- Cut-Off Passing Grade & Acceptance Metric -->
 			<div class="flex items-center gap-4 bg-white/10 p-4 rounded-xl border border-white/15 backdrop-blur-sm">
 				<div class="text-center px-3 border-r border-white/20">
-					<span class="text-[11px] text-sky-200 block uppercase font-medium">Lulus Kuota</span>
+					<span class="text-[11px] text-sky-200 block uppercase font-medium">Diterima (Lulus)</span>
 					<span class="text-2xl font-black text-emerald-300">{metrics().lulusCount}</span>
 				</div>
 				<div class="text-center px-3 border-r border-white/20">
-					<span class="text-[11px] text-sky-200 block uppercase font-medium">Waiting List</span>
+					<span class="text-[11px] text-sky-200 block uppercase font-medium">Cadangan</span>
 					<span class="text-2xl font-black text-amber-300">{metrics().waitingCount}</span>
 				</div>
 				<div class="text-center px-3">
-					<span class="text-[11px] text-sky-200 block uppercase font-medium">Passing Grade</span>
+					<span class="text-[11px] text-sky-200 block uppercase font-medium">Nilai Terendah Lolos</span>
 					<span class="text-2xl font-black text-white">{metrics().passingGrade || '-'}</span>
 				</div>
 			</div>
@@ -286,7 +286,7 @@
 		<!-- Breakdown Acceptance per Jurusan & Form Pengesahan -->
 		<div class="mt-6 pt-5 border-t border-white/15 flex flex-col md:flex-row md:items-center justify-between gap-4">
 			<div class="flex items-center gap-4 flex-wrap text-xs text-sky-200">
-				<span>Sebaran Lulus Jurusan:</span>
+				<span>Sebaran Santri Diterima per Jurusan:</span>
 				<span class="bg-blue-800/80 px-2.5 py-1 rounded-md border border-blue-600 text-white font-medium">
 					RPL: {metrics().deptAccepted['Rekayasa Perangkat Lunak']} santri
 				</span>
@@ -306,7 +306,7 @@
 				class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-950/20 disabled:opacity-50 min-h-[44px]"
 			>
 				<ShieldCheck class="w-5 h-5 text-white" />
-				<span>{isSaving ? 'Menyimpan Pengesahan...' : 'Sahkan Keputusan Pleno'}</span>
+				<span>{isSaving ? 'Menyimpan Penetapan...' : 'Tetapkan & Sahkan Kelulusan'}</span>
 			</button>
 		</div>
 	</div>
@@ -315,16 +315,16 @@
 	<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 		<div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
 			<div>
-				<h2 class="text-sm font-bold text-slate-800">Urutan Peringkat Paralel & Garis Batas Kuota</h2>
+				<h2 class="text-sm font-bold text-slate-800">Daftar Peringkat Nilai & Batas Kuota</h2>
 				<p class="text-xs text-slate-500">
-					Garis pembatas menandai posisi batas daya tampung (Cut-off #{quotaInput}). Klik "Dossier" untuk telaah wawancara.
+					Garis pembatas menandai batas kuota penerimaan ({quotaInput} santri teratas). Klik "Catatan" untuk melihat hasil wawancara santri & wali.
 				</p>
 			</div>
 			<div class="text-xs text-slate-500 flex items-center gap-2">
 				<span class="inline-block w-3 h-3 rounded bg-emerald-100 border border-emerald-300"></span>
-				<span>Lulus Kuota</span>
+				<span>Diterima (Lulus)</span>
 				<span class="inline-block w-3 h-3 rounded bg-amber-100 border border-amber-300 ml-2"></span>
-				<span>Waiting List</span>
+				<span>Cadangan</span>
 			</div>
 		</div>
 
@@ -332,16 +332,16 @@
 			<table class="w-full text-left text-xs">
 				<thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
 					<tr>
-						<th class="py-3 px-3 text-center w-14">Rank</th>
-						<th class="py-3 px-3">No Tes</th>
+						<th class="py-3 px-3 text-center w-14">Peringkat</th>
+						<th class="py-3 px-3">No. Tes</th>
 						<th class="py-3 px-4">Nama Santri</th>
 						<th class="py-3 px-3">Jurusan</th>
-						<th class="py-3 px-3 text-right">Skor TPA</th>
-						<th class="py-3 px-3 text-right">Skor Pesantren</th>
-						<th class="py-3 px-3 text-right font-bold text-slate-900">Skor Komposit</th>
-						<th class="py-3 px-3 text-center">Status Pleno</th>
-						<th class="py-3 px-3 text-center">Diskresi / Override</th>
-						<th class="py-3 px-3 text-center w-24">Dossier</th>
+						<th class="py-3 px-3 text-right">Nilai TPA</th>
+						<th class="py-3 px-3 text-right">Nilai Kepesantrenan</th>
+						<th class="py-3 px-3 text-right font-bold text-slate-900">Nilai Akhir</th>
+						<th class="py-3 px-3 text-center">Status Kelulusan</th>
+						<th class="py-3 px-3 text-center">Pertimbangan Khusus</th>
+						<th class="py-3 px-3 text-center w-24">Catatan</th>
 					</tr>
 				</thead>
 
@@ -406,13 +406,13 @@
 								{:else}
 									<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
 										<AlertCircle class="w-3 h-3 text-amber-600" />
-										WAITING LIST
+										CADANGAN
 									</span>
 								{/if}
 
 								{#if c.isOverridden}
 									<span class="block text-[9px] text-blue-700 font-semibold mt-0.5" title={c.overrideReason}>
-										(Override Pimpinan)
+										(Kebijakan Pimpinan)
 									</span>
 								{/if}
 							</td>
@@ -423,26 +423,26 @@
 									<button
 										type="button"
 										onclick={() => removeOverride(c.id)}
-										class="px-2 py-0.5 text-[10px] rounded bg-rose-100 text-rose-700 hover:bg-rose-200 font-medium"
-										title="Batalkan override dan kembalikan ke sistem ranking murni"
+										class="px-2 py-0.5 text-[10px] rounded bg-rose-100 text-rose-700 hover:bg-rose-200 font-medium transition"
+										title="Kembalikan status berdasarkan nilai murni sistem"
 									>
-										Batal Override
+										Kembalikan ke Nilai Murni
 									</button>
 								{:else if isLulus}
 									<button
 										type="button"
 										onclick={() => startOverride(c, 'WAITING_LIST')}
 										class="px-2 py-0.5 text-[10px] rounded bg-slate-100 text-slate-600 hover:bg-amber-100 hover:text-amber-800 font-medium transition"
-										title="Ubah status ke Waiting List dengan pertimbangan pleno"
+										title="Ubah status menjadi Cadangan dengan catatan khusus"
 									>
-										&rarr; Waiting List
+										&rarr; Jadikan Cadangan
 									</button>
 								{:else}
 									<button
 										type="button"
 										onclick={() => startOverride(c, 'LULUS')}
 										class="px-2 py-0.5 text-[10px] rounded bg-slate-100 text-slate-600 hover:bg-emerald-100 hover:text-emerald-800 font-medium transition"
-										title="Ubah status ke Lulus dengan pertimbangan pleno"
+										title="Luluskan santri ini dengan pertimbangan khusus"
 									>
 										&rarr; Luluskan
 									</button>
@@ -455,9 +455,10 @@
 									type="button"
 									onclick={() => openDossier(c)}
 									class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition font-semibold"
+									title="Buka Catatan Lengkap Wawancara Santri & Orang Tua"
 								>
 									<Eye class="w-3.5 h-3.5" />
-									<span>Dossier</span>
+									<span>Catatan</span>
 								</button>
 							</td>
 						</tr>
@@ -467,9 +468,9 @@
 							<tr class="bg-amber-500 text-white font-bold text-center">
 								<td colspan="10" class="py-2 px-4 shadow-inner">
 									<div class="flex items-center justify-center gap-3 text-xs tracking-wider uppercase">
-										<span>&darr; BATAS CUT-OFF KUOTA UTAMA ({quotaInput} SANTRI) &darr;</span>
+										<span>&darr; BATAS KUOTA PENERIMAAN ({quotaInput} SANTRI TERATAS) &darr;</span>
 										<span class="text-[11px] font-normal normal-case opacity-90">
-											Santri di bawah garis ini berstatus WAITING LIST Gelombang Berikutnya
+											Santri di bawah garis ini berstatus CADANGAN (menunggu kuota tambahan)
 										</span>
 									</div>
 								</td>
@@ -481,7 +482,7 @@
 		</div>
 	</div>
 
-	<!-- Modal Dossier Calon Santri -->
+	<!-- Modal Catatan Profil & Wawancara Calon Santri -->
 	{#if selectedDossierCandidate}
 		{@const cand = selectedDossierCandidate}
 		{@const formD = (cand.interview?.formData as Record<string, unknown>) || {}}
@@ -515,7 +516,7 @@
 					<!-- Score Recap Cards -->
 					<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 						<div class="p-3 rounded-xl bg-blue-50 border border-blue-100">
-							<span class="text-slate-500 block text-[11px]">Skor TPA (Skala 100)</span>
+							<span class="text-slate-500 block text-[11px]">Nilai TPA (Skala 100)</span>
 							<p class="text-2xl font-black text-blue-700 mt-1">{cand.tpaScore?.finalScore100 || '-'}</p>
 							<span class="text-[10px] text-blue-600 font-medium">
 								{cand.tpaScore?.category || '-'} &bull; ({cand.tpaScore?.rawTotalScore || 0}/69 poin)
@@ -523,7 +524,7 @@
 						</div>
 
 						<div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-							<span class="text-slate-500 block text-[11px]">Skor Kepesantrenan</span>
+							<span class="text-slate-500 block text-[11px]">Nilai Kepesantrenan</span>
 							<p class="text-2xl font-black text-emerald-700 mt-1">{cand.pesantrenScore?.averageScore || '-'}</p>
 							<span class="text-[10px] text-emerald-600 font-medium">
 								Tahsin {cand.pesantrenScore?.tahsinScore} &bull; Tahfidz {cand.pesantrenScore?.tahfidzScore}
@@ -531,10 +532,10 @@
 						</div>
 
 						<div class="p-3 rounded-xl bg-slate-900 text-white">
-							<span class="text-sky-200 block text-[11px]">Skor Komposit Akhir</span>
+							<span class="text-sky-200 block text-[11px]">Nilai Akhir Kelulusan</span>
 							<p class="text-2xl font-black text-white mt-1">{cand.ranking?.compositeScore || '-'}</p>
 							<span class="text-[10px] text-sky-200 font-medium">
-								Peringkat Paralel #{cand.ranking?.rankParallel || '-'}
+								Peringkat #{cand.ranking?.rankParallel || '-'}
 							</span>
 						</div>
 					</div>
@@ -543,7 +544,7 @@
 					<div class="space-y-4">
 						<div class="flex items-center gap-2 border-b border-slate-200 pb-2">
 							<MessageSquareText class="w-4 h-4 text-blue-600" />
-							<h4 class="font-bold text-slate-900 text-sm">Dossier Wawancara Kualitatif (26 Butir)</h4>
+							<h4 class="font-bold text-slate-900 text-sm">Catatan Hasil Wawancara & Asatidz</h4>
 						</div>
 
 						<!-- Grid Butir Pertanyaan Terpilih -->
@@ -648,7 +649,7 @@
 					<div class="text-xs text-slate-600">
 						Status Saat Ini:
 						<strong class={cand.ranking?.admissionStatus === 'LULUS' ? 'text-emerald-700' : 'text-amber-700'}>
-							{cand.ranking?.admissionStatus || 'WAITING_LIST'}
+							{cand.ranking?.admissionStatus || 'CADANGAN'}
 						</strong>
 					</div>
 					<button
@@ -656,14 +657,14 @@
 						onclick={closeDossier}
 						class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 text-white hover:bg-slate-900 transition"
 					>
-						Tutup Dossier
+						Tutup Catatan
 					</button>
 				</div>
 			</div>
 		</div>
 	{/if}
 
-	<!-- Custom Modal Pengesahan Sidang Pleno (Bebas Dialog Browser Native) -->
+	<!-- Custom Modal Pengesahan Hasil Seleksi (Bebas Dialog Browser Native) -->
 	{#if showRatifyModal}
 		<div
 			class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
@@ -680,10 +681,10 @@
 					</div>
 					<div>
 						<h3 class="text-lg font-bold text-slate-900">
-							Sahkan Keputusan Sidang Pleno?
+							Sahkan Hasil Seleksi Santri Baru?
 						</h3>
 						<p class="text-xs text-slate-500 mt-1 leading-relaxed">
-							Konfirmasi penetapan kuota kelulusan resmi santri baru TA 2027/2028. Hasil kelulusan akan disimpan permanen ke database seleksi.
+							Konfirmasi penetapan kuota kelulusan resmi santri baru. Hasil kelulusan akan disimpan secara resmi ke database seleksi.
 						</p>
 					</div>
 				</div>
@@ -703,7 +704,7 @@
 					<div
 						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
 					>
-						<span class="text-slate-500 font-medium">Daya Tampung / Kuota:</span>
+						<span class="text-slate-500 font-medium">Kapasitas Kuota Diterima:</span>
 						<span class="font-black text-emerald-700 text-sm"
 							>{quotaInput} Santri Lulus</span
 						>
@@ -711,7 +712,7 @@
 					<div
 						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
 					>
-						<span class="text-slate-500 font-medium">Total Peserta Diperingkat:</span>
+						<span class="text-slate-500 font-medium">Total Santri Dinilai:</span>
 						<span class="font-bold text-slate-800"
 							>{plenoCandidates.length} Santri</span
 						>
@@ -719,7 +720,7 @@
 					<div
 						class="flex justify-between items-center py-1.5 border-b border-slate-200/80"
 					>
-						<span class="text-slate-500 font-medium">Jumlah Waiting List:</span>
+						<span class="text-slate-500 font-medium">Jumlah Santri Cadangan:</span>
 						<span class="font-bold text-amber-700"
 							>{Math.max(0, plenoCandidates.length - quotaInput)} Santri</span
 						>
@@ -727,7 +728,7 @@
 					<div
 						class="flex justify-between items-center py-1.5"
 					>
-						<span class="text-slate-500 font-medium">Pimpinan Sidang:</span>
+						<span class="text-slate-500 font-medium">Penanggung Jawab / Pimpinan:</span>
 						<span class="font-semibold text-slate-800 text-right"
 							>{approvedByName}</span
 						>
@@ -740,7 +741,7 @@
 				>
 					<CheckCircle2 class="w-4 h-4 text-blue-600 shrink-0" />
 					<span
-						>Hasil pleno ini mengunci status LULUS dan WAITING LIST untuk publikasi pengumuman santri baru.</span
+						>Keputusan ini menetapkan daftar santri yang Diterima (Lulus) dan Cadangan untuk pengumuman resmi.</span
 					>
 				</div>
 
@@ -793,7 +794,7 @@
 							class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-950/20 disabled:opacity-50 min-h-[44px]"
 						>
 							<ShieldCheck class="w-4 h-4 text-white" />
-							<span>{isSaving ? 'Menyimpan...' : 'Ya, Sahkan Keputusan'}</span>
+							<span>{isSaving ? 'Menyimpan...' : 'Ya, Tetapkan Kelulusan'}</span>
 						</button>
 					</form>
 				</div>
@@ -801,7 +802,7 @@
 		</div>
 	{/if}
 
-	<!-- Custom Modal Diskresi Override Pimpinan Pleno -->
+	<!-- Custom Modal Kebijakan Khusus Pimpinan -->
 	{#if overrideCandidate}
 		<div
 			class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
@@ -817,36 +818,36 @@
 					</div>
 					<div>
 						<h3 class="text-base font-bold text-slate-900">
-							Diskresi Pimpinan Sidang Pleno
+							Kebijakan Khusus Pimpinan
 						</h3>
 						<p class="text-xs text-slate-500 mt-0.5">
-							Ubah status kelulusan untuk <strong>{overrideCandidate.fullName}</strong> ({overrideCandidate.testNumber}).
+							Penyesuaian status kelulusan untuk <strong>{overrideCandidate.fullName}</strong> ({overrideCandidate.testNumber}).
 						</p>
 					</div>
 				</div>
 
 				<div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
 					<div class="flex justify-between">
-						<span class="text-slate-500">Peringkat Komposit:</span>
-						<span class="font-bold text-slate-900">#{overrideCandidate.ranking?.rankParallel || '-'} (Skor: {overrideCandidate.ranking?.compositeScore || '-'})</span>
+						<span class="text-slate-500">Peringkat & Nilai Akhir:</span>
+						<span class="font-bold text-slate-900">#{overrideCandidate.ranking?.rankParallel || '-'} (Nilai: {overrideCandidate.ranking?.compositeScore || '-'})</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-slate-500">Target Status Baru:</span>
+						<span class="text-slate-500">Status Baru:</span>
 						<span class="font-bold {targetOverrideStatus === 'LULUS' ? 'text-emerald-700' : 'text-amber-700'}">
-							{targetOverrideStatus === 'LULUS' ? 'LULUS (Prioritas Kuota)' : 'WAITING LIST (Penangguhan)'}
+							{targetOverrideStatus === 'LULUS' ? 'LULUS (Diterima Kuota Khusus)' : 'CADANGAN (Penangguhan)'}
 						</span>
 					</div>
 				</div>
 
 				<div>
 					<label for="override-reason" class="block text-xs font-semibold text-slate-700 mb-1.5">
-						Alasan / Catatan Pertimbangan Diskresi:
+						Alasan / Catatan Kebijakan Khusus:
 					</label>
 					<textarea
 						id="override-reason"
 						bind:value={overrideReasonText}
 						rows="3"
-						placeholder="Contoh: Prestasi hafalan Quran mutqin, rekomendasi khusus pengasuh pondok..."
+						placeholder="Contoh: Prestasi hafalan Al-Qur'an mutqin, rekomendasi khusus pengasuh pondok..."
 						class="w-full text-xs rounded-xl border border-slate-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 resize-none"
 					></textarea>
 				</div>
@@ -864,7 +865,7 @@
 						onclick={confirmOverride}
 						class="px-4 py-2 rounded-xl {targetOverrideStatus === 'LULUS' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-950/20' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-950/20'} text-white font-bold text-xs transition shadow-md min-h-[38px]"
 					>
-						Terapkan Diskresi
+						Terapkan Kebijakan
 					</button>
 				</div>
 			</div>

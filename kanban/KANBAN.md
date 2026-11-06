@@ -12,6 +12,10 @@ Siklus Task Wajib: `To Do` -> `In Progress` (`in_progress`) -> `In Review / Test
 
 ## ✅ Done
 
+- [x] **EDU-TEST-35**: Humanisasi Bahasa & Pembersihan Jargon (User-Friendly Wording) pada Halaman Pleno, Rekap Ledger, dan Sidebar Navigasi
+
+- [x] **EDU-TEST-34**: Redesign Modal Pemilih Santri ke Grid 4 Kolom (`max-w-6xl`, kartu vertikal kaya info, toolbar 4 kolom, empty state reset filter, Esc/backdrop) pada `/tpa`, `/rubrik`, dan `/wawancara`
+- [x] **EDU-TEST-33**: Wajib Konfirmasi Sebelum Keluar — Modal Konfirmasi Logout Estetik (backdrop blur, focus trap, Esc, state loading) di `+layout.svelte`
 - [x] **EDU-TEST-32**: Redesign Candidate Header Selector Bar Opsi 1 (Interactive Identity, Grouped Stepper, & Progress Meter) pada `/tpa`, `/rubrik`, dan `/wawancara`
 - [x] **EDU-TEST-31**: Implementasi Tabel Users, Seeding Super Admin admin@skillage.com ke Neon DB, dan Eliminasi Akses Cepat Demo
 - [x] **EDU-TEST-30**: Enforce Wajib Login (Auth Hook & Session Guard) dan Eliminasi Profil Ust. Nurul Huda di Login UI

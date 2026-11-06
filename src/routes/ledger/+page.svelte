@@ -167,7 +167,7 @@
 </script>
 
 <svelte:head>
-	<title>Master Ledger & Ranking Paralel | Edu-Test</title>
+	<title>Rekap Nilai & Peringkat Santri | Edu-Test</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -209,7 +209,7 @@
 			href="/pleno"
 			class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold transition ml-auto shadow-xs shadow-blue-700/20"
 		>
-			<span>Sidang Pleno</span>
+			<span>Penetapan Kelulusan</span>
 			<ArrowRight class="w-3.5 h-3.5" />
 		</a>
 	</div>
@@ -223,7 +223,7 @@
 				</span>
 			</div>
 			<p class="text-sm text-slate-500 mt-1">
-				Rekapitulasi nilai gabungan (50% TPA + 50% Kepesantrenan), peringkat otomatis paralel, dan berkas ekspor kelulusan
+				Rekapitulasi nilai gabungan (50% TPA + 50% Kepesantrenan), peringkat santri otomatis, dan unduh data kelulusan.
 			</p>
 		</div>
 
@@ -247,7 +247,7 @@
 					class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition border border-slate-300 disabled:opacity-50 shadow-sm"
 				>
 					<RefreshCw class="w-4 h-4 {isRecalculating ? 'animate-spin text-blue-600' : 'text-slate-600'}" />
-					<span>{isRecalculating ? 'Menghitung...' : 'Hitung Ulang Ranking'}</span>
+					<span>{isRecalculating ? 'Menghitung...' : 'Hitung Ulang Peringkat'}</span>
 				</button>
 			</form>
 
@@ -267,7 +267,7 @@
 				class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm"
 			>
 				<Award class="w-4 h-4" />
-				<span>Sidang Pleno</span>
+				<span>Penetapan Kelulusan</span>
 			</a>
 		</div>
 	</div>
@@ -312,7 +312,7 @@
 		</div>
 
 		<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-			<span class="text-xs text-slate-500 font-medium">Waiting List</span>
+			<span class="text-xs text-slate-500 font-medium">Cadangan</span>
 			<p class="text-xl font-extrabold text-amber-600 mt-1">{stats().waiting} santri</p>
 		</div>
 	</div>
@@ -422,7 +422,7 @@
 			>
 				<option value="ALL">Semua Status Kelulusan</option>
 				<option value="LULUS">LULUS (Masuk Kuota)</option>
-				<option value="WAITING_LIST">WAITING LIST</option>
+				<option value="WAITING_LIST">CADANGAN</option>
 			</select>
 		</div>
 	</div>
@@ -599,7 +599,7 @@
 										</span>
 									{:else}
 										<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
-											<AlertCircle class="w-3 h-3" /> WAITING LIST
+											<AlertCircle class="w-3 h-3" /> CADANGAN
 										</span>
 									{/if}
 								</td>
@@ -639,7 +639,7 @@
 											<span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
 											<span class="tracking-wide uppercase text-emerald-900">BATAS KUOTA PENERIMAAN: {quotaInput} SANTRI TERATAS DINYATAKAN LULUS</span>
 											<span class="text-slate-300">|</span>
-											<span class="text-amber-800 font-semibold text-[11px]">Peringkat #{quotaInput + 1} ke bawah berstatus WAITING LIST</span>
+											<span class="text-amber-800 font-semibold text-[11px]">Peringkat #{quotaInput + 1} ke bawah berstatus CADANGAN</span>
 											<span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
 										</div>
 									</td>
@@ -926,7 +926,7 @@
 						onclick={closeDossier}
 						class="px-5 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-white hover:bg-slate-900 transition"
 					>
-						Tutup Dossier
+						Tutup Catatan
 					</button>
 				</div>
 			</div>

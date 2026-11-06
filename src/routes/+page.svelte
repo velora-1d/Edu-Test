@@ -39,14 +39,14 @@
 				class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-blue-700 text-white hover:bg-blue-800 transition shadow-xs shadow-blue-700/20"
 			>
 				<FileSpreadsheet class="w-3.5 h-3.5" />
-				<span>Master Ledger</span>
+				<span>Rekap Nilai</span>
 			</a>
 			<a
 				href="/pleno"
 				class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition shadow-2xs"
 			>
 				<Award class="w-3.5 h-3.5 text-sky-400" />
-				<span>Sidang Pleno</span>
+				<span>Penetapan Kelulusan</span>
 			</a>
 		</div>
 	</div>
@@ -417,7 +417,7 @@
 					<div>
 						<h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
 							<Award class="w-4 h-4 text-blue-700" />
-							Top 5 Peringkat Paralel Sementara
+							Top 5 Peringkat Santri Sementara
 						</h2>
 					</div>
 					<a
@@ -432,13 +432,13 @@
 					<table class="w-full text-left text-xs">
 						<thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 text-[11px]">
 							<tr>
-								<th class="py-2 px-2.5">Rank</th>
-								<th class="py-2 px-2.5">No Tes</th>
+								<th class="py-2 px-2.5">Peringkat</th>
+								<th class="py-2 px-2.5">No. Tes</th>
 								<th class="py-2 px-2.5">Nama Santri</th>
 								<th class="py-2 px-2.5">Jurusan</th>
 								<th class="py-2 px-2.5 text-right">TPA</th>
 								<th class="py-2 px-2.5 text-right">Pesantren</th>
-								<th class="py-2 px-2.5 text-right">Komposit</th>
+								<th class="py-2 px-2.5 text-right">Nilai Akhir</th>
 								<th class="py-2 px-2.5 text-center">Status</th>
 							</tr>
 						</thead>
@@ -485,9 +485,9 @@
 			</div>
 
 			<div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-				<span>Perhitungan komposit: 50% TPA + 50% Kepesantrenan</span>
+				<span>Perhitungan: 50% TPA + 50% Kepesantrenan</span>
 				<a href="/pleno" class="text-blue-700 hover:text-blue-800 font-semibold inline-flex items-center gap-1">
-					Sidang Pleno <ChevronRight class="w-3 h-3" />
+					Penetapan Kelulusan <ChevronRight class="w-3 h-3" />
 				</a>
 			</div>
 		</div>

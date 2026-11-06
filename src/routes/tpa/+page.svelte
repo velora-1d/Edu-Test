@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { goto } from '$app/navigation';
+	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import {
 		BookOpen,
 		Calculator,
@@ -28,6 +29,15 @@
 
 	let showLockModal = $state(false);
 	let showCandidateModal = $state(false);
+	let showUnlockModal = $state(false);
+	let unlockCandidateId = $state<string | null>(null);
+	let unlockSubmitting = $state(false);
+	let unlockForm = $state<HTMLFormElement | null>(null);
+
+	function confirmUnlock() {
+		unlockSubmitting = true;
+		unlockForm?.requestSubmit();
+	}
 
 	// Modal Filters
 	let modalSearch = $state('');
@@ -155,7 +165,17 @@
 	function goToNext() {
 		if (nextCandidate) selectCandidate(nextCandidate.id);
 	}
+
+	function handleCandidateModalKeydown(event: KeyboardEvent) {
+		if (!showCandidateModal) return;
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			showCandidateModal = false;
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleCandidateModalKeydown} />
 
 <div class="w-full space-y-5">
 	<!-- Top Navigation Workflow Bar (Clean & Compact) -->
@@ -257,17 +277,19 @@
 					<!-- Actions: Buka Kunci (if locked) & Pilih Santri button -->
 					<div class="flex items-center gap-2">
 						{#if isLocked}
-							<form method="POST" action="?/unlockScore" class="shrink-0">
-								<input type="hidden" name="candidateId" value={currentCandidate.id} />
-								<button
-									type="submit"
-									class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 text-xs font-semibold transition shadow-2xs"
-									title="Buka kunci nilai untuk mengedit kembali"
-								>
-									<Unlock class="w-3.5 h-3.5 text-amber-600" />
-									<span>Buka Kunci</span>
-								</button>
-							</form>
+							<button
+								type="button"
+								onclick={() => {
+									unlockCandidateId = currentCandidate.id;
+									unlockSubmitting = false;
+									showUnlockModal = true;
+								}}
+								class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-800 text-xs font-semibold transition shadow-2xs cursor-pointer"
+								title="Buka kunci nilai untuk mengedit kembali"
+							>
+								<Unlock class="w-3.5 h-3.5 text-amber-600" />
+								<span>Buka Kunci</span>
+							</button>
 						{/if}
 
 						<button
@@ -912,57 +934,75 @@
 		</div>
 	{/if}
 
-	<!-- MODAL POPUP PEMILIHAN SANTRI (DENGAN FILTER STATUS, RUANGAN, JURUSAN) -->
+	<!-- MODAL POPUP PEMILIHAN SANTRI (GRID KARTU + FILTER STATUS, RUANGAN, JURUSAN) -->
 	{#if showCandidateModal}
 		<div
-			class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+			class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-xs sm:p-6"
 			tabindex="-1"
 			role="dialog"
 			aria-modal="true"
+			aria-labelledby="candidate-modal-title"
+			onclick={(e) => {
+				if (e.target === e.currentTarget) showCandidateModal = false;
+			}}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') showCandidateModal = false;
+			}}
 		>
-			<div class="bg-white rounded-3xl max-w-2xl w-full p-5 md:p-6 shadow-2xl border border-slate-200 space-y-4 relative max-h-[88vh] flex flex-col">
+			<div class="relative flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/5">
 				<!-- Header Modal -->
-				<div class="flex items-center justify-between pb-3 border-b border-slate-100">
-					<div class="flex items-center gap-2.5">
-						<div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
-							<Users class="w-4 h-4" />
+				<div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 md:px-7 md:py-5">
+					<div class="flex min-w-0 items-center gap-3">
+						<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-800">
+							<Users class="h-5 w-5" />
 						</div>
-						<div>
-							<h3 class="text-base font-bold text-slate-900">Pilih Santri Ujian TPA</h3>
+						<div class="min-w-0">
+							<h3 id="candidate-modal-title" class="font-display text-base font-bold tracking-tight text-slate-900 md:text-lg">
+								Pilih Santri Ujian TPA
+							</h3>
 							<p class="text-xs text-slate-500">Pilih santri untuk membuka lembar penilaian</p>
 						</div>
 					</div>
-					<button
-						type="button"
-						onclick={() => (showCandidateModal = false)}
-						class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-					>
-						<X class="w-5 h-5" />
-					</button>
+					<div class="flex shrink-0 items-center gap-2">
+						<span class="hidden rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-slate-600 sm:inline-flex">
+							{modalFilteredCandidates.length} / {data.candidates.length}
+						</span>
+						<button
+							type="button"
+							aria-label="Tutup pemilih santri"
+							onclick={() => (showCandidateModal = false)}
+							class="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+						>
+							<X class="h-5 w-5" />
+						</button>
+					</div>
 				</div>
 
-				<!-- Filter Toolbar di dalam Modal -->
-				<div class="space-y-2.5">
-					<!-- Search Input -->
-					<div class="relative">
-						<Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-						<input
-							type="text"
-							bind:value={modalSearch}
-							placeholder="Cari nama santri, no tes, asal sekolah..."
-							class="w-full pl-9 pr-3 py-2 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white"
-						/>
-					</div>
+				<!-- Toolbar: Pencarian & Filter -->
+				<div class="shrink-0 border-b border-slate-100 bg-slate-50/70 px-5 py-3.5 md:px-7">
+					<div class="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+						<!-- Pencarian -->
+						<div class="sm:col-span-2 lg:col-span-1">
+							<label for="modal-search" class="mb-0.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500">Pencarian</label>
+							<div class="relative">
+								<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+								<input
+									id="modal-search"
+									type="text"
+									bind:value={modalSearch}
+									placeholder="Cari nama santri, no tes, asal sekolah..."
+									class="w-full rounded-lg border border-slate-200 bg-white py-1.5 pl-9 pr-3 text-xs text-slate-700 shadow-2xs transition focus:border-blue-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 md:text-sm"
+								/>
+							</div>
+						</div>
 
-					<!-- Filters: Status, Ruangan, Jurusan -->
-					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
 						<!-- Filter Status -->
 						<div>
-							<label for="filter-status" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Status Nilai</label>
+							<label for="filter-status" class="mb-0.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500">Status Nilai</label>
 							<select
 								id="filter-status"
 								bind:value={modalFilterStatus}
-								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+								class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-medium text-slate-700 shadow-2xs transition focus:border-blue-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
 							>
 								<option value="ALL">Semua Status</option>
 								<option value="UNSCORED">Belum Dinilai</option>
@@ -973,11 +1013,11 @@
 
 						<!-- Filter Ruangan -->
 						<div>
-							<label for="filter-room" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Ruang Ujian</label>
+							<label for="filter-room" class="mb-0.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500">Ruang Ujian</label>
 							<select
 								id="filter-room"
 								bind:value={modalFilterRoom}
-								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+								class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-medium text-slate-700 shadow-2xs transition focus:border-blue-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
 							>
 								<option value="ALL">Semua Ruangan</option>
 								{#each availableRooms as r}
@@ -988,11 +1028,11 @@
 
 						<!-- Filter Jurusan -->
 						<div>
-							<label for="filter-major" class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Jurusan</label>
+							<label for="filter-major" class="mb-0.5 block text-[10px] font-bold uppercase tracking-wide text-slate-500">Jurusan</label>
 							<select
 								id="filter-major"
 								bind:value={modalFilterMajor}
-								class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
+								class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-medium text-slate-700 shadow-2xs transition focus:border-blue-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
 							>
 								<option value="ALL">Semua Jurusan</option>
 								{#each availableMajors as m}
@@ -1003,78 +1043,122 @@
 					</div>
 				</div>
 
-				<!-- Candidate List (Vertikal Scroll) -->
-				<div class="overflow-y-auto space-y-1.5 flex-1 pr-1 border-t border-slate-100 pt-2">
+				<!-- Grid Kartu Santri -->
+				<div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 md:px-7">
 					{#if modalFilteredCandidates.length === 0}
-						<div class="py-10 text-center text-slate-400">
-							<Users class="w-8 h-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
-							<p class="text-xs font-semibold text-slate-600">Tidak ada santri yang sesuai filter</p>
-						</div>
-					{:else}
-						{#each modalFilteredCandidates as c}
-							{@const isCurrent = currentCandidate?.id === c.id}
-							{@const isLockedScore = c.tpaScore?.lockStatus === 'LOCKED'}
-							{@const isDraftScore = c.tpaScore?.lockStatus === 'DRAFT'}
-
+						<div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-14 text-center">
+							<div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+								<Users class="h-6 w-6 text-slate-400" />
+							</div>
+							<p class="text-sm font-semibold text-slate-700">Tidak ada santri yang sesuai filter</p>
+							<p class="mt-1 text-xs text-slate-500">Coba ubah kata kunci atau longgarkan filter di atas.</p>
 							<button
 								type="button"
-								onclick={() => selectCandidate(c.id)}
-								class={`w-full p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-3 ${
-									isCurrent
-										? 'bg-blue-50/80 border-blue-400 ring-2 ring-blue-500/20'
-										: 'bg-white hover:bg-slate-50 border-slate-200'
-								}`}
+								onclick={() => {
+									modalSearch = '';
+									modalFilterStatus = 'ALL';
+									modalFilterRoom = 'ALL';
+									modalFilterMajor = 'ALL';
+								}}
+								class="mt-4 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50"
 							>
-								<div class="flex items-center gap-2.5 min-w-0">
-									<span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 font-mono font-bold text-xs flex items-center justify-center shrink-0">
-										{c.testNumber.slice(-3)}
-									</span>
-									<div class="min-w-0">
-										<div class="flex items-center gap-2">
-											<span class="font-bold text-xs text-slate-900 truncate">{c.fullName}</span>
-											{#if isCurrent}
-												<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-600 text-white">Sedang Dinilai</span>
+								Reset filter
+							</button>
+						</div>
+					{:else}
+						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+							{#each modalFilteredCandidates as c}
+								{@const isCurrent = currentCandidate?.id === c.id}
+								{@const isLockedScore = c.tpaScore?.lockStatus === 'LOCKED'}
+								{@const isDraftScore = c.tpaScore?.lockStatus === 'DRAFT'}
+
+								<button
+									type="button"
+									onclick={() => selectCandidate(c.id)}
+									aria-current={isCurrent ? 'true' : undefined}
+									title={`${c.fullName} · ${c.schoolOrigin}`}
+									class={`group relative flex h-full flex-col rounded-2xl border p-3.5 text-left transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1 ${
+										isCurrent
+											? 'border-blue-400 bg-blue-50/70 shadow-sm'
+											: 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md'
+									}`}
+								>
+									<div class="flex items-center gap-1.5">
+										<span class="rounded-md bg-blue-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-blue-800">
+											{c.testNumber.slice(-3)}
+										</span>
+										{#if isCurrent}
+											<span class="rounded-md bg-blue-600 px-1.5 py-0.5 text-[9px] font-bold text-white">Sedang Dinilai</span>
+										{/if}
+									</div>
+
+									<h4 class="mt-2 truncate text-sm font-bold leading-tight text-slate-900">{c.fullName}</h4>
+
+									<div class="mt-1.5 space-y-0.5 text-[11px] leading-relaxed text-slate-500">
+										<p class="truncate" title={c.schoolOrigin}>{c.schoolOrigin}</p>
+										<p class="truncate" title={c.majorChoice}>{c.majorChoice}</p>
+										<p class="truncate font-medium text-slate-600">{c.roomAssignment || 'Ruang 1'}</p>
+									</div>
+
+									<div class="mt-auto pt-3">
+										<div class="flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
+											<span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Nilai</span>
+											{#if isLockedScore}
+												<span class="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-700">
+													<Lock class="h-2.5 w-2.5" />
+													<span>{c.tpaScore?.finalScore100}</span>
+												</span>
+											{:else if isDraftScore}
+												<span class="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-700">
+													Draf ({c.tpaScore?.finalScore100})
+												</span>
+											{:else}
+												<span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+													Belum Dinilai
+												</span>
 											{/if}
 										</div>
-										<div class="text-[11px] text-slate-400 truncate">
-											<span>{c.schoolOrigin}</span> &bull; <span>{c.majorChoice}</span> &bull; <span class="text-slate-600">{c.roomAssignment || 'Ruang 1'}</span>
-										</div>
 									</div>
-								</div>
-
-								<div class="shrink-0 text-right">
-									{#if isLockedScore}
-										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
-											<Lock class="w-2.5 h-2.5 text-emerald-600" />
-											<span>{c.tpaScore?.finalScore100}</span>
-										</span>
-									{:else if isDraftScore}
-										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 font-mono">
-											<span>Draf ({c.tpaScore?.finalScore100})</span>
-										</span>
-									{:else}
-										<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500">
-											Belum Dinilai
-										</span>
-									{/if}
-								</div>
-							</button>
-						{/each}
+								</button>
+							{/each}
+						</div>
 					{/if}
 				</div>
 
 				<!-- Modal Footer -->
-				<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-					<span>Ditemukan <strong class="text-slate-800 font-mono">{modalFilteredCandidates.length}</strong> dari {data.candidates.length} santri</span>
-					<button
-						type="button"
-						onclick={() => (showCandidateModal = false)}
-						class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
-					>
-						Tutup
-					</button>
+				<div class="flex shrink-0 flex-col gap-2 border-t border-slate-100 bg-white px-5 py-3.5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between md:px-7">
+					<span>Ditemukan <strong class="font-mono text-slate-800">{modalFilteredCandidates.length}</strong> dari {data.candidates.length} santri</span>
+					<div class="flex items-center gap-3">
+						<span class="hidden text-[11px] text-slate-400 md:inline">
+							Tekan <kbd class="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-600">Esc</kbd> untuk menutup
+						</span>
+						<button
+							type="button"
+							onclick={() => (showCandidateModal = false)}
+							class="rounded-lg bg-slate-100 px-4 py-1.5 font-semibold text-slate-700 transition hover:bg-slate-200"
+						>
+							Tutup
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
 	{/if}
+
+	<!-- KONFIRMASI BUKA KUNCI NILAI -->
+	<form bind:this={unlockForm} method="POST" action="?/unlockScore" class="hidden">
+		<input type="hidden" name="candidateId" value={unlockCandidateId ?? ''} />
+	</form>
+
+	<ConfirmDialog
+		open={showUnlockModal}
+		tone="amber"
+		title="Buka kunci nilai?"
+		description={`Nilai TPA ${currentCandidate?.fullName ?? 'santri ini'} akan kembali ke mode draf dan bisa diedit ulang oleh penguji.`}
+		confirmLabel="Ya, buka kunci"
+		cancelLabel="Batal"
+		loading={unlockSubmitting}
+		onconfirm={confirmUnlock}
+		oncancel={() => (showUnlockModal = false)}
+	/>
 </div>

@@ -74,14 +74,14 @@
 		{
 			title: "Hasil & Kelulusan",
 			items: [
-				{ href: "/ledger", label: "Rekap Nilai & Kuota", icon: FileSpreadsheet },
-				{ href: "/pleno", label: "Sidang Yudisium Pleno", icon: Award },
+				{ href: "/ledger", label: "Rekap Nilai Santri", icon: FileSpreadsheet },
+				{ href: "/pleno", label: "Penetapan Kelulusan", icon: Award },
 			],
 		},
 		{
 			title: "Master & Pengaturan",
 			items: [
-				{ href: "/peserta?manageMaster=true", label: "Kelola Jurusan & Ruang", icon: SlidersHorizontal },
+				{ href: "/peserta?manageMaster=true", label: "Master Jurusan & Ruang", icon: SlidersHorizontal },
 			],
 		},
 	];
@@ -108,11 +108,11 @@
 			category: "Penilaian Seleksi",
 		},
 		"/ledger": {
-			title: "Rekap Nilai & Simulasi Kuota",
+			title: "Rekap Nilai Santri",
 			category: "Hasil & Kelulusan",
 		},
 		"/pleno": {
-			title: "Sidang Yudisium Pleno",
+			title: "Penetapan Hasil Kelulusan",
 			category: "Hasil & Kelulusan",
 		},
 	};
