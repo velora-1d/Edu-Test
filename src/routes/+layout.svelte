@@ -141,6 +141,9 @@
 	<title>{currentRoute.title} - Edu-Test Seleksi Santri</title>
 </svelte:head>
 
+{#if page.url.pathname === '/login'}
+	{@render children()}
+{:else}
 <SidebarProvider>
 	<!-- Modern Professional Blue Sidebar (Width 280px, Sleek SaaS Layout, Clean Collapsed Mode) -->
 	<Sidebar collapsible="icon" class="border-r border-slate-200/90 bg-white shadow-2xs">
@@ -238,10 +241,9 @@
 						</div>
 						<span class="font-medium text-slate-700 truncate">Panitia PPDB</span>
 					</div>
-					<span class="text-[10px] text-slate-400 flex items-center gap-1 shrink-0 font-medium">
-						<Database class="w-3 h-3 text-emerald-600" />
-						<span>Postgres</span>
-					</span>
+					<a href="/login" class="text-[10px] text-blue-600 hover:text-blue-700 font-semibold hover:underline flex items-center gap-1">
+						<span>Masuk</span>
+					</a>
 				</div>
 			</div>
 
@@ -313,3 +315,4 @@
 		</footer>
 	</SidebarInset>
 </SidebarProvider>
+{/if}
