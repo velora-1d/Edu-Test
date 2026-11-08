@@ -238,6 +238,19 @@
   - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
   - [x] Verifikasi empiris rendering via curl pada seluruh rute (HTTP 200 OK & skor poin mentah tampil)
 
+### [TASK-021] Perbaikan Komprehensif CRUD Santri, Dropdown STIFIn, Tampilan Jurusan & Sinkronisasi Gelombang
+- **Status**: Done
+- **Prioritas**: High
+- **Deskripsi**: Memperbaiki bug fatal ID peserta tidak valid pada aksi edit dan hapus calon santri, menstandarkan format dropdown STIFIn pada lembar wawancara menjadi [Singkatan] - [Kepanjangan], menghilangkan hardcoded fallback jurusan 'Bisnis Digital' di tabel peserta, menyelaraskan query gelombang pendaftaran antara TPA (14 santri) dan Kepesantrenan (6 santri), serta memastikan reaktivitas perhitungan skor TPA live.
+- **Sub-tasks**:
+  - [x] Perbaiki contract parameter `id` dan `candidateId` pada Server Actions `updateCandidate` dan `deleteCandidate` di `src/routes/peserta/+page.server.ts` serta modal form di `src/routes/peserta/+page.svelte`
+  - [x] Standarisasi opsi dropdown STIFIn di `src/routes/wawancara/+page.svelte` menjadi format `[Singkatan] - [Kepanjangan]` tanpa kata 'yaitu' atau teks deskripsi panjang
+  - [x] Dinamisasi badge jurusan di tabel `src/routes/peserta/+page.svelte` agar menampilkan jurusan aktual santri (PPLG, TKP, UPT, RPL, DKV, BD) tanpa dipaksa menjadi 'Bisnis Digital'
+  - [x] Sinkronkan query gelombang peserta pada lembar kepesantrenan (`src/routes/rubrik/+page.server.ts`) dan TPA (`src/routes/tpa/+page.server.ts`) agar seluruh 14 santri dapat diakses
+  - [x] Perbaiki sinkronisasi state live-scoring TPA pada `src/routes/tpa/+page.svelte`
+  - [x] Verifikasi `pnpm check` (0 errors, 0 warnings) dan `pnpm build` (100% lulus)
+  - [x] Verifikasi runtime HTTP dan fungsionalitas di browser/curl
+
 
 
 

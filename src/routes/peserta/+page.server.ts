@@ -131,7 +131,7 @@ export const actions: Actions = {
 
 	updateCandidate: async ({ request }) => {
 		const data = await request.formData();
-		const id = data.get('id') as string;
+		const id = ((data.get('candidateId') || data.get('id')) as string) || '';
 		const fullName = ((data.get('fullName') as string) || '').trim();
 		const schoolOrigin = ((data.get('schoolOrigin') as string) || '').trim();
 		const majorChoice = data.get('majorChoice') as string;
@@ -167,7 +167,7 @@ export const actions: Actions = {
 
 	deleteCandidate: async ({ request }) => {
 		const data = await request.formData();
-		const id = data.get('id') as string;
+		const id = ((data.get('candidateId') || data.get('id')) as string) || '';
 
 		if (!id) {
 			return fail(400, { error: 'ID Peserta tidak valid' });

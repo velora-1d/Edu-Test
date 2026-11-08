@@ -37,3 +37,4 @@
 {"id":"EDU-TEST-37","title":"Penyatuan Tab Wawancara Santri (Umum + Kepesantrenan), Poin Pertanyaan Dinamis (Bisa Diedit/Ditambah), dan Humanisasi Bahasa di /wawancara","status":"closed","created_at":"2026-11-06T23:35:00Z","priority":"high"}
 {"id":"EDU-TEST-38","title":"Implementasi Pengaturan Gelombang & Tahun Ajaran (CRUD, Switch Aktif/Nonaktif, Kuota & Integrasi di /peserta)","status":"closed","created_at":"2026-11-07T00:02:00Z","priority":"high"}
 {"id":"EDU-TEST-39","title":"Optimasi Efisiensi Request & Database Query (Preload-data tap, eliminasi query redundan server, seleksi santri reaktif di klien, dan form use:enhance)","status":"closed","created_at":"2026-11-07T00:30:00Z","priority":"high"}
+{"id":"EDU-TEST-40","title":"Perbaikan Komprehensif CRUD Santri, Dropdown STIFIn, Tampilan Jurusan & Sinkronisasi Gelombang","status":"closed","created_at":"2026-11-08T12:48:00Z","priority":"high"}

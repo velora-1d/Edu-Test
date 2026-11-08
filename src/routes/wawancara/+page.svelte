@@ -256,11 +256,7 @@
 	function selectCandidate(id: string) {
 		showCandidateModal = false;
 		customSelectedId = id;
-		if (typeof window !== 'undefined') {
-			const url = new URL(window.location.href);
-			url.searchParams.set('candidateId', id);
-			window.history.replaceState({}, '', url.toString());
-		}
+		goto(`/wawancara?candidateId=${id}`, { replace: true, reset: false });
 	}
 
 	let currentIndex = $derived(
@@ -764,11 +760,11 @@
 									class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium"
 								>
 									<option value="">-- Pilih Mesin Kecerdasan --</option>
-									<option value="Sensing">Sensing (Memori & Fisik)</option>
-									<option value="Thinking">Thinking (Logika & Struktur)</option>
-									<option value="Intuiting">Intuiting (Kreativitas & Konsep)</option>
-									<option value="Feeling">Feeling (Emosi & Hubungan)</option>
-									<option value="Instinct">Instinct (Spontanitas & Naluri)</option>
+									<option value="Sensing">S - Sensing</option>
+									<option value="Thinking">T - Thinking</option>
+									<option value="Intuiting">I - Intuiting</option>
+									<option value="Feeling">F - Feeling</option>
+									<option value="Instinct">In - Instinct</option>
 								</select>
 							</div>
 
@@ -783,16 +779,16 @@
 									class="w-full p-2.5 text-xs md:text-sm bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium"
 								>
 									<option value="">-- Pilih Tipe Karakter --</option>
-									<option value="Si">Si - Sensing Introvert (Rajin, Ulet, Teliti)</option>
-									<option value="Se">Se - Sensing Extrovert (Petualang, Aksi Nyata)</option>
-									<option value="Ti">Ti - Thinking Introvert (Analitis, Mandiri, Ahli)</option>
-									<option value="Te">Te - Thinking Extrovert (Manajerial, Berwibawa)</option>
-									<option value="Ii">Ii - Intuiting Introvert (Penggagas, Inovatif)</option>
-									<option value="Ie">Ie - Intuiting Extrovert (Kreatif, Percaya Diri)</option>
-									<option value="Fi">Fi - Feeling Introvert (Pemimpin Kharismatik, Empatis)</option>
-									<option value="Fe">Fe - Feeling Extrovert (Komunikator, Bersahabat)</option>
-									<option value="In">In - Instinct (Serba Bisa, Respons Cepat, Rela Berkorban)</option>
-									<option value="Belum Tes">Belum Mengikuti Tes STIFIn</option>
+									<option value="Si">Si - Sensing Introvert</option>
+									<option value="Se">Se - Sensing Extrovert</option>
+									<option value="Ti">Ti - Thinking Introvert</option>
+									<option value="Te">Te - Thinking Extrovert</option>
+									<option value="Ii">Ii - Intuiting Introvert</option>
+									<option value="Ie">Ie - Intuiting Extrovert</option>
+									<option value="Fi">Fi - Feeling Introvert</option>
+									<option value="Fe">Fe - Feeling Extrovert</option>
+									<option value="In">In - Instinct</option>
+									<option value="Belum Tes">Belum Tes - Belum Mengikuti Tes STIFIn</option>
 								</select>
 							</div>
 

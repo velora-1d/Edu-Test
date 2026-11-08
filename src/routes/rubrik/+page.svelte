@@ -228,11 +228,7 @@
 	function selectCandidate(id: string) {
 		showCandidateModal = false;
 		customSelectedId = id;
-		if (typeof window !== "undefined") {
-			const url = new URL(window.location.href);
-			url.searchParams.set("candidateId", id);
-			window.history.replaceState({}, "", url.toString());
-		}
+		goto(`/rubrik?candidateId=${id}`, { replace: true, reset: false });
 	}
 
 	let currentIndex = $derived(

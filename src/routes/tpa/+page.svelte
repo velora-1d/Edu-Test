@@ -112,6 +112,9 @@
 	);
 
 	let category = $derived.by(() => {
+		if (rawTotal === 0 && !isLocked) {
+			return { label: 'Belum Dinilai', color: 'bg-slate-100 text-slate-700 border-slate-300' };
+		}
 		if (finalScore100 <= 20) return { label: 'Sangat Buruk', color: 'bg-slate-100 text-slate-700 border-slate-300' };
 		if (finalScore100 <= 40) return { label: 'Buruk', color: 'bg-rose-50 text-rose-800 border-rose-200' };
 		if (finalScore100 <= 60) return { label: 'Sedang', color: 'bg-amber-50 text-amber-800 border-amber-200' };
@@ -164,11 +167,7 @@
 	function selectCandidate(id: string) {
 		showCandidateModal = false;
 		customSelectedId = id;
-		if (typeof window !== 'undefined') {
-			const url = new URL(window.location.href);
-			url.searchParams.set('candidateId', id);
-			window.history.replaceState({}, '', url.toString());
-		}
+		goto(`/tpa?candidateId=${id}`, { replace: true, reset: false });
 	}
 
 	function goToPrev() {

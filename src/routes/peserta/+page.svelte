@@ -131,6 +131,58 @@
 		deletingCandidate = null;
 	}
 
+	function getMajorBadge(majorChoice: string, testNumber?: string) {
+		const m = (majorChoice || '').toLowerCase();
+		const t = (testNumber || '').toUpperCase();
+
+		if (m.includes('perangkat lunak') || m.includes('programmer') || t.includes('RPL') || t.includes('PPLG')) {
+			const code = t.includes('PPLG') ? 'PPLG' : 'RPL';
+			return {
+				code,
+				name: majorChoice,
+				color: 'bg-blue-50 text-blue-700 border border-blue-200'
+			};
+		}
+		if (m.includes('komunikasi visual') || m.includes('designer') || t.includes('DKV')) {
+			return {
+				code: 'DKV',
+				name: majorChoice,
+				color: 'bg-amber-50 text-amber-700 border border-amber-200'
+			};
+		}
+		if (m.includes('sipil') || m.includes('arsitektur') || m.includes('perumahan') || t.includes('TKP')) {
+			return {
+				code: 'TKP',
+				name: majorChoice,
+				color: 'bg-cyan-50 text-cyan-700 border border-cyan-200'
+			};
+		}
+		if (m.includes('pertanian') || t.includes('UPT')) {
+			return {
+				code: 'UPT',
+				name: majorChoice,
+				color: 'bg-lime-50 text-lime-700 border border-lime-200'
+			};
+		}
+		if (m.includes('bisnis') || t.includes('BD')) {
+			return {
+				code: 'BD',
+				name: majorChoice,
+				color: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+			};
+		}
+		const code = majorChoice.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'UMM';
+		return {
+			code,
+			name: majorChoice,
+			color: 'bg-slate-50 text-slate-700 border border-slate-200'
+		};
+	}
+
+	const allDistinctMajors = $derived(
+		Array.from(new Set([...(data.majors?.map((m) => m.name) || []), ...data.candidates.map((c) => c.majorChoice)])).filter(Boolean)
+	);
+
 	const filteredCandidates = $derived(
 		data.candidates.filter((c) => {
 			const matchesSearch =
@@ -312,15 +364,10 @@
 				class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-600 font-medium"
 			>
 				<option value="ALL">Semua Jurusan</option>
-				{#if data.majors && data.majors.length > 0}
-					{#each data.majors as m}
-						<option value={m.name}>{m.name} ({m.code})</option>
-					{/each}
-				{:else}
-					<option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak (RPL)</option>
-					<option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
-					<option value="Bisnis Digital">Bisnis Digital (BD)</option>
-				{/if}
+				{#each allDistinctMajors as mName}
+					{@const b = getMajorBadge(mName)}
+					<option value={mName}>{b.code} - {mName}</option>
+				{/each}
 			</select>
 
 			<!-- Filter Status Pipeline -->
@@ -379,6 +426,7 @@
 							{@const isPesantrenLocked = c.pesantrenScore?.lockStatus === 'LOCKED'}
 							{@const isInterviewDone = c.interview?.completionStatus === 'COMPLETED'}
 							{@const stifinType = (c.interview?.formData as Record<string, any>)?.stifin_type}
+							{@const majorInfo = getMajorBadge(c.majorChoice, c.testNumber)}
 
 							<tr class="hover:bg-blue-50/30 transition">
 								<td class="py-3 px-3.5 text-center font-semibold text-slate-400">{i + 1}</td>
@@ -420,12 +468,14 @@
 
 								<!-- Jurusan -->
 								<td class="py-3 px-3.5 whitespace-nowrap">
-									<span class="inline-flex px-2 py-0.5 rounded-md text-[11px] font-semibold {c.majorChoice === 'Rekayasa Perangkat Lunak'
-										? 'bg-blue-50 text-blue-700 border border-blue-200'
-										: c.majorChoice === 'Desain Komunikasi Visual'
-											? 'bg-amber-50 text-amber-700 border border-amber-200'
-											: 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
-										{c.majorChoice === 'Rekayasa Perangkat Lunak' ? 'RPL' : c.majorChoice === 'Desain Komunikasi Visual' ? 'DKV' : 'Bisnis Digital'}
+									<span
+										class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold {majorInfo.color}"
+										title={c.majorChoice}
+									>
+										<span class="font-bold">{majorInfo.code}</span>
+										<span class="text-[10px] font-normal opacity-80 max-w-[140px] truncate hidden xl:inline">
+											{c.majorChoice}
+										</span>
 									</span>
 								</td>
 
@@ -775,6 +825,7 @@
 				class="space-y-4"
 			>
 				<input type="hidden" name="candidateId" value={editingCandidate.id} />
+				<input type="hidden" name="id" value={editingCandidate.id} />
 				<input type="hidden" name="waveId" value={editWaveId} />
 
 				<!-- Nama Lengkap -->
@@ -966,6 +1017,7 @@
 				class="flex items-center justify-end gap-2.5 pt-2"
 			>
 				<input type="hidden" name="candidateId" value={deletingCandidate.id} />
+				<input type="hidden" name="id" value={deletingCandidate.id} />
 				<button
 					type="button"
 					onclick={closeDeleteModal}

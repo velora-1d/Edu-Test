@@ -32,15 +32,21 @@ export async function getActiveWave() {
  * Form Wawancara, dan Status Ranking untuk gelombang tertentu.
  */
 export async function getCandidatesWithScores(waveId?: string) {
-	let targetWaveId = waveId;
-	if (!targetWaveId) {
-		const active = await getActiveWave();
-		if (!active) return [];
-		targetWaveId = active.id;
+	if (waveId && waveId !== 'ALL') {
+		return await db.query.candidates.findMany({
+			where: eq(candidates.waveId, waveId),
+			with: {
+				wave: true,
+				tpaScore: true,
+				pesantrenScore: true,
+				interview: true,
+				ranking: true
+			},
+			orderBy: [asc(candidates.testNumber)]
+		});
 	}
 
 	return await db.query.candidates.findMany({
-		where: eq(candidates.waveId, targetWaveId),
 		with: {
 			wave: true,
 			tpaScore: true,
