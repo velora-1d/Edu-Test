@@ -441,20 +441,13 @@
 
 								<!-- Nama Calon Santri -->
 								<td class="py-3 px-3.5">
-									<div class="flex items-center gap-2">
-										<div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-[11px] shrink-0">
-											{c.fullName.substring(0, 2).toUpperCase()}
-										</div>
-										<div>
-											<div class="flex items-center gap-1.5 flex-wrap">
-												<span class="font-bold text-slate-900 text-xs">{c.fullName}</span>
-												{#if stifinType && stifinType !== 'Belum Tes'}
-													<span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200" title="Hasil STIFIn: {stifinType}">
-														{stifinType}
-													</span>
-												{/if}
-											</div>
-										</div>
+									<div class="flex items-center gap-1.5 flex-wrap">
+										<span class="font-bold text-slate-900 text-xs">{c.fullName}</span>
+										{#if stifinType && stifinType !== 'Belum Tes'}
+											<span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200" title="Hasil STIFIn: {stifinType}">
+												{stifinType}
+											</span>
+										{/if}
 									</div>
 								</td>
 
